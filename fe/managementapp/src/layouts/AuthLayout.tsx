@@ -7,8 +7,7 @@ type LayoutProps = {
 const DefaultLayout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="relative flex h-full w-full mx-auto overflow-auto">
-      <LeftSidebar />
-      <div className="flex-1">{children}</div>
+      {children}
     </div>
   );
 };

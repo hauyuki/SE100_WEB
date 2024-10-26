@@ -1,3 +1,34 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  @font-face {
+    font-family: "BalooTammudu2";
+    font-weight: 400;
+    src: url("/src/assets/fonts/BalooTammudu2-Regular.ttf");
+  }
+  @font-face {
+    font-family: "BalooTammudu2";
+    font-weight: 600;
+    src: url("/src/assets/fonts/BalooTammudu2-SemiBold.ttf");
+  }
+  @font-face {
+    font-family: "BalooTammudu2";
+    font-weight: 500;
+    src: url("/src/assets/fonts/BalooTammudu2-Medium.ttf");
+  }
+  @font-face {
+    font-family: "BalooTammudu2";
+    font-weight: 700;
+    src: url("/src/assets/fonts/BalooTammudu2-Bold.ttf");
+  }
+  @font-face {
+    font-family: "BalooTammudu2";
+    font-weight: 900;
+    src: url("/src/assets/fonts/BalooTammudu2-ExtraBold.ttf");
+  }
+  html {
+    /* @apply font-bt; */
+  }
+}
