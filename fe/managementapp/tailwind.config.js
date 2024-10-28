@@ -9,11 +9,15 @@ module.exports = {
         "BalooTammudu2",
         "Arial",
         "sans-serif",
+        "Abril Fatface",
         ...defaultTheme.fontFamily.sans,
       ],
     },
 
     extend: {
+      fontFamily: {
+        abril: ["AbrilFatface"],
+      },
       screens: {
         sm: "640px",
         md: "768px",
@@ -21,8 +25,7 @@ module.exports = {
       },
       colors: {
         primary: "#636AE8",
-
-        secondary: "#F4F5F7",
+        secondary: "#F8F9FA",
         gray: {
           default: "#878181",
         },

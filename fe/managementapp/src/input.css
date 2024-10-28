@@ -28,6 +28,11 @@
     font-weight: 900;
     src: url("/src/assets/fonts/BalooTammudu2-ExtraBold.ttf");
   }
+  @font-face {
+    font-family: "AbrilFatface";
+    font-weight: 400;
+    src: url("/src/assets/fonts/AbrilFatface-Regular.ttf");
+  }
   html {
     /* @apply font-bt; */
   }

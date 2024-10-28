@@ -6,14 +6,33 @@ import {
   ArrowDownOnSquareIcon,
 } from "@heroicons/react/24/outline";
 import React from "react";
+import { Link } from "react-router-dom";
 type Item = {
   itemName: string;
   path: string;
   icon: React.ReactElement;
 };
-export const LeftSidebar: React.FC = () => {
-  const { path } = useParams<{ path: string }>();
+
+interface LeftSidebarProps {
+  currentPath: string;
+}
+
+export const LeftSidebar: React.FC<LeftSidebarProps> = ({ currentPath }) => {
   const items: Item[] = [
+    {
+      itemName: "Dashboard",
+      path: "dashboard",
+      icon: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          className="size-6"
+        >
+          <path d="M5.566 4.657A4.505 4.505 0 0 1 6.75 4.5h10.5c.41 0 .806.055 1.183.157A3 3 0 0 0 15.75 3h-7.5a3 3 0 0 0-2.684 1.657ZM2.25 12a3 3 0 0 1 3-3h13.5a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3v-6ZM5.25 7.5c-.41 0-.806.055-1.184.157A3 3 0 0 1 6.75 6h10.5a3 3 0 0 1 2.683 1.657A4.505 4.505 0 0 0 18.75 7.5H5.25Z" />
+        </svg>
+      ),
+    },
     {
       itemName: "Sản phẩm",
       path: "product",
@@ -125,26 +144,25 @@ export const LeftSidebar: React.FC = () => {
   return (
     <div className="mx-5">
       <div className="flex justify-start items-center gap-3 mt-10 ml-7 mb-10">
-        <div className="text-3xl">Dashboard</div>
+        <div className="text-3xl font-abril text-[#636AE8FF]">SWM</div>
       </div>
       <ul className="w-full ml-2">
         {items?.map((item, index) => (
-          <li>
-            <a
-              href={`/${item.path}`}
+          <li key={index}>
+            <Link
+              to={`/${item.path}`}
               className={`flex items-center capitalize my-3 px-5 font-medium
-  p-2  item hover:bg-primary rounded-lg hover:text-white ${
-    item.path === path ? "text-white bg-primary" : "text-gray-default"
-  }`}
+                p-2 item hover:bg-primary rounded-lg hover:text-white ${
+                  item.path === currentPath
+                    ? "text-white bg-primary"
+                    : "text-gray-default"
+                }`}
             >
               {item.icon}
-              <p
-                className="flex-1 capitalize
-  ms-3 whitespace-nowrap py-1"
-              >
+              <p className="flex-1 capitalize ms-3 whitespace-nowrap py-1">
                 {item.itemName}
               </p>
-            </a>
+            </Link>
           </li>
         ))}
       </ul>
