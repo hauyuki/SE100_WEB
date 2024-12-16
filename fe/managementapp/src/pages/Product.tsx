@@ -1,41 +1,27 @@
 import React, { useState, useEffect } from "react";
 import { MagnifyingGlassIcon, PencilIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
-import { ProductApi } from "../api/ProductApi";
 import { Product } from "../models/Product";
+import { useGetProducts } from "../hooks/products";
 
 const ProductPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const productsPerPage = 10;
   const navigate = useNavigate();
 
-  // Fetch products on component mount
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+  const {
+    data: products,
+    isPending: loading,
+    isError: error,
+  } = useGetProducts();
 
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      const data = await ProductApi.getAllProducts();
-      setProducts(data);
-      setError(null);
-    } catch (err) {
-      console.error("Failed to fetch products:", err);
-      setError("Failed to fetch products. Please try again later.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Pagination logic
-  const totalPages = Math.ceil(products.length / productsPerPage);
+  //Pagination logic
+  const totalPages = Math.ceil(
+    products?.productList?.length ?? 1 / productsPerPage
+  );
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = products.slice(
+  const currentProducts = products?.productList.slice(
     indexOfFirstProduct,
     indexOfLastProduct
   );
@@ -91,7 +77,7 @@ const ProductPage = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {currentProducts.map((product, index) => (
+              {currentProducts?.map((product, index) => (
                 <tr
                   key={product.id}
                   onClick={() => handleRowClick(product.id)}
@@ -125,7 +111,7 @@ const ProductPage = () => {
                     {new Intl.NumberFormat("vi-VN", {
                       style: "currency",
                       currency: "VND",
-                    }).format(product.price)}
+                    }).format(Number.parseInt(product.marketPrice))}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     <button
