@@ -8,7 +8,7 @@ const LoginForm = () => {
 
   const handleSubmit = (event: any) => {
     event.preventDefault();
-    navigate("/home");
+    navigate("/dashboard"); // Change from "/home" to "/dashboard"
   };
 
   return (
