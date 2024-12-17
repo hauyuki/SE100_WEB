@@ -1,4 +1,3 @@
-
 export const HOST = process.env.NEXT_PUBLIC_HOST;
 export const API_HOST = process.env.NEXT_PUBLIC_HOST + "/api";
 

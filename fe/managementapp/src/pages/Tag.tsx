@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { PencilIcon, PlusIcon } from "@heroicons/react/24/outline";
+import EditTagModal from "../components/modals/EditTagModal";
+import AddTagModal from "../components/modals/AddTagModal";
 
 interface AreaProduct {
   name: string;
@@ -15,6 +17,13 @@ interface WarehouseArea {
 
 const Tag = () => {
   const [selectedArea, setSelectedArea] = useState<WarehouseArea | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedTag, setSelectedTag] = useState<{
+    name: string;
+    meaning: string;
+    date: string;
+  } | null>(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   // Warehouse areas data
   const warehouseAreas: WarehouseArea[] = [
@@ -104,6 +113,31 @@ const Tag = () => {
       "HIGH VALUE": "bg-green-100 text-green-800",
     };
     return colors[tag] || "bg-gray-100 text-gray-800";
+  };
+
+  const handleEditClick = (tag: {
+    name: string;
+    meaning: string;
+    dateCreated: string;
+  }) => {
+    setSelectedTag({
+      name: tag.name,
+      meaning: tag.meaning,
+      date: tag.dateCreated,
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditSubmit = (tagData: { name: string; meaning: string }) => {
+    // Handle the edit submission here
+    console.log("Updated tag:", tagData);
+    // You would typically make an API call here to update the tag
+  };
+
+  const handleAddSubmit = (tagData: { name: string; meaning: string }) => {
+    // Handle the add submission here
+    console.log("New tag:", tagData);
+    // You would typically make an API call here to create the tag
   };
 
   return (
@@ -238,8 +272,11 @@ const Tag = () => {
       <div className="bg-white rounded-lg p-6">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg font-medium">DANH SÁCH THẺ TAG</h2>
-          <button className="bg-primary text-white p-2 rounded-full hover:bg-primary/90">
-            <PlusIcon className="h-6 w-6" />
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90"
+          >
+            Tạo mới Tag
           </button>
         </div>
 
@@ -279,7 +316,10 @@ const Tag = () => {
                   {tag.dateCreated}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  <button className="text-gray-600 hover:text-primary">
+                  <button
+                    className="text-gray-600 hover:text-primary"
+                    onClick={() => handleEditClick(tag)}
+                  >
                     <PencilIcon className="h-5 w-5" />
                   </button>
                 </td>
@@ -287,6 +327,26 @@ const Tag = () => {
             ))}
           </tbody>
         </table>
+
+        {/* Add Modal */}
+        <AddTagModal
+          isOpen={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
+          onSubmit={handleAddSubmit}
+        />
+
+        {/* Edit Modal */}
+        {selectedTag && (
+          <EditTagModal
+            isOpen={isEditModalOpen}
+            onClose={() => {
+              setIsEditModalOpen(false);
+              setSelectedTag(null);
+            }}
+            onSubmit={handleEditSubmit}
+            initialData={selectedTag}
+          />
+        )}
       </div>
     </div>
   );
