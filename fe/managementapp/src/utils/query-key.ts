@@ -1,0 +1,2 @@
+export const USER_PROFILE = "USER_PROFILE";
+export const LIST_PRODUCT_KEY = "LIST_PRODUCT_KEY";

@@ -105,7 +105,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({ currentPath }) => {
     },
     {
       itemName: "Tag",
-      path: "math",
+      path: "tag",
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
