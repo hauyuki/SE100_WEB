@@ -6,6 +6,7 @@ import Product from "../pages/employee/products/Product";
 import ProductDetail from "../pages/employee/products/ProductDetail";
 import Import from "../pages/employee/import/Import";
 import Report from "../pages/employee/reports/Report";
+import ReportGenerator from "../pages/employee/reports/ReportGenerator";
 import Tag from "../pages/employee/tags/Tag";
 
 export const routes = [
@@ -15,5 +16,10 @@ export const routes = [
   { path: "/product/:id", component: ProductDetail, layout: DefaultLayout },
   { path: "/import", component: Import, layout: DefaultLayout },
   { path: "/report", component: Report, layout: DefaultLayout },
+  {
+    path: "/report/generate",
+    component: ReportGenerator,
+    layout: DefaultLayout,
+  },
   { path: "/tag", component: Tag, layout: DefaultLayout },
 ];
