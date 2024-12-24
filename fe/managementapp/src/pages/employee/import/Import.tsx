@@ -1,345 +1,299 @@
 import React, { useState } from "react";
-import {
-  MagnifyingGlassIcon,
-  PlusIcon,
-  ChevronUpDownIcon,
-} from "@heroicons/react/24/outline";
-import { useNavigate } from "react-router-dom";
-
-type TabType = "import" | "export" | "shipping";
+import { FaCalendarAlt, FaPlus, FaTimes } from "react-icons/fa";
+import ImportForm from "./components/ImportForm";
 
 const Import = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [activeTab, setActiveTab] = useState("import");
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedValue, setSelectedValue] = useState("");
-  const [selectedDate, setSelectedDate] = useState("");
-  const [selectedCompletionDate, setSelectedCompletionDate] = useState("");
-  const [activeTab, setActiveTab] = useState<TabType>("shipping");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
-  const itemsPerPage = 10;
-  const navigate = useNavigate();
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    orderId: "",
+    totalValue: "",
+    shipper: "",
+    shippingDate: "",
+    completionDate: "",
+    notes: "",
+  });
 
-  // Sample data
-  const allShipments = [
+  const importData = [
     {
-      stt: 1,
-      code: "S001",
-      totalValue: "8,795 đ",
-      carrier: "Dior",
-      shipDate: "13/07/2024",
-      completionDate: "16/12/2022",
-      notes: "Postman",
+      id: 1,
+      orderId: "IM001",
+      totalValue: 1500000,
+      shipper: "Dior Express",
+      shippingDate: "15/03/2024",
+      completionDate: "20/03/2024",
+      notes: "Standard Import",
     },
     {
-      stt: 2,
-      code: "S001",
-      totalValue: "7,655 đ",
-      carrier: "Content",
-      shipDate: "09/05/2020",
-      completionDate: "10/11/2022",
-      notes: "Account Manager",
-    },
-    {
-      stt: 3,
-      code: "S001",
-      totalValue: "4,502 đ",
-      carrier: "Content",
-      shipDate: "19/11/2020",
-      completionDate: "28/01/2024",
-      notes: "Industrial Designer",
-    },
-    {
-      stt: 4,
-      code: "S001",
-      totalValue: "9,040 đ",
-      carrier: "Content",
-      shipDate: "13/12/2022",
-      completionDate: "01/03/2024",
-      notes: "Clinical Psychologist",
-    },
-    {
-      stt: 5,
-      code: "S001",
-      totalValue: "5,698 đ",
-      carrier: "Content",
-      shipDate: "04/08/2022",
-      completionDate: "08/04/2021",
-      notes: "Public Health Inspector",
-    },
-    {
-      stt: 6,
-      code: "S001",
-      totalValue: "1,296 đ",
-      carrier: "Content",
-      shipDate: "01/10/2021",
-      completionDate: "07/05/2020",
-      notes: "Waiter",
-    },
-    {
-      stt: 7,
-      code: "S001",
-      totalValue: "1,440 đ",
-      carrier: "Content",
-      shipDate: "01/09/2020",
-      completionDate: "23/03/2024",
-      notes: "Air Traffic Controller",
-    },
-    {
-      stt: 8,
-      code: "S001",
-      totalValue: "5,440 đ",
-      carrier: "Content",
-      shipDate: "24/09/2023",
-      completionDate: "23/02/2021",
-      notes: "Computer Security Specialist",
-    },
-    {
-      stt: 9,
-      code: "S001",
-      totalValue: "6,399 đ",
-      carrier: "Content",
-      shipDate: "08/12/2022",
-      completionDate: "01/11/2023",
-      notes: "Business Analyst",
-    },
-    {
-      stt: 10,
-      code: "S001",
-      totalValue: "7,056 đ",
-      carrier: "Content",
-      shipDate: "01/10/2021",
-      completionDate: "23/11/2020",
-      notes: "Insurance Agent",
+      id: 2,
+      orderId: "IM002",
+      totalValue: 2300000,
+      shipper: "Content Logistics",
+      shippingDate: "16/03/2024",
+      completionDate: "21/03/2024",
+      notes: "Express Import",
     },
   ];
 
-  const handleSortClick = () => {
-    if (sortOrder === null) {
-      setSortOrder("asc");
-    } else if (sortOrder === "asc") {
-      setSortOrder("desc");
-    } else {
-      setSortOrder(null);
+  const exportData = [
+    {
+      id: 1,
+      orderId: "EX001",
+      totalValue: 3500000,
+      shipper: "Fast Export",
+      shippingDate: "18/03/2024",
+      completionDate: "23/03/2024",
+      notes: "Priority Export",
+    },
+    {
+      id: 2,
+      orderId: "EX002",
+      totalValue: 4200000,
+      shipper: "Swift Logistics",
+      shippingDate: "19/03/2024",
+      completionDate: "24/03/2024",
+      notes: "Standard Export",
+    },
+  ];
+
+  const shippingData = [
+    {
+      id: 1,
+      orderId: "SH001",
+      totalValue: 1800000,
+      shipper: "Global Shipping",
+      shippingDate: "20/03/2024",
+      completionDate: "25/03/2024",
+      notes: "International Shipping",
+    },
+    {
+      id: 2,
+      orderId: "SH002",
+      totalValue: 2600000,
+      shipper: "Ocean Freight",
+      shippingDate: "21/03/2024",
+      completionDate: "26/03/2024",
+      notes: "Sea Shipping",
+    },
+  ];
+
+  const [data, setData] = useState(importData);
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    switch (tab) {
+      case "import":
+        setData(importData);
+        break;
+      case "export":
+        setData(exportData);
+        break;
+      case "shipping":
+        setData(shippingData);
+        break;
+      default:
+        setData(importData);
     }
   };
 
-  // Sort items based on total value if sort order is set
-  const sortedItems = [...allShipments].sort((a, b) => {
-    if (sortOrder === null) return 0;
-    const valueA = parseFloat(a.totalValue.replace(/[^\d]/g, ""));
-    const valueB = parseFloat(b.totalValue.replace(/[^\d]/g, ""));
-    return sortOrder === "asc" ? valueA - valueB : valueB - valueA;
-  });
-
-  // Pagination logic
-  const totalPages = Math.ceil(sortedItems.length / itemsPerPage);
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = sortedItems.slice(indexOfFirstItem, indexOfLastItem);
-
-  const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  const pageNumbers = [];
-  for (let i = 1; i <= totalPages; i++) {
-    pageNumbers.push(i);
-  }
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const newItem = {
+      id: data.length + 1,
+      ...formData,
+      totalValue: parseFloat(formData.totalValue),
+    };
+    setData((prev) => [...prev, newItem]);
+    setFormData({
+      orderId: "",
+      totalValue: "",
+      shipper: "",
+      shippingDate: "",
+      completionDate: "",
+      notes: "",
+    });
+    setShowForm(false);
+  };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(value);
+  };
+
+  const filteredData = data
+    .filter(
+      (item) =>
+        item.orderId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.shipper.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.notes.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .sort((a, b) => {
+      if (selectedValue === "asc") {
+        return a.totalValue - b.totalValue;
+      } else if (selectedValue === "desc") {
+        return b.totalValue - a.totalValue;
+      }
+      return 0;
+    });
 
   return (
-    <div className="p-6">
-      {/* Tabs Navigation */}
-      <div className="mb-6">
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8">
-            <button
-              onClick={() => setActiveTab("import")}
-              className={`${
-                activeTab === "import"
-                  ? "border-primary text-primary"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-            >
-              Danh sách phiếu nhập
-            </button>
-            <button
-              onClick={() => setActiveTab("export")}
-              className={`${
-                activeTab === "export"
-                  ? "border-primary text-primary"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-            >
-              Danh sách phiếu xuất
-            </button>
-            <button
-              onClick={() => setActiveTab("shipping")}
-              className={`${
-                activeTab === "shipping"
-                  ? "border-primary text-primary"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-            >
-              Danh sách vận chuyển
-            </button>
-          </nav>
-        </div>
+    <div className="container mx-auto p-6">
+      <div className="border-b border-gray-200 mb-6">
+        <nav className="flex space-x-8">
+          <button
+            className={`py-4 px-6 font-medium rounded-t-lg transition-all duration-300 ${
+              activeTab === "import"
+                ? "bg-indigo-500 text-white"
+                : "text-gray-600 hover:bg-indigo-50"
+            }`}
+            onClick={() => handleTabChange("import")}
+          >
+            Danh sách phiếu nhập
+          </button>
+          <button
+            className={`py-4 px-6 font-medium rounded-t-lg transition-all duration-300 ${
+              activeTab === "export"
+                ? "bg-indigo-500 text-white"
+                : "text-gray-600 hover:bg-indigo-50"
+            }`}
+            onClick={() => handleTabChange("export")}
+          >
+            Danh sách phiếu xuất
+          </button>
+          <button
+            className={`py-4 px-6 font-medium rounded-t-lg transition-all duration-300 ${
+              activeTab === "shipping"
+                ? "bg-indigo-500 text-white"
+                : "text-gray-600 hover:bg-indigo-50"
+            }`}
+            onClick={() => handleTabChange("shipping")}
+          >
+            Danh sách vận chuyển
+          </button>
+        </nav>
       </div>
 
-      {/* Header with title and add button */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold">
-          {activeTab === "import" && "DANH SÁCH PHIẾU NHẬP"}
-          {activeTab === "export" && "DANH SÁCH PHIẾU XUẤT"}
-          {activeTab === "shipping" && "DANH SÁCH VẬN CHUYỂN"}
-        </h2>
-        <button className="bg-primary text-white p-2 rounded-full hover:bg-primary/90">
-          <PlusIcon className="h-6 w-6" />
-        </button>
-      </div>
-
-      {/* Filters Section */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
-        {/* Search Bar */}
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Tìm kiếm"
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <MagnifyingGlassIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-        </div>
-
-        {/* Total Value Filter with Sort */}
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Tổng giá trị"
-            className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold mb-4">Danh Sách Phiếu Nhập</h2>
+        <div className="flex items-center space-x-4 mb-6">
+          <div className="relative w-1/3">
+            <input
+              type="text"
+              placeholder="Tìm kiếm theo mã vận đơn, đơn vị vận chuyển hoặc ghi chú"
+              className="w-full border rounded-md pl-4 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-400 text-sm"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+              <svg
+                className="h-5 w-5 text-gray-400"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+          </div>
+          <select
+            className="w-1/5 border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer transition-colors hover:bg-gray-50"
             value={selectedValue}
             onChange={(e) => setSelectedValue(e.target.value)}
-          />
-          <button
-            onClick={handleSortClick}
-            className={`absolute right-3 top-2.5 ${
-              sortOrder ? "text-primary" : "text-gray-400"
-            } hover:text-primary`}
           >
-            <ChevronUpDownIcon className="h-5 w-5" />
+            <option value="">Tổng giá trị</option>
+            <option value="asc">Tăng dần</option>
+            <option value="desc">Giảm dần</option>
+          </select>
+          <div className="relative w-1/6">
+            <input
+              type="date"
+              className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
+            <FaCalendarAlt className="absolute right-3 top-3 text-gray-400" />
+          </div>
+          <div className="relative w-1/6">
+            <input
+              type="date"
+              className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+            />
+            <FaCalendarAlt className="absolute right-3 top-3 text-gray-400" />
+          </div>
+          <button
+            className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center hover:bg-indigo-600 transition-colors"
+            onClick={() => setShowForm(true)}
+          >
+            <FaPlus className="text-white" />
           </button>
         </div>
 
-        {/* Ship Date Filter */}
-        <div>
-          <input
-            type="date"
-            placeholder="Ngày vận chuyển"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-          />
-        </div>
+        <ImportForm
+          showForm={showForm}
+          formData={formData}
+          onClose={() => setShowForm(false)}
+          onSubmit={handleSubmit}
+          onChange={handleInputChange}
+        />
 
-        {/* Completion Date Filter */}
-        <div>
-          <input
-            type="date"
-            placeholder="Ngày hoàn thành"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary"
-            value={selectedCompletionDate}
-            onChange={(e) => setSelectedCompletionDate(e.target.value)}
-          />
-        </div>
-      </div>
-
-      {/* Table */}
-      <div className="bg-white rounded-lg shadow">
-        <table className="min-w-full">
-          <thead>
-            <tr className="bg-gray-50">
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                STT
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Mã vận đơn
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Tổng giá trị
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Đơn vị vận chuyển
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Ngày vận chuyển
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Ngày hoàn thành
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Ghi chú
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {currentItems.map((item) => (
-              <tr key={item.stt} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {item.stt}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-primary cursor-pointer hover:underline">
-                  {item.code}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {item.totalValue}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {item.carrier}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {item.shipDate}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {item.completionDate}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {item.notes}
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-gray-50 text-gray-500 uppercase text-sm">
+                <th className="px-6 py-3 text-center">STT</th>
+                <th className="px-6 py-3 text-left">Mã vận đơn</th>
+                <th className="px-6 py-3 text-right">Tổng giá trị</th>
+                <th className="px-6 py-3 text-left">Đơn vị vận chuyển</th>
+                <th className="px-6 py-3 text-center">Ngày vận chuyển</th>
+                <th className="px-6 py-3 text-center">Ngày hoàn thành</th>
+                <th className="px-6 py-3 text-left">Ghi chú</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {/* Pagination */}
-        <div className="flex justify-end items-center px-6 py-3 border-t">
-          <button
-            className="px-3 py-1 border rounded-l-lg hover:bg-gray-50 disabled:opacity-50"
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-          >
-            &lt;
-          </button>
-          {pageNumbers.map((number) => (
-            <button
-              key={number}
-              className={`px-3 py-1 border-t border-b ${
-                currentPage === number
-                  ? "bg-primary text-white"
-                  : "hover:bg-gray-50"
-              }`}
-              onClick={() => handlePageChange(number)}
-            >
-              {number}
-            </button>
-          ))}
-          <button
-            className="px-3 py-1 border rounded-r-lg hover:bg-gray-50 disabled:opacity-50"
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-          >
-            &gt;
-          </button>
+            </thead>
+            <tbody>
+              {filteredData.map((item) => (
+                <tr
+                  key={item.id}
+                  className="border-b border-gray-200 hover:bg-gray-100"
+                >
+                  <td className="px-6 py-4 text-center">{item.id}</td>
+                  <td className="px-6 py-4">
+                    <a href="#" className="text-indigo-500 underline">
+                      {item.orderId}
+                    </a>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    {formatCurrency(item.totalValue)}
+                  </td>
+                  <td className="px-6 py-4">{item.shipper}</td>
+                  <td className="px-6 py-4 text-center">{item.shippingDate}</td>
+                  <td className="px-6 py-4 text-center">
+                    {item.completionDate}
+                  </td>
+                  <td className="px-6 py-4">{item.notes}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
