@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { MagnifyingGlassIcon, PencilIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
-import { Product } from "../models/Product";
-import { useGetProducts } from "../hooks/products";
+import { Product } from "../../../models/Product";
+import { useGetProducts } from "../../../hooks/products";
 import productImage1 from "../assets/images/Image16.jpeg";
 
 const ProductPage = () => {

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
-import productImage1 from "../assets/images/itempic.png";
+import productImage1 from "../../../assets/images/itempic.png";
 
 const ProductDetail = () => {
   const { id } = useParams();

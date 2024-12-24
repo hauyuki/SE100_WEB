@@ -11,7 +11,7 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import StatsCard from "../components/StatsCard";
+import StatsCard from "../../../components/StatsCard";
 
 const Dashboard = () => {
   // Sample data for weekly stats

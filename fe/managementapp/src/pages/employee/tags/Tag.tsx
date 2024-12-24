@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { PencilIcon, PlusIcon } from "@heroicons/react/24/outline";
-import EditTagModal from "../components/modals/EditTagModal";
-import AddTagModal from "../components/modals/AddTagModal";
+import EditTagModal from "../../../components/modals/EditTagModal";
+import AddTagModal from "../../../components/modals/AddTagModal";
 
 interface AreaProduct {
   name: string;
