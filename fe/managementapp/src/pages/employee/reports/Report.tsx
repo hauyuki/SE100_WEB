@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   LineChart,
   Line,
@@ -14,6 +15,7 @@ import {
 } from "@heroicons/react/24/outline";
 
 const Report = () => {
+  const navigate = useNavigate();
   const [timeFilter, setTimeFilter] = useState("7 ngày qua");
 
   // Sample data for the line chart
@@ -108,7 +110,10 @@ const Report = () => {
       <div className="bg-white rounded-lg p-6">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg font-medium">Danh sách báo cáo</h2>
-          <button className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90">
+          <button
+            onClick={() => navigate("/report/generate")}
+            className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90"
+          >
             Tạo báo cáo
           </button>
         </div>
