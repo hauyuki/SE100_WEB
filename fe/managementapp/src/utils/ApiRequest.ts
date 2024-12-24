@@ -1,5 +1,8 @@
+import Cookies from "js-cookie";
+
 export const HOST = process.env.NEXT_PUBLIC_HOST;
-export const API_HOST = process.env.NEXT_PUBLIC_HOST + "/api";
+export const API_HOST =
+  "https://inventory-management-server-fkr8.onrender.com" + "/api";
 
 export const getFormData = (data: { [name: string]: any }): FormData => {
   const formData = new FormData();
@@ -18,11 +21,11 @@ const getRequestHeaders = async (
   method: string,
   isFormData?: boolean
 ): Promise<any> => {
-  const token = localStorage.getItem("token");
+  const token = Cookies.get("token");
 
   const headers = new Headers();
   if (token) {
-    headers.append("Authorization", "Bearer " + token);
+    headers.append("token", "Bearer " + token);
   }
   if (!isFormData) {
     headers.append("Content-Type", "application/json");
@@ -57,8 +60,11 @@ const apiFetch = async (
   try {
     const response = await fetch(input, init);
     const result = await response.json();
-    if (!response.ok || response.status != 200) {
-      const message = `Lỗi: ${result.message || response.status}`;
+    if (!response.ok || response.status !== 200) {
+      if (response.status === 401) {
+        if (Cookies.get("token") !== undefined) Cookies.set("token", "");
+      }
+      const message = `Error: ${result.message || response.status}`;
       throw new Error(message);
     }
     const tmp = JSON.stringify(result);
@@ -87,7 +93,7 @@ export const apiPost = async (query: string, body: any) => {
   });
 };
 
-export const apiDelete = async (query: string, body: any) => {
+export const apiDelete = async (query: string, body?: any) => {
   const isFormData = body instanceof FormData;
   const headers = await getRequestHeaders("DELETE", isFormData);
   return await apiFetch(getRequestUrl(query), {

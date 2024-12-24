@@ -1,12 +1,12 @@
 import AuthLayout from "../layouts/AuthLayout";
 import DefaultLayout from "../layouts/DefaultLayout";
 import Login from "../pages/Login";
-import Dashboard from "../pages/Dashboard";
-import Product from "../pages/Product";
-import ProductDetail from "../pages/ProductDetail";
-import Import from "../pages/Import";
-import Report from "../pages/Report";
-import Tag from "../pages/Tag";
+import Dashboard from "../pages/employee/dashboard/Dashboard";
+import Product from "../pages/employee/products/Product";
+import ProductDetail from "../pages/employee/products/ProductDetail";
+import Import from "../pages/employee/import/Import";
+import Report from "../pages/employee/reports/Report";
+import Tag from "../pages/employee/tags/Tag";
 
 export const routes = [
   { path: "/", component: Login, layout: AuthLayout },
