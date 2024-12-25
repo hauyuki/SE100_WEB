@@ -6,6 +6,7 @@ import Dashboard from "../pages/employee/dashboard/Dashboard";
 import Product from "../pages/employee/products/Product";
 import ProductDetail from "../pages/employee/products/ProductDetail";
 import Import from "../pages/employee/import/Import";
+import ImportDetail from "../pages/employee/import/ImportDetail";
 import Report from "../pages/employee/reports/Report";
 import ReportGenerator from "../pages/employee/reports/ReportGenerator";
 import Tag from "../pages/employee/tags/Tag";
@@ -19,6 +20,7 @@ export const routes = [
   { path: "/product", component: Product, layout: DefaultLayout },
   { path: "/product/:id", component: ProductDetail, layout: DefaultLayout },
   { path: "/import", component: Import, layout: DefaultLayout },
+  { path: "/import/:id", component: ImportDetail, layout: DefaultLayout },
   { path: "/report", component: Report, layout: DefaultLayout },
   {
     path: "/report/generate",

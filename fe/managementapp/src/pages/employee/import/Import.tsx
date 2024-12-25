@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { FaCalendarAlt, FaPlus, FaTimes } from "react-icons/fa";
+import { Link } from "react-router-dom";
 import ImportForm from "./components/ImportForm";
 
 interface Product {
@@ -297,13 +298,16 @@ const Import = () => {
               {filteredData.map((item) => (
                 <tr
                   key={item.id}
-                  className="border-b border-gray-200 hover:bg-gray-100"
+                  className="border-b border-gray-200 hover:bg-gray-100 cursor-pointer"
                 >
                   <td className="px-6 py-4 text-center">{item.id}</td>
                   <td className="px-6 py-4">
-                    <a href="#" className="text-indigo-500 underline">
+                    <Link
+                      to={`/import/${item.id}`}
+                      className="text-indigo-500 hover:text-indigo-600"
+                    >
                       {item.orderId}
-                    </a>
+                    </Link>
                   </td>
                   <td className="px-6 py-4 text-right">
                     {formatCurrency(item.totalValue)}
