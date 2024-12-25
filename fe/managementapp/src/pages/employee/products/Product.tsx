@@ -1,13 +1,25 @@
 import React, { useState } from "react";
 import { MagnifyingGlassIcon, PencilIcon } from "@heroicons/react/24/outline";
+import { FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { Product } from "../../../models/Product";
 import { useGetProducts } from "../../../hooks/products";
 import productImage1 from "../assets/images/Image16.jpeg";
+import AddProductForm, { ProductFormData } from "./components/AddProductForm";
 
 const ProductPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState<ProductFormData>({
+    sku: "",
+    name: "",
+    description: "",
+    category: "",
+    company: "",
+    marketPrice: "",
+    image: "",
+  });
   const productsPerPage = 10;
   const navigate = useNavigate();
 
@@ -16,6 +28,32 @@ const ProductPage = () => {
     isPending: loading,
     isError: error,
   } = useGetProducts();
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    // Add API call to create product here
+    console.log("New product:", formData);
+    setFormData({
+      sku: "",
+      name: "",
+      description: "",
+      category: "",
+      company: "",
+      marketPrice: "",
+      image: "",
+    });
+    setShowForm(false);
+  };
 
   //Pagination logic
   const totalPages = Math.ceil(
@@ -44,6 +82,27 @@ const ProductPage = () => {
   return (
     <>
       <div className="p-6">
+        {/* Header with Add Button */}
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-800">Quản lý sản phẩm</h1>
+          <button
+            onClick={() => setShowForm(true)}
+            className="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 flex items-center gap-2"
+          >
+            <FaPlus className="w-4 h-4" />
+            <span>Thêm sản phẩm</span>
+          </button>
+        </div>
+
+        {/* Add Product Form */}
+        <AddProductForm
+          showForm={showForm}
+          onClose={() => setShowForm(false)}
+          onSubmit={handleSubmit}
+          formData={formData}
+          onChange={handleInputChange}
+        />
+
         {loading ? (
           <div className="text-center py-4">Loading...</div>
         ) : error ? (
