@@ -2,6 +2,22 @@ import React, { useState } from "react";
 import { FaCalendarAlt, FaPlus, FaTimes } from "react-icons/fa";
 import ImportForm from "./components/ImportForm";
 
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+}
+
+interface FormData {
+  orderId: string;
+  shipper: string;
+  shippingDate: string;
+  completionDate: string;
+  notes: string;
+  products: Product[];
+}
+
 const Import = () => {
   const [activeTab, setActiveTab] = useState("import");
   const [searchQuery, setSearchQuery] = useState("");
@@ -9,13 +25,13 @@ const Import = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     orderId: "",
-    totalValue: "",
     shipper: "",
     shippingDate: "",
     completionDate: "",
     notes: "",
+    products: [],
   });
 
   const importData = [
@@ -110,19 +126,27 @@ const Import = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const totalValue = formData.products.reduce(
+      (sum, product) => sum + product.price * product.quantity,
+      0
+    );
     const newItem = {
       id: data.length + 1,
-      ...formData,
-      totalValue: parseFloat(formData.totalValue),
+      orderId: formData.orderId,
+      totalValue,
+      shipper: formData.shipper,
+      shippingDate: formData.shippingDate,
+      completionDate: formData.completionDate,
+      notes: formData.notes,
     };
     setData((prev) => [...prev, newItem]);
     setFormData({
       orderId: "",
-      totalValue: "",
       shipper: "",
       shippingDate: "",
       completionDate: "",
       notes: "",
+      products: [],
     });
     setShowForm(false);
   };
