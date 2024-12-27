@@ -14,6 +14,8 @@ export type Product = {
   category: Category;
   company: Company;
   tags: Tag[];
+  quantity: number;
+  storageArea: string;
 };
 
 export interface UpsertProductModel {
