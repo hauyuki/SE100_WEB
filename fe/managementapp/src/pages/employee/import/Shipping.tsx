@@ -1,41 +1,28 @@
-import React, { useState } from "react";
-import { FaCalendarAlt, FaPlus } from "react-icons/fa";
+import React, { useState, useEffect } from "react";
+import { FaCalendarAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import ImportForm from "./components/ImportForm";
 import ImportTabs from "./components/ImportTabs";
 
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-}
-
-interface FormData {
+interface ShippingData {
+  id: number;
   orderId: string;
+  totalValue: number;
   shipper: string;
   shippingDate: string;
   completionDate: string;
   notes: string;
-  products: Product[];
+  type: "import" | "export";
 }
 
-const Import = () => {
+const Shipping = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedValue, setSelectedValue] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState<FormData>({
-    orderId: "",
-    shipper: "",
-    shippingDate: "",
-    completionDate: "",
-    notes: "",
-    products: [],
-  });
+  const [combinedData, setCombinedData] = useState<ShippingData[]>([]);
 
-  const [data, setData] = useState([
+  // Dữ liệu mẫu cho phiếu nhập
+  const importData = [
     {
       id: 1,
       orderId: "IM001",
@@ -44,6 +31,7 @@ const Import = () => {
       shippingDate: "15/03/2024",
       completionDate: "20/03/2024",
       notes: "Standard Import",
+      type: "import" as const,
     },
     {
       id: 2,
@@ -53,52 +41,43 @@ const Import = () => {
       shippingDate: "16/03/2024",
       completionDate: "21/03/2024",
       notes: "Express Import",
+      type: "import" as const,
     },
-  ]);
+  ];
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  // Dữ liệu mẫu cho phiếu xuất
+  const exportData = [
+    {
+      id: 3,
+      orderId: "EX001",
+      totalValue: 3500000,
+      shipper: "Fast Export",
+      shippingDate: "18/03/2024",
+      completionDate: "23/03/2024",
+      notes: "Priority Export",
+      type: "export" as const,
+    },
+    {
+      id: 4,
+      orderId: "EX002",
+      totalValue: 4200000,
+      shipper: "Swift Logistics",
+      shippingDate: "19/03/2024",
+      completionDate: "24/03/2024",
+      notes: "Standard Export",
+      type: "export" as const,
+    },
+  ];
 
-  const generateOrderId = () => {
-    const lastImport = data[data.length - 1];
-    if (!lastImport) return "IM001";
-
-    const lastNumber = parseInt(lastImport.orderId.slice(2));
-    const newNumber = lastNumber + 1;
-    return `IM${newNumber.toString().padStart(3, "0")}`;
-  };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const totalValue = formData.products.reduce(
-      (sum, product) => sum + product.price * product.quantity,
-      0
-    );
-    const newItem = {
-      id: data.length + 1,
-      orderId: generateOrderId(),
-      totalValue,
-      shipper: formData.shipper,
-      shippingDate: formData.shippingDate,
-      completionDate: formData.completionDate,
-      notes: formData.notes,
-    };
-    setData((prev) => [...prev, newItem]);
-    setFormData({
-      orderId: "",
-      shipper: "",
-      shippingDate: "",
-      completionDate: "",
-      notes: "",
-      products: [],
+  // Kết hợp dữ liệu từ cả phiếu nhập và xuất
+  useEffect(() => {
+    const combined = [...importData, ...exportData].sort((a, b) => {
+      const dateA = new Date(a.shippingDate.split("/").reverse().join("-"));
+      const dateB = new Date(b.shippingDate.split("/").reverse().join("-"));
+      return dateB.getTime() - dateA.getTime();
     });
-    setShowForm(false);
-  };
+    setCombinedData(combined);
+  }, []);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -107,7 +86,7 @@ const Import = () => {
     }).format(value);
   };
 
-  const filteredData = data
+  const filteredData = combinedData
     .filter(
       (item) =>
         item.orderId.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -127,7 +106,7 @@ const Import = () => {
     <div className="container mx-auto p-6">
       <ImportTabs />
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Danh Sách Phiếu Nhập</h2>
+        <h2 className="text-xl font-semibold mb-4">Danh Sách Vận Chuyển</h2>
         <div className="flex items-center space-x-4 mb-6">
           <div className="relative w-1/3">
             <input
@@ -179,21 +158,7 @@ const Import = () => {
             />
             <FaCalendarAlt className="absolute right-3 top-3 text-gray-400" />
           </div>
-          <button
-            className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center hover:bg-indigo-600 transition-colors"
-            onClick={() => setShowForm(true)}
-          >
-            <FaPlus className="text-white" />
-          </button>
         </div>
-
-        <ImportForm
-          showForm={showForm}
-          formData={formData}
-          onClose={() => setShowForm(false)}
-          onSubmit={handleSubmit}
-          onChange={handleInputChange}
-        />
 
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
@@ -201,6 +166,7 @@ const Import = () => {
               <tr className="bg-gray-50 text-gray-500 uppercase text-sm">
                 <th className="px-6 py-3 text-center">STT</th>
                 <th className="px-6 py-3 text-left">Mã vận đơn</th>
+                <th className="px-6 py-3 text-center">Loại</th>
                 <th className="px-6 py-3 text-right">Tổng giá trị</th>
                 <th className="px-6 py-3 text-left">Đơn vị vận chuyển</th>
                 <th className="px-6 py-3 text-center">Ngày vận chuyển</th>
@@ -209,19 +175,30 @@ const Import = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredData.map((item) => (
+              {filteredData.map((item, index) => (
                 <tr
                   key={item.id}
                   className="border-b border-gray-200 hover:bg-gray-100 cursor-pointer"
                 >
-                  <td className="px-6 py-4 text-center">{item.id}</td>
+                  <td className="px-6 py-4 text-center">{index + 1}</td>
                   <td className="px-6 py-4">
                     <Link
-                      to={`/import/${item.id}`}
+                      to={`/${item.type}/${item.id}`}
                       className="text-indigo-500 hover:text-indigo-600"
                     >
                       {item.orderId}
                     </Link>
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        item.type === "import"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-blue-100 text-blue-800"
+                      }`}
+                    >
+                      {item.type === "import" ? "Nhập" : "Xuất"}
+                    </span>
                   </td>
                   <td className="px-6 py-4 text-right">
                     {formatCurrency(item.totalValue)}
@@ -242,4 +219,4 @@ const Import = () => {
   );
 };
 
-export default Import;
+export default Shipping;

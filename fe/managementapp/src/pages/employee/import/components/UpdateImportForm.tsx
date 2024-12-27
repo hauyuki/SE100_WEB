@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaTimes, FaPlus } from "react-icons/fa";
 
 interface Product {
@@ -15,34 +15,36 @@ interface FormData {
   completionDate: string;
   notes: string;
   products: Product[];
+  status: string;
 }
 
-interface ImportFormProps {
+interface UpdateImportFormProps {
   showForm: boolean;
-  formData: FormData;
+  initialData: FormData;
   onClose: () => void;
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onSubmit: (data: FormData) => void;
 }
 
-const ImportForm: React.FC<ImportFormProps> = ({
+const UpdateImportForm: React.FC<UpdateImportFormProps> = ({
   showForm,
-  formData,
+  initialData,
   onClose,
   onSubmit,
-  onChange,
 }) => {
-  const [products, setProducts] = useState<Product[]>([
-    { id: "", name: "", price: 0, quantity: 1 },
-  ]);
+  const [formData, setFormData] = useState<FormData>(initialData);
 
-  const handleAddProduct = () => {
-    setProducts([...products, { id: "", name: "", price: 0, quantity: 1 }]);
-  };
+  useEffect(() => {
+    setFormData(initialData);
+  }, [initialData]);
 
-  const handleRemoveProduct = (index: number) => {
-    const newProducts = products.filter((_, i) => i !== index);
-    setProducts(newProducts);
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleProductChange = (
@@ -50,20 +52,35 @@ const ImportForm: React.FC<ImportFormProps> = ({
     field: keyof Product,
     value: string | number
   ) => {
-    const newProducts = [...products];
+    const newProducts = [...formData.products];
     if (field === "price" || field === "quantity") {
       newProducts[index][field] = Number(value);
     } else {
       newProducts[index][field] = value as string;
     }
-    setProducts(newProducts);
+    setFormData((prev) => ({
+      ...prev,
+      products: newProducts,
+    }));
   };
 
-  const calculateTotal = () => {
-    return products.reduce(
-      (sum, product) => sum + product.price * product.quantity,
-      0
-    );
+  const handleAddProduct = () => {
+    setFormData((prev) => ({
+      ...prev,
+      products: [...prev.products, { id: "", name: "", price: 0, quantity: 1 }],
+    }));
+  };
+
+  const handleRemoveProduct = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      products: prev.products.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(formData);
   };
 
   if (!showForm) return null;
@@ -79,7 +96,7 @@ const ImportForm: React.FC<ImportFormProps> = ({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-semibold">Thêm Phiếu Nhập Mới</h3>
+          <h3 className="text-xl font-semibold">Cập nhật phiếu nhập</h3>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
@@ -87,7 +104,8 @@ const ImportForm: React.FC<ImportFormProps> = ({
             <FaTimes />
           </button>
         </div>
-        <form onSubmit={onSubmit} className="space-y-6">
+
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -97,10 +115,25 @@ const ImportForm: React.FC<ImportFormProps> = ({
                 type="text"
                 name="shipper"
                 value={formData.shipper}
-                onChange={onChange}
+                onChange={handleInputChange}
                 className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
               />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Trạng thái
+              </label>
+              <select
+                name="status"
+                value={formData.status}
+                onChange={handleInputChange}
+                className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                required
+              >
+                <option value="Pending">Đang xử lý</option>
+                <option value="Completed">Hoàn thành</option>
+              </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -110,7 +143,7 @@ const ImportForm: React.FC<ImportFormProps> = ({
                 type="date"
                 name="shippingDate"
                 value={formData.shippingDate}
-                onChange={onChange}
+                onChange={handleInputChange}
                 className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
               />
@@ -123,7 +156,7 @@ const ImportForm: React.FC<ImportFormProps> = ({
                 type="date"
                 name="completionDate"
                 value={formData.completionDate}
-                onChange={onChange}
+                onChange={handleInputChange}
                 className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
               />
@@ -144,7 +177,7 @@ const ImportForm: React.FC<ImportFormProps> = ({
               </button>
             </div>
 
-            {products.map((product, index) => (
+            {formData.products.map((product, index) => (
               <div
                 key={index}
                 className="grid grid-cols-5 gap-4 p-4 bg-gray-50 rounded-lg"
@@ -171,7 +204,7 @@ const ImportForm: React.FC<ImportFormProps> = ({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Giá nhập
+                    Đơn giá
                   </label>
                   <input
                     type="number"
@@ -200,7 +233,7 @@ const ImportForm: React.FC<ImportFormProps> = ({
                   />
                 </div>
                 <div className="flex items-end">
-                  {products.length > 1 && (
+                  {formData.products.length > 1 && (
                     <button
                       type="button"
                       onClick={() => handleRemoveProduct(index)}
@@ -212,17 +245,6 @@ const ImportForm: React.FC<ImportFormProps> = ({
                 </div>
               </div>
             ))}
-
-            {/* Total Section */}
-            <div className="flex justify-end items-center p-4 bg-gray-50 rounded-lg">
-              <span className="font-medium text-lg mr-4">Tổng giá trị:</span>
-              <span className="text-xl font-semibold text-indigo-600">
-                {new Intl.NumberFormat("vi-VN", {
-                  style: "currency",
-                  currency: "VND",
-                }).format(calculateTotal())}
-              </span>
-            </div>
           </div>
 
           <div>
@@ -233,7 +255,7 @@ const ImportForm: React.FC<ImportFormProps> = ({
               type="text"
               name="notes"
               value={formData.notes}
-              onChange={onChange}
+              onChange={handleInputChange}
               className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
@@ -250,7 +272,7 @@ const ImportForm: React.FC<ImportFormProps> = ({
               type="submit"
               className="px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600"
             >
-              Thêm
+              Cập nhật
             </button>
           </div>
         </form>
@@ -259,4 +281,4 @@ const ImportForm: React.FC<ImportFormProps> = ({
   );
 };
 
-export default ImportForm;
+export default UpdateImportForm;
