@@ -78,7 +78,7 @@ const Dashboard = () => {
             Chúng mình hãy xem các báo cáo hoạt động.
           </p>
           <p className="text-gray-100">Hãy tiếp tục phát triển nhé.</p>
-          <button className="mt-4 bg-white text-primary px-4 py-2 rounded-lg">
+          <button className="mt-4 bg-white text-primary font-bold px-4 py-2 rounded-lg">
             Tiến hành nhập hàng
           </button>
         </div>
@@ -161,8 +161,8 @@ const Dashboard = () => {
             <YAxis />
             <Tooltip />
             <Legend />
-            <Bar dataKey="nhap" fill="#4F46E5" />
-            <Bar dataKey="xuat" fill="#06B6D4" />
+            <Bar dataKey="nhap" name="Nhập" fill="#4F46E5" />
+            <Bar dataKey="xuat" name="Xuất" fill="#06B6D4" />
           </BarChart>
         </div>
         <div className="bg-white p-4 rounded-lg shadow">
@@ -193,7 +193,7 @@ const Dashboard = () => {
 
       {/* Products Table */}
       <div className="bg-white p-4 rounded-lg shadow">
-        <h3 className="text-gray-600 mb-4">Sản phẩm cần nhập</h3>
+        <h3 className="text-gray-600 font-bold mb-4">Sản phẩm cần nhập</h3>
         <div className="overflow-x-auto">
           <table className="min-w-full">
             <thead>
