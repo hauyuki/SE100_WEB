@@ -3,11 +3,14 @@ import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
 import { Product } from "../../../models/Product";
 import { useGetProducts } from "../../../hooks/products";
-import productImage1 from "../assets/images/Image16.jpeg";
 
 const ProductPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCompany, setSelectedCompany] = useState("");
+  const [selectedStorageArea, setSelectedStorageArea] = useState("");
+  const [sortQuantity, setSortQuantity] = useState<"asc" | "desc" | "">("");
   const productsPerPage = 10;
   const navigate = useNavigate();
 
@@ -17,15 +20,59 @@ const ProductPage = () => {
     isError: error,
   } = useGetProducts();
 
-  // Filter products based on search term
+  // Get unique categories, companies, and storage areas for filters
+  const categories = useMemo(() => {
+    if (!products?.productList) return [];
+    return Array.from(
+      new Set(products.productList.map((p) => p.category.name))
+    );
+  }, [products?.productList]);
+
+  const companies = useMemo(() => {
+    if (!products?.productList) return [];
+    return Array.from(new Set(products.productList.map((p) => p.company.name)));
+  }, [products?.productList]);
+
+  const storageAreas = useMemo(() => {
+    if (!products?.productList) return [];
+    return Array.from(new Set(products.productList.map((p) => p.storageArea)));
+  }, [products?.productList]);
+
+  // Filter products based on all criteria
   const filteredProducts = useMemo(() => {
     if (!products?.productList) return [];
-    return products.productList.filter((product) =>
-      Object.values(product).some((value) =>
-        value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+
+    return products.productList
+      .filter((product) =>
+        Object.values(product).some((value) =>
+          value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+        )
       )
-    );
-  }, [products?.productList, searchTerm]);
+      .filter((product) =>
+        selectedCategory ? product.category.name === selectedCategory : true
+      )
+      .filter((product) =>
+        selectedCompany ? product.company.name === selectedCompany : true
+      )
+      .filter((product) =>
+        selectedStorageArea ? product.storageArea === selectedStorageArea : true
+      )
+      .sort((a, b) => {
+        if (sortQuantity === "asc") {
+          return a.quantity - b.quantity;
+        } else if (sortQuantity === "desc") {
+          return b.quantity - a.quantity;
+        }
+        return 0;
+      });
+  }, [
+    products?.productList,
+    searchTerm,
+    selectedCategory,
+    selectedCompany,
+    selectedStorageArea,
+    sortQuantity,
+  ]);
 
   //Pagination logic
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
@@ -36,10 +83,6 @@ const ProductPage = () => {
     indexOfLastProduct
   );
 
-  const handleRowClick = (sku: string) => {
-    navigate(`/product/${sku}`);
-  };
-
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
   };
@@ -49,27 +92,93 @@ const ProductPage = () => {
     setCurrentPage(1);
   };
 
+  const handleQuantitySort = () => {
+    if (sortQuantity === "") setSortQuantity("asc");
+    else if (sortQuantity === "asc") setSortQuantity("desc");
+    else setSortQuantity("");
+  };
+
   const pageNumbers = [];
   for (let i = 1; i <= totalPages; i++) {
     pageNumbers.push(i);
   }
 
+  const handleRowClick = (sku: string) => {
+    navigate(`/product/${sku}`);
+  };
+
   return (
     <>
       <div className="p-6">
-        {/* Search Bar */}
-        <div className="mb-6 flex justify-start">
-          <div className="relative w-1/4">
-            <input
-              type="text"
-              placeholder="Tìm kiếm sản phẩm..."
-              value={searchTerm}
-              onChange={handleSearch}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            />
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+        {/* Search and Filters */}
+        <div className="mb-6">
+          {/* Search Bar and Filters in one row */}
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Tìm kiếm sản phẩm..."
+                value={searchTerm}
+                onChange={handleSearch}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              />
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+              </div>
             </div>
+
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="">Tất cả danh mục</option>
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={selectedCompany}
+              onChange={(e) => setSelectedCompany(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="">Tất cả hãng sản xuất</option>
+              {companies.map((company) => (
+                <option key={company} value={company}>
+                  {company}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={selectedStorageArea}
+              onChange={(e) => setSelectedStorageArea(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="">Tất cả khu vực</option>
+              {storageAreas.map((area) => (
+                <option key={area} value={area}>
+                  {area}
+                </option>
+              ))}
+            </select>
+
+            <button
+              onClick={handleQuantitySort}
+              className={`px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                sortQuantity ? "bg-indigo-50" : ""
+              }`}
+            >
+              Số lượng{" "}
+              {sortQuantity === "asc"
+                ? "↑"
+                : sortQuantity === "desc"
+                ? "↓"
+                : ""}
+            </button>
           </div>
         </div>
 
@@ -92,16 +201,16 @@ const ProductPage = () => {
                     Tên sản phẩm
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Ảnh
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Danh mục
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Công ty
+                    Hãng sản xuất
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Giá
+                    Số lượng
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Khu vực lưu trữ
                   </th>
                 </tr>
               </thead>
@@ -109,8 +218,8 @@ const ProductPage = () => {
                 {currentProducts.map((product, index) => (
                   <tr
                     key={product.id}
+                    className="hover:bg-gray-50 cursor-pointer"
                     onClick={() => handleRowClick(product.sku)}
-                    className="cursor-pointer hover:bg-gray-50"
                   >
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {indexOfFirstProduct + index + 1}
@@ -121,26 +230,23 @@ const ProductPage = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {product.name}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="h-12 w-12 rounded-lg bg-gray-100 overflow-hidden">
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {product.category.name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {product.company.name}
                     </td>
+                    <td
+                      className={`px-6 py-4 whitespace-nowrap text-sm ${
+                        product.quantity <= 10
+                          ? "text-red-500"
+                          : "text-gray-900"
+                      }`}
+                    >
+                      {product.quantity}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {new Intl.NumberFormat("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                      }).format(Number.parseInt(product.marketPrice))}
+                      {product.storageArea}
                     </td>
                   </tr>
                 ))}

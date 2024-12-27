@@ -9,6 +9,7 @@ import {
   FaCog,
   FaSignOutAlt,
 } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 interface SidebarItem {
   id: string;

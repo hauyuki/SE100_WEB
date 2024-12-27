@@ -13,12 +13,21 @@ const Header: React.FC<HeaderProps> = ({
   userRole = "Nhân viên",
 }) => {
   // Convert path to title (first letter uppercase)
-  const title = currentPath.charAt(0).toUpperCase() + currentPath.slice(1);
+  const getTitle = (path: string) => {
+    if (path === "product") return "Quản lý sản phẩm";
+    if (path.startsWith("product/")) {
+      const sku = path.split("/")[1];
+      return `Chi tiết sản phẩm ${sku}`;
+    }
+    return path.charAt(0).toUpperCase() + path.slice(1);
+  };
 
   return (
     <header className="flex justify-between items-center p-6 bg-white border-b z-50">
       {/* Left side - Title */}
-      <h1 className="text-4xl font-semibold text-indigo-500">{title}</h1>
+      <h1 className="text-4xl font-semibold text-indigo-500">
+        {getTitle(currentPath)}
+      </h1>
 
       {/* Right side - User info */}
       <div className="flex items-center gap-3">

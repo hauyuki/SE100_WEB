@@ -29,7 +29,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({ currentPath }) => {
       ),
     },
     {
-      itemName: "Sản phẩm",
+      itemName: "Quản lý sản phẩm",
       path: "product",
       icon: (
         <svg
