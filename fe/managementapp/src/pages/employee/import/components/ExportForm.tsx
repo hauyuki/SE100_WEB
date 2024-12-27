@@ -17,7 +17,7 @@ interface FormData {
   products: Product[];
 }
 
-interface ImportFormProps {
+interface ExportFormProps {
   showForm: boolean;
   formData: FormData;
   onClose: () => void;
@@ -25,7 +25,7 @@ interface ImportFormProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-const ImportForm: React.FC<ImportFormProps> = ({
+const ExportForm: React.FC<ExportFormProps> = ({
   showForm,
   formData,
   onClose,
@@ -79,7 +79,7 @@ const ImportForm: React.FC<ImportFormProps> = ({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-semibold">Thêm Phiếu Nhập Mới</h3>
+          <h3 className="text-xl font-semibold">Thêm Phiếu Xuất Mới</h3>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
@@ -171,7 +171,7 @@ const ImportForm: React.FC<ImportFormProps> = ({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Giá nhập
+                    Giá xuất
                   </label>
                   <input
                     type="number"
@@ -259,4 +259,4 @@ const ImportForm: React.FC<ImportFormProps> = ({
   );
 };
 
-export default ImportForm;
+export default ExportForm;

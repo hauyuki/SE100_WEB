@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ChevronLeftIcon, PencilIcon } from "@heroicons/react/24/outline";
-import UpdateImportForm from "./components/UpdateImportForm";
+import UpdateExportForm from "./components/UpdateExportForm";
 
 interface Product {
   id: string;
@@ -10,7 +10,7 @@ interface Product {
   quantity: number;
 }
 
-interface ImportDetail {
+interface ExportData {
   id: number;
   orderId: string;
   totalValue: number;
@@ -32,37 +32,37 @@ interface FormData {
   status: string;
 }
 
-const ImportDetail = () => {
+const ExportDetail = () => {
   const { id } = useParams();
   const [showUpdateForm, setShowUpdateForm] = useState(false);
 
   // Mock data (replace with actual API call in production)
-  const mockData: ImportDetail = {
+  const mockData: ExportData = {
     id: 1,
-    orderId: "IM001",
-    totalValue: 1500000,
-    shipper: "Dior Express",
-    shippingDate: "15/03/2024",
-    completionDate: "20/03/2024",
-    notes: "Standard Import",
+    orderId: "EX001",
+    totalValue: 3500000,
+    shipper: "Fast Export",
+    shippingDate: "18/03/2024",
+    completionDate: "23/03/2024",
+    notes: "Priority Export",
     status: "Completed",
     products: [
       {
         id: "PRD001",
         name: "Sản phẩm A",
-        price: 500000,
-        quantity: 2,
+        price: 1500000,
+        quantity: 1,
       },
       {
         id: "PRD002",
         name: "Sản phẩm B",
-        price: 250000,
+        price: 1000000,
         quantity: 2,
       },
     ],
   };
 
-  const [currentData, setCurrentData] = useState<ImportDetail>(mockData);
+  const [currentData, setCurrentData] = useState<ExportData>(mockData);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -73,7 +73,7 @@ const ImportDetail = () => {
 
   const handleUpdate = (formData: FormData) => {
     // Trong thực tế, gọi API để cập nhật dữ liệu
-    const updatedData: ImportDetail = {
+    const updatedData: ExportData = {
       ...currentData,
       shipper: formData.shipper,
       shippingDate: formData.shippingDate,
@@ -97,7 +97,7 @@ const ImportDetail = () => {
       {/* Back button */}
       <div className="flex justify-between items-center mb-6">
         <Link
-          to="/import"
+          to="/export"
           className="inline-flex items-center text-indigo-600 hover:text-indigo-700"
         >
           <ChevronLeftIcon className="h-5 w-5 mr-1" />
@@ -108,7 +108,7 @@ const ImportDetail = () => {
           className="inline-flex items-center px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600"
         >
           <PencilIcon className="h-5 w-5 mr-2" />
-          Sửa phiếu nhập
+          Sửa phiếu xuất
         </button>
       </div>
 
@@ -117,7 +117,7 @@ const ImportDetail = () => {
         <div className="p-6 border-b border-gray-200">
           <div className="flex justify-between items-center">
             <h1 className="text-2xl font-bold text-gray-900">
-              Chi tiết phiếu nhập #{currentData.orderId}
+              Chi tiết phiếu xuất #{currentData.orderId}
             </h1>
             <span
               className={`px-4 py-2 rounded-full text-sm font-semibold ${
@@ -177,7 +177,7 @@ const ImportDetail = () => {
                     Tên sản phẩm
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Đơn giá
+                    Giá xuất
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Số lượng
@@ -227,7 +227,7 @@ const ImportDetail = () => {
         </div>
       </div>
 
-      <UpdateImportForm
+      <UpdateExportForm
         showForm={showUpdateForm}
         initialData={{
           orderId: currentData.orderId,
@@ -245,4 +245,4 @@ const ImportDetail = () => {
   );
 };
 
-export default ImportDetail;
+export default ExportDetail;

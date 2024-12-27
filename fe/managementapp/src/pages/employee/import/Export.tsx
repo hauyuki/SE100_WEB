@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { FaCalendarAlt, FaPlus } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import ImportForm from "./components/ImportForm";
 import ImportTabs from "./components/ImportTabs";
+import ExportForm from "./components/ExportForm";
 
 interface Product {
   id: string;
@@ -20,7 +20,7 @@ interface FormData {
   products: Product[];
 }
 
-const Import = () => {
+const Export = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedValue, setSelectedValue] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -38,21 +38,21 @@ const Import = () => {
   const [data, setData] = useState([
     {
       id: 1,
-      orderId: "IM001",
-      totalValue: 1500000,
-      shipper: "Dior Express",
-      shippingDate: "15/03/2024",
-      completionDate: "20/03/2024",
-      notes: "Standard Import",
+      orderId: "EX001",
+      totalValue: 3500000,
+      shipper: "Fast Export",
+      shippingDate: "18/03/2024",
+      completionDate: "23/03/2024",
+      notes: "Priority Export",
     },
     {
       id: 2,
-      orderId: "IM002",
-      totalValue: 2300000,
-      shipper: "Content Logistics",
-      shippingDate: "16/03/2024",
-      completionDate: "21/03/2024",
-      notes: "Express Import",
+      orderId: "EX002",
+      totalValue: 4200000,
+      shipper: "Swift Logistics",
+      shippingDate: "19/03/2024",
+      completionDate: "24/03/2024",
+      notes: "Standard Export",
     },
   ]);
 
@@ -65,12 +65,12 @@ const Import = () => {
   };
 
   const generateOrderId = () => {
-    const lastImport = data[data.length - 1];
-    if (!lastImport) return "IM001";
+    const lastExport = data[data.length - 1];
+    if (!lastExport) return "EX001";
 
-    const lastNumber = parseInt(lastImport.orderId.slice(2));
+    const lastNumber = parseInt(lastExport.orderId.slice(2));
     const newNumber = lastNumber + 1;
-    return `IM${newNumber.toString().padStart(3, "0")}`;
+    return `EX${newNumber.toString().padStart(3, "0")}`;
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -127,7 +127,7 @@ const Import = () => {
     <div className="container mx-auto p-6">
       <ImportTabs />
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Danh Sách Phiếu Nhập</h2>
+        <h2 className="text-xl font-semibold mb-4">Danh Sách Phiếu Xuất</h2>
         <div className="flex items-center space-x-4 mb-6">
           <div className="relative w-1/3">
             <input
@@ -187,7 +187,7 @@ const Import = () => {
           </button>
         </div>
 
-        <ImportForm
+        <ExportForm
           showForm={showForm}
           formData={formData}
           onClose={() => setShowForm(false)}
@@ -217,7 +217,7 @@ const Import = () => {
                   <td className="px-6 py-4 text-center">{item.id}</td>
                   <td className="px-6 py-4">
                     <Link
-                      to={`/import/${item.id}`}
+                      to={`/export/${item.id}`}
                       className="text-indigo-500 hover:text-indigo-600"
                     >
                       {item.orderId}
@@ -242,4 +242,4 @@ const Import = () => {
   );
 };
 
-export default Import;
+export default Export;
