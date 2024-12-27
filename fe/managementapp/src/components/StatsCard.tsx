@@ -16,7 +16,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
   return (
     <div className="bg-white p-4 rounded-lg shadow">
       <div className="flex items-center justify-between">
-        <h3 className="text-gray-600">{title}</h3>
+        <h3 className="text-gray-600 font-bold">{title}</h3>
         <div className="text-[#636AE8FF]">{icon}</div>
       </div>
       <div className="flex items-center justify-between mt-2">

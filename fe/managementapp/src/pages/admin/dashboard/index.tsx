@@ -76,7 +76,9 @@ const AdminDashboard = () => {
           </div>
           <div>
             <div className="text-3xl font-semibold">250</div>
-            <div className="text-sm text-gray-500">Hàng trong kho</div>
+            <div className="text-sm font-bold text-gray-500">
+              Hàng trong kho
+            </div>
             <div className="text-green-500 text-xs">+20%</div>
           </div>
         </div>
@@ -86,7 +88,7 @@ const AdminDashboard = () => {
           </div>
           <div>
             <div className="text-3xl font-semibold">10</div>
-            <div className="text-sm text-gray-500">Vận chuyển</div>
+            <div className="text-sm font-bold text-gray-500">Vận chuyển</div>
             <div className="text-green-500 text-xs">+20%</div>
           </div>
         </div>
@@ -96,7 +98,9 @@ const AdminDashboard = () => {
           </div>
           <div>
             <div className="text-3xl font-semibold">200</div>
-            <div className="text-sm text-gray-500">Số lượng hàng cần nhập</div>
+            <div className="text-sm font-bold text-gray-500">
+              Số lượng hàng cần nhập
+            </div>
             <div className="text-red-500 text-xs">+30%</div>
           </div>
         </div>
@@ -105,11 +109,11 @@ const AdminDashboard = () => {
       {/* Charts */}
       <div className="flex gap-4">
         <div className="w-2/3 bg-white shadow-md rounded-lg p-4">
-          <h2 className="text-lg font-semibold mb-4">Trạng thái trong tuần</h2>
+          <h2 className="text-lg font-bold mb-4">Trạng thái trong tuần</h2>
           <Bar data={barChartData} />
         </div>
         <div className="w-1/3 bg-white shadow-md rounded-lg p-4">
-          <h2 className="text-lg font-semibold mb-4">Thống kê hàng hóa</h2>
+          <h2 className="text-lg font-bold mb-4">Thống kê hàng hóa</h2>
           <Pie data={pieChartData} />
         </div>
       </div>
@@ -122,7 +126,7 @@ const AdminDashboard = () => {
             className="bg-white shadow-md rounded-lg p-4 flex justify-between items-center"
           >
             <div>
-              <div className="text-lg font-semibold">{shipment.product}</div>
+              <div className="text-lg font-bold">{shipment.product}</div>
               <div
                 className={`text-sm ${
                   shipment.status === "Failed"
