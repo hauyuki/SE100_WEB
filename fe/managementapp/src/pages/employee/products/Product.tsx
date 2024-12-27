@@ -1,25 +1,13 @@
-import React, { useState } from "react";
-import { MagnifyingGlassIcon, PencilIcon } from "@heroicons/react/24/outline";
-import { FaPlus } from "react-icons/fa";
+import React, { useState, useMemo } from "react";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
 import { Product } from "../../../models/Product";
 import { useGetProducts } from "../../../hooks/products";
 import productImage1 from "../assets/images/Image16.jpeg";
-import AddProductForm, { ProductFormData } from "./components/AddProductForm";
 
 const ProductPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState<ProductFormData>({
-    sku: "",
-    name: "",
-    description: "",
-    category: "",
-    company: "",
-    marketPrice: "",
-    image: "",
-  });
   const productsPerPage = 10;
   const navigate = useNavigate();
 
@@ -29,39 +17,21 @@ const ProductPage = () => {
     isError: error,
   } = useGetProducts();
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    // Add API call to create product here
-    console.log("New product:", formData);
-    setFormData({
-      sku: "",
-      name: "",
-      description: "",
-      category: "",
-      company: "",
-      marketPrice: "",
-      image: "",
-    });
-    setShowForm(false);
-  };
+  // Filter products based on search term
+  const filteredProducts = useMemo(() => {
+    if (!products?.productList) return [];
+    return products.productList.filter((product) =>
+      Object.values(product).some((value) =>
+        value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+  }, [products?.productList, searchTerm]);
 
   //Pagination logic
-  const totalPages = Math.ceil(
-    products?.productList?.length ?? 1 / productsPerPage
-  );
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = products?.productList.slice(
+  const currentProducts = filteredProducts.slice(
     indexOfFirstProduct,
     indexOfLastProduct
   );
@@ -74,6 +44,11 @@ const ProductPage = () => {
     setCurrentPage(pageNumber);
   };
 
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
+
   const pageNumbers = [];
   for (let i = 1; i <= totalPages; i++) {
     pageNumbers.push(i);
@@ -82,26 +57,21 @@ const ProductPage = () => {
   return (
     <>
       <div className="p-6">
-        {/* Header with Add Button */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Quản lý sản phẩm</h1>
-          <button
-            onClick={() => setShowForm(true)}
-            className="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 flex items-center gap-2"
-          >
-            <FaPlus className="w-4 h-4" />
-            <span>Thêm sản phẩm</span>
-          </button>
+        {/* Search Bar */}
+        <div className="mb-6 flex justify-start">
+          <div className="relative w-1/4">
+            <input
+              type="text"
+              placeholder="Tìm kiếm sản phẩm..."
+              value={searchTerm}
+              onChange={handleSearch}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            />
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+            </div>
+          </div>
         </div>
-
-        {/* Add Product Form */}
-        <AddProductForm
-          showForm={showForm}
-          onClose={() => setShowForm(false)}
-          onSubmit={handleSubmit}
-          formData={formData}
-          onChange={handleInputChange}
-        />
 
         {loading ? (
           <div className="text-center py-4">Loading...</div>
@@ -133,20 +103,17 @@ const ProductPage = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Giá
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Thao tác
-                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {currentProducts?.map((product, index) => (
+                {currentProducts.map((product, index) => (
                   <tr
                     key={product.id}
                     onClick={() => handleRowClick(product.sku)}
                     className="cursor-pointer hover:bg-gray-50"
                   >
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {index + 1}
+                      {indexOfFirstProduct + index + 1}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-primary">
                       {product.sku}
@@ -174,17 +141,6 @@ const ProductPage = () => {
                         style: "currency",
                         currency: "VND",
                       }).format(Number.parseInt(product.marketPrice))}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <button
-                        className="text-gray-600 hover:text-primary"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          // Add edit functionality here
-                        }}
-                      >
-                        <PencilIcon className="h-5 w-5" />
-                      </button>
                     </td>
                   </tr>
                 ))}
