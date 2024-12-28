@@ -13,6 +13,7 @@ interface FormData {
   shipper: string;
   shippingDate: string;
   completionDate: string;
+  status: string;
   notes: string;
   products: Product[];
 }
@@ -22,7 +23,9 @@ interface ImportFormProps {
   formData: FormData;
   onClose: () => void;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => void;
 }
 
 const ImportForm: React.FC<ImportFormProps> = ({
@@ -100,6 +103,7 @@ const ImportForm: React.FC<ImportFormProps> = ({
                 onChange={onChange}
                 className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
+                placeholder="Nhập đơn vị vận chuyển"
               />
             </div>
             <div>
@@ -125,8 +129,25 @@ const ImportForm: React.FC<ImportFormProps> = ({
                 value={formData.completionDate}
                 onChange={onChange}
                 className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                required
               />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Trạng thái vận chuyển
+              </label>
+              <select
+                name="status"
+                value={formData.status}
+                onChange={onChange}
+                className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                required
+              >
+                <option value="Đang vận chuyển">Đang vận chuyển</option>
+                <option value="Vận chuyển thành công">
+                  Vận chuyển thành công
+                </option>
+                <option value="Vận chuyển thất bại">Vận chuyển thất bại</option>
+              </select>
             </div>
           </div>
 
@@ -151,7 +172,7 @@ const ImportForm: React.FC<ImportFormProps> = ({
               >
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Sản phẩm
+                    Mã SKU
                   </label>
                   <select
                     value={product.id}
@@ -164,7 +185,7 @@ const ImportForm: React.FC<ImportFormProps> = ({
                     <option value="">Chọn sản phẩm</option>
                     {sampleProducts.map((p) => (
                       <option key={p.id} value={p.id}>
-                        {p.name}
+                        {p.id} - {p.name}
                       </option>
                     ))}
                   </select>
@@ -182,6 +203,7 @@ const ImportForm: React.FC<ImportFormProps> = ({
                     className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     required
                     min="0"
+                    placeholder="Nhập giá"
                   />
                 </div>
                 <div>
@@ -197,6 +219,7 @@ const ImportForm: React.FC<ImportFormProps> = ({
                     className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     required
                     min="1"
+                    placeholder="Nhập số lượng"
                   />
                 </div>
                 <div className="flex items-end">

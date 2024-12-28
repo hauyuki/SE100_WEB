@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { FaCalendarAlt, FaPlus } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import ImportTabs from "./components/ImportTabs";
 import ExportForm from "./components/ExportForm";
+import ImportTabs from "./components/ImportTabs";
+import UpdateExportForm from "./components/UpdateExportForm";
 
 interface Product {
   id: string;
@@ -16,6 +17,7 @@ interface FormData {
   shipper: string;
   shippingDate: string;
   completionDate: string;
+  status: string;
   notes: string;
   products: Product[];
 }
@@ -26,11 +28,18 @@ const Export = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [showUpdateForm, setShowUpdateForm] = useState(false);
+  const [selectedExport, setSelectedExport] = useState<{
+    orderId: string;
+    status: string;
+    completionDate?: string;
+  } | null>(null);
   const [formData, setFormData] = useState<FormData>({
     orderId: "",
     shipper: "",
     shippingDate: "",
     completionDate: "",
+    status: "Đang vận chuyển",
     notes: "",
     products: [],
   });
@@ -39,24 +48,28 @@ const Export = () => {
     {
       id: 1,
       orderId: "EX001",
-      totalValue: 3500000,
-      shipper: "Fast Export",
-      shippingDate: "18/03/2024",
-      completionDate: "23/03/2024",
-      notes: "Priority Export",
+      totalValue: 1500000,
+      shipper: "Dior Express",
+      shippingDate: "15/03/2024",
+      completionDate: "20/03/2024",
+      status: "Vận chuyển thành công",
+      notes: "Standard Export",
     },
     {
       id: 2,
       orderId: "EX002",
-      totalValue: 4200000,
-      shipper: "Swift Logistics",
-      shippingDate: "19/03/2024",
-      completionDate: "24/03/2024",
-      notes: "Standard Export",
+      totalValue: 2300000,
+      shipper: "Content Logistics",
+      shippingDate: "16/03/2024",
+      completionDate: "",
+      status: "Đang vận chuyển",
+      notes: "Express Export",
     },
   ]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -86,6 +99,7 @@ const Export = () => {
       shipper: formData.shipper,
       shippingDate: formData.shippingDate,
       completionDate: formData.completionDate,
+      status: formData.status,
       notes: formData.notes,
     };
     setData((prev) => [...prev, newItem]);
@@ -94,6 +108,7 @@ const Export = () => {
       shipper: "",
       shippingDate: "",
       completionDate: "",
+      status: "Đang vận chuyển",
       notes: "",
       products: [],
     });
@@ -123,16 +138,60 @@ const Export = () => {
       return 0;
     });
 
+  const handleEdit = (id: number) => {
+    const itemToEdit = data.find((item) => item.id === id);
+    if (itemToEdit) {
+      setSelectedExport({
+        orderId: itemToEdit.orderId,
+        status: itemToEdit.status,
+        completionDate: itemToEdit.completionDate,
+      });
+      setShowUpdateForm(true);
+    }
+  };
+
+  const handleUpdateSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!selectedExport) return;
+
+    setData((prev) =>
+      prev.map((item) =>
+        item.orderId === selectedExport.orderId
+          ? {
+              ...item,
+              status: selectedExport.status,
+              completionDate:
+                selectedExport.status === "Vận chuyển thành công"
+                  ? selectedExport.completionDate || ""
+                  : "",
+            }
+          : item
+      )
+    );
+    setShowUpdateForm(false);
+    setSelectedExport(null);
+  };
+
+  const handleUpdateChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    if (!selectedExport) return;
+    setSelectedExport((prev) => ({
+      ...prev!,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
   return (
     <div className="container mx-auto p-6">
       <ImportTabs />
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Danh Sách Phiếu Xuất</h2>
+        <h2 className="text-xl font-semibold mb-4">Danh sách phiếu xuất</h2>
         <div className="flex items-center space-x-4 mb-6">
           <div className="relative w-1/3">
             <input
               type="text"
-              placeholder="Tìm kiếm theo mã vận đơn, đơn vị vận chuyển hoặc ghi chú"
+              placeholder="Tìm kiếm theo mã phiếu xuất, đơn vị vận chuyển hoặc ghi chú"
               className="w-full border rounded-md pl-4 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-400 text-sm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -195,24 +254,39 @@ const Export = () => {
           onChange={handleInputChange}
         />
 
+        {selectedExport && (
+          <UpdateExportForm
+            showForm={showUpdateForm}
+            exportData={selectedExport}
+            onClose={() => {
+              setShowUpdateForm(false);
+              setSelectedExport(null);
+            }}
+            onSubmit={handleUpdateSubmit}
+            onChange={handleUpdateChange}
+          />
+        )}
+
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-gray-50 text-gray-500 uppercase text-sm">
                 <th className="px-6 py-3 text-center">STT</th>
-                <th className="px-6 py-3 text-left">Mã vận đơn</th>
-                <th className="px-6 py-3 text-right">Tổng giá trị</th>
-                <th className="px-6 py-3 text-left">Đơn vị vận chuyển</th>
+                <th className="px-6 py-3 text-center">Mã phiếu xuất</th>
+                <th className="px-6 py-3 text-center">Tổng giá trị</th>
+                <th className="px-6 py-3 text-center">Đơn vị vận chuyển</th>
                 <th className="px-6 py-3 text-center">Ngày vận chuyển</th>
                 <th className="px-6 py-3 text-center">Ngày hoàn thành</th>
-                <th className="px-6 py-3 text-left">Ghi chú</th>
+                <th className="px-6 py-3 text-center">Trạng thái</th>
+                <th className="px-6 py-3 text-center">Ghi chú</th>
+                <th className="px-6 py-3 text-center">Thao tác</th>
               </tr>
             </thead>
             <tbody>
               {filteredData.map((item) => (
                 <tr
                   key={item.id}
-                  className="border-b border-gray-200 hover:bg-gray-100 cursor-pointer"
+                  className="border-b border-gray-200 hover:bg-gray-100"
                 >
                   <td className="px-6 py-4 text-center">{item.id}</td>
                   <td className="px-6 py-4">
@@ -229,9 +303,30 @@ const Export = () => {
                   <td className="px-6 py-4">{item.shipper}</td>
                   <td className="px-6 py-4 text-center">{item.shippingDate}</td>
                   <td className="px-6 py-4 text-center">
-                    {item.completionDate}
+                    {item.completionDate || "-"}
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <span
+                      className={`inline-flex items-center justify-center px-3 py-1 text-sm font-medium rounded-full ${
+                        item.status === "Vận chuyển thành công"
+                          ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20"
+                          : item.status === "Đang vận chuyển"
+                          ? "bg-amber-50 text-amber-700 ring-1 ring-amber-600/20"
+                          : "bg-rose-50 text-rose-700 ring-1 ring-rose-600/20"
+                      }`}
+                    >
+                      {item.status}
+                    </span>
                   </td>
                   <td className="px-6 py-4">{item.notes}</td>
+                  <td className="px-6 py-4 text-center">
+                    <button
+                      onClick={() => handleEdit(item.id)}
+                      className="text-indigo-600 hover:text-indigo-900"
+                    >
+                      Sửa
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>

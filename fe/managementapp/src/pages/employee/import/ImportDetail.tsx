@@ -35,6 +35,11 @@ interface FormData {
 const ImportDetail = () => {
   const { id } = useParams();
   const [showUpdateForm, setShowUpdateForm] = useState(false);
+  const [selectedImport, setSelectedImport] = useState<{
+    orderId: string;
+    status: string;
+    completionDate?: string;
+  } | null>(null);
 
   // Mock data (replace with actual API call in production)
   const mockData: ImportDetail = {
@@ -45,7 +50,7 @@ const ImportDetail = () => {
     shippingDate: "15/03/2024",
     completionDate: "20/03/2024",
     notes: "Standard Import",
-    status: "Completed",
+    status: "Đang vận chuyển",
     products: [
       {
         id: "PRD001",
@@ -71,25 +76,39 @@ const ImportDetail = () => {
     }).format(value);
   };
 
-  const handleUpdate = (formData: FormData) => {
-    // Trong thực tế, gọi API để cập nhật dữ liệu
-    const updatedData: ImportDetail = {
-      ...currentData,
-      shipper: formData.shipper,
-      shippingDate: formData.shippingDate,
-      completionDate: formData.completionDate,
-      notes: formData.notes,
-      products: formData.products,
-      status: formData.status,
-      totalValue: formData.products.reduce(
-        (sum: number, product: Product) =>
-          sum + product.price * product.quantity,
-        0
-      ),
-    };
-    setCurrentData(updatedData);
-    console.log("Updated data:", updatedData);
+  const handleEdit = () => {
+    setSelectedImport({
+      orderId: currentData.orderId,
+      status: currentData.status,
+      completionDate: currentData.completionDate,
+    });
+    setShowUpdateForm(true);
+  };
+
+  const handleUpdate = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!selectedImport) return;
+
+    setCurrentData((prev) => ({
+      ...prev,
+      status: selectedImport.status,
+      completionDate:
+        selectedImport.status === "Vận chuyển thành công"
+          ? selectedImport.completionDate || ""
+          : "",
+    }));
     setShowUpdateForm(false);
+    setSelectedImport(null);
+  };
+
+  const handleUpdateChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    if (!selectedImport) return;
+    setSelectedImport((prev) => ({
+      ...prev!,
+      [e.target.name]: e.target.value,
+    }));
   };
 
   return (
@@ -229,17 +248,16 @@ const ImportDetail = () => {
 
       <UpdateImportForm
         showForm={showUpdateForm}
-        initialData={{
+        importData={{
           orderId: currentData.orderId,
-          shipper: currentData.shipper,
-          shippingDate: currentData.shippingDate,
-          completionDate: currentData.completionDate,
-          notes: currentData.notes,
-          products: currentData.products,
           status: currentData.status,
         }}
-        onClose={() => setShowUpdateForm(false)}
+        onClose={() => {
+          setShowUpdateForm(false);
+          setSelectedImport(null);
+        }}
         onSubmit={handleUpdate}
+        onChange={handleUpdateChange}
       />
     </div>
   );

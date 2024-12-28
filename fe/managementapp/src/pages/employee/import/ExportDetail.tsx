@@ -10,7 +10,7 @@ interface Product {
   quantity: number;
 }
 
-interface ExportData {
+interface ExportDetail {
   id: number;
   orderId: string;
   totalValue: number;
@@ -22,47 +22,42 @@ interface ExportData {
   status: string;
 }
 
-interface FormData {
-  orderId: string;
-  shipper: string;
-  shippingDate: string;
-  completionDate: string;
-  notes: string;
-  products: Product[];
-  status: string;
-}
-
 const ExportDetail = () => {
   const { id } = useParams();
   const [showUpdateForm, setShowUpdateForm] = useState(false);
+  const [selectedExport, setSelectedExport] = useState<{
+    orderId: string;
+    status: string;
+    completionDate?: string;
+  } | null>(null);
 
   // Mock data (replace with actual API call in production)
-  const mockData: ExportData = {
+  const mockData: ExportDetail = {
     id: 1,
     orderId: "EX001",
-    totalValue: 3500000,
-    shipper: "Fast Export",
-    shippingDate: "18/03/2024",
-    completionDate: "23/03/2024",
-    notes: "Priority Export",
-    status: "Completed",
+    totalValue: 1500000,
+    shipper: "Dior Express",
+    shippingDate: "15/03/2024",
+    completionDate: "20/03/2024",
+    notes: "Standard Export",
+    status: "Đang vận chuyển",
     products: [
       {
         id: "PRD001",
         name: "Sản phẩm A",
-        price: 1500000,
-        quantity: 1,
+        price: 500000,
+        quantity: 2,
       },
       {
         id: "PRD002",
         name: "Sản phẩm B",
-        price: 1000000,
+        price: 250000,
         quantity: 2,
       },
     ],
   };
 
-  const [currentData, setCurrentData] = useState<ExportData>(mockData);
+  const [currentData, setCurrentData] = useState<ExportDetail>(mockData);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -71,25 +66,39 @@ const ExportDetail = () => {
     }).format(value);
   };
 
-  const handleUpdate = (formData: FormData) => {
-    // Trong thực tế, gọi API để cập nhật dữ liệu
-    const updatedData: ExportData = {
-      ...currentData,
-      shipper: formData.shipper,
-      shippingDate: formData.shippingDate,
-      completionDate: formData.completionDate,
-      notes: formData.notes,
-      products: formData.products,
-      status: formData.status,
-      totalValue: formData.products.reduce(
-        (sum: number, product: Product) =>
-          sum + product.price * product.quantity,
-        0
-      ),
-    };
-    setCurrentData(updatedData);
-    console.log("Updated data:", updatedData);
+  const handleEdit = () => {
+    setSelectedExport({
+      orderId: currentData.orderId,
+      status: currentData.status,
+      completionDate: currentData.completionDate,
+    });
+    setShowUpdateForm(true);
+  };
+
+  const handleUpdate = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!selectedExport) return;
+
+    setCurrentData((prev) => ({
+      ...prev,
+      status: selectedExport.status,
+      completionDate:
+        selectedExport.status === "Vận chuyển thành công"
+          ? selectedExport.completionDate || ""
+          : "",
+    }));
     setShowUpdateForm(false);
+    setSelectedExport(null);
+  };
+
+  const handleUpdateChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    if (!selectedExport) return;
+    setSelectedExport((prev) => ({
+      ...prev!,
+      [e.target.name]: e.target.value,
+    }));
   };
 
   return (
@@ -97,14 +106,14 @@ const ExportDetail = () => {
       {/* Back button */}
       <div className="flex justify-between items-center mb-6">
         <Link
-          to="/export"
+          to="/import"
           className="inline-flex items-center text-indigo-600 hover:text-indigo-700"
         >
           <ChevronLeftIcon className="h-5 w-5 mr-1" />
           Trở về danh sách
         </Link>
         <button
-          onClick={() => setShowUpdateForm(true)}
+          onClick={handleEdit}
           className="inline-flex items-center px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600"
         >
           <PencilIcon className="h-5 w-5 mr-2" />
@@ -120,10 +129,12 @@ const ExportDetail = () => {
               Chi tiết phiếu xuất #{currentData.orderId}
             </h1>
             <span
-              className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                currentData.status === "Completed"
-                  ? "bg-green-100 text-green-800"
-                  : "bg-yellow-100 text-yellow-800"
+              className={`inline-flex items-center justify-center px-3 py-1 text-sm font-medium rounded-full ${
+                currentData.status === "Vận chuyển thành công"
+                  ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20"
+                  : currentData.status === "Đang vận chuyển"
+                  ? "bg-amber-50 text-amber-700 ring-1 ring-amber-600/20"
+                  : "bg-rose-50 text-rose-700 ring-1 ring-rose-600/20"
               }`}
             >
               {currentData.status}
@@ -151,7 +162,7 @@ const ExportDetail = () => {
             </div>
             <div>
               <p className="text-sm text-gray-600 mb-1">Ngày hoàn thành</p>
-              <p className="font-medium">{currentData.completionDate}</p>
+              <p className="font-medium">{currentData.completionDate || "-"}</p>
             </div>
             <div className="col-span-2">
               <p className="text-sm text-gray-600 mb-1">Ghi chú</p>
@@ -177,7 +188,7 @@ const ExportDetail = () => {
                     Tên sản phẩm
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Giá xuất
+                    Đơn giá
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Số lượng
@@ -227,20 +238,18 @@ const ExportDetail = () => {
         </div>
       </div>
 
-      <UpdateExportForm
-        showForm={showUpdateForm}
-        initialData={{
-          orderId: currentData.orderId,
-          shipper: currentData.shipper,
-          shippingDate: currentData.shippingDate,
-          completionDate: currentData.completionDate,
-          notes: currentData.notes,
-          products: currentData.products,
-          status: currentData.status,
-        }}
-        onClose={() => setShowUpdateForm(false)}
-        onSubmit={handleUpdate}
-      />
+      {selectedExport && (
+        <UpdateExportForm
+          showForm={showUpdateForm}
+          exportData={selectedExport}
+          onClose={() => {
+            setShowUpdateForm(false);
+            setSelectedExport(null);
+          }}
+          onSubmit={handleUpdate}
+          onChange={handleUpdateChange}
+        />
+      )}
     </div>
   );
 };

@@ -106,7 +106,7 @@ const Shipping = () => {
     <div className="container mx-auto p-6">
       <ImportTabs />
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Danh Sách Vận Chuyển</h2>
+        <h2 className="text-xl font-semibold mb-4">Danh sách vận chuyển</h2>
         <div className="flex items-center space-x-4 mb-6">
           <div className="relative w-1/3">
             <input

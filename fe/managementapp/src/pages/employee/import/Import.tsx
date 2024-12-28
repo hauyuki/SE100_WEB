@@ -3,6 +3,7 @@ import { FaCalendarAlt, FaPlus } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import ImportForm from "./components/ImportForm";
 import ImportTabs from "./components/ImportTabs";
+import UpdateImportForm from "./components/UpdateImportForm";
 
 interface Product {
   id: string;
@@ -16,6 +17,7 @@ interface FormData {
   shipper: string;
   shippingDate: string;
   completionDate: string;
+  status: string;
   notes: string;
   products: Product[];
 }
@@ -26,11 +28,17 @@ const Import = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [showUpdateForm, setShowUpdateForm] = useState(false);
+  const [selectedImport, setSelectedImport] = useState<{
+    orderId: string;
+    status: string;
+  } | null>(null);
   const [formData, setFormData] = useState<FormData>({
     orderId: "",
     shipper: "",
     shippingDate: "",
     completionDate: "",
+    status: "Đang vận chuyển",
     notes: "",
     products: [],
   });
@@ -43,6 +51,7 @@ const Import = () => {
       shipper: "Dior Express",
       shippingDate: "15/03/2024",
       completionDate: "20/03/2024",
+      status: "Vận chuyển thành công",
       notes: "Standard Import",
     },
     {
@@ -51,12 +60,15 @@ const Import = () => {
       totalValue: 2300000,
       shipper: "Content Logistics",
       shippingDate: "16/03/2024",
-      completionDate: "21/03/2024",
+      completionDate: "",
+      status: "Đang vận chuyển",
       notes: "Express Import",
     },
   ]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -86,6 +98,7 @@ const Import = () => {
       shipper: formData.shipper,
       shippingDate: formData.shippingDate,
       completionDate: formData.completionDate,
+      status: formData.status,
       notes: formData.notes,
     };
     setData((prev) => [...prev, newItem]);
@@ -94,6 +107,7 @@ const Import = () => {
       shipper: "",
       shippingDate: "",
       completionDate: "",
+      status: "Đang vận chuyển",
       notes: "",
       products: [],
     });
@@ -123,11 +137,47 @@ const Import = () => {
       return 0;
     });
 
+  const handleEdit = (id: number) => {
+    const itemToEdit = data.find((item) => item.id === id);
+    if (itemToEdit) {
+      setSelectedImport({
+        orderId: itemToEdit.orderId,
+        status: itemToEdit.status,
+      });
+      setShowUpdateForm(true);
+    }
+  };
+
+  const handleUpdateSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!selectedImport) return;
+
+    setData((prev) =>
+      prev.map((item) =>
+        item.orderId === selectedImport.orderId
+          ? { ...item, status: selectedImport.status }
+          : item
+      )
+    );
+    setShowUpdateForm(false);
+    setSelectedImport(null);
+  };
+
+  const handleUpdateChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    if (!selectedImport) return;
+    setSelectedImport((prev) => ({
+      ...prev!,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
   return (
     <div className="container mx-auto p-6">
       <ImportTabs />
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Danh Sách Phiếu Nhập</h2>
+        <h2 className="text-xl font-semibold mb-4">Danh sách phiếu nhập</h2>
         <div className="flex items-center space-x-4 mb-6">
           <div className="relative w-1/3">
             <input
@@ -195,24 +245,39 @@ const Import = () => {
           onChange={handleInputChange}
         />
 
+        {selectedImport && (
+          <UpdateImportForm
+            showForm={showUpdateForm}
+            importData={selectedImport}
+            onClose={() => {
+              setShowUpdateForm(false);
+              setSelectedImport(null);
+            }}
+            onSubmit={handleUpdateSubmit}
+            onChange={handleUpdateChange}
+          />
+        )}
+
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-gray-50 text-gray-500 uppercase text-sm">
                 <th className="px-6 py-3 text-center">STT</th>
-                <th className="px-6 py-3 text-left">Mã vận đơn</th>
-                <th className="px-6 py-3 text-right">Tổng giá trị</th>
-                <th className="px-6 py-3 text-left">Đơn vị vận chuyển</th>
+                <th className="px-6 py-3 text-center">Mã phiếu nhập</th>
+                <th className="px-6 py-3 text-center">Tổng giá trị</th>
+                <th className="px-6 py-3 text-center">Đơn vị vận chuyển</th>
                 <th className="px-6 py-3 text-center">Ngày vận chuyển</th>
                 <th className="px-6 py-3 text-center">Ngày hoàn thành</th>
-                <th className="px-6 py-3 text-left">Ghi chú</th>
+                <th className="px-6 py-3 text-center">Trạng thái</th>
+                <th className="px-6 py-3 text-center">Ghi chú</th>
+                <th className="px-6 py-3 text-center">Thao tác</th>
               </tr>
             </thead>
             <tbody>
               {filteredData.map((item) => (
                 <tr
                   key={item.id}
-                  className="border-b border-gray-200 hover:bg-gray-100 cursor-pointer"
+                  className="border-b border-gray-200 hover:bg-gray-100"
                 >
                   <td className="px-6 py-4 text-center">{item.id}</td>
                   <td className="px-6 py-4">
@@ -229,9 +294,30 @@ const Import = () => {
                   <td className="px-6 py-4">{item.shipper}</td>
                   <td className="px-6 py-4 text-center">{item.shippingDate}</td>
                   <td className="px-6 py-4 text-center">
-                    {item.completionDate}
+                    {item.completionDate || "-"}
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <span
+                      className={`inline-flex items-center justify-center px-3 py-1 text-sm font-medium rounded-full ${
+                        item.status === "Vận chuyển thành công"
+                          ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20"
+                          : item.status === "Đang vận chuyển"
+                          ? "bg-amber-50 text-amber-700 ring-1 ring-amber-600/20"
+                          : "bg-rose-50 text-rose-700 ring-1 ring-rose-600/20"
+                      }`}
+                    >
+                      {item.status}
+                    </span>
                   </td>
                   <td className="px-6 py-4">{item.notes}</td>
+                  <td className="px-6 py-4 text-center">
+                    <button
+                      onClick={() => handleEdit(item.id)}
+                      className="text-indigo-600 hover:text-indigo-900"
+                    >
+                      Sửa
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
