@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { FaCalendarAlt, FaPlus } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import ImportForm from "./components/ImportForm";
 import ImportTabs from "./components/ImportTabs";
 import UpdateImportForm from "./components/UpdateImportForm";
+import InboundReportForm from "../../../components/InboundReportForm";
+import { useGetInboundReports } from "../../../hooks/inboundReports";
 
 interface Product {
   id: string;
@@ -42,7 +43,7 @@ const Import = () => {
     notes: "",
     products: [],
   });
-
+  const { data: inboundData } = useGetInboundReports();
   const [data, setData] = useState([
     {
       id: 1,
@@ -237,14 +238,17 @@ const Import = () => {
           </button>
         </div>
 
-        <ImportForm
+        {/* <ImportForm
           showForm={showForm}
           formData={formData}
           onClose={() => setShowForm(false)}
           onSubmit={handleSubmit}
           onChange={handleInputChange}
+        /> */}
+        <InboundReportForm
+          showForm={showForm}
+          onClose={() => setShowForm(false)}
         />
-
         {selectedImport && (
           <UpdateImportForm
             showForm={showUpdateForm}
@@ -274,7 +278,7 @@ const Import = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredData.map((item) => (
+              {inboundData?.data?.map((item) => (
                 <tr
                   key={item.id}
                   className="border-b border-gray-200 hover:bg-gray-100"
@@ -285,31 +289,33 @@ const Import = () => {
                       to={`/import/${item.id}`}
                       className="text-indigo-500 hover:text-indigo-600"
                     >
-                      {item.orderId}
+                      {item.id}
                     </Link>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    {formatCurrency(item.totalValue)}
+                    {formatCurrency(item.price)}
                   </td>
-                  <td className="px-6 py-4">{item.shipper}</td>
-                  <td className="px-6 py-4 text-center">{item.shippingDate}</td>
+                  <td className="px-6 py-4">{item.shipment.carrier}</td>
                   <td className="px-6 py-4 text-center">
-                    {item.completionDate || "-"}
+                    {item.shipment.date.toISOString()}
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    {item.shipment.status || "-"}
                   </td>
                   <td className="px-6 py-4 text-center">
                     <span
                       className={`inline-flex items-center justify-center px-3 py-1 text-sm font-medium rounded-full ${
-                        item.status === "Vận chuyển thành công"
+                        item.shipment.status === "Vận chuyển thành công"
                           ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20"
-                          : item.status === "Đang vận chuyển"
+                          : item.shipment.status === "Đang vận chuyển"
                           ? "bg-amber-50 text-amber-700 ring-1 ring-amber-600/20"
                           : "bg-rose-50 text-rose-700 ring-1 ring-rose-600/20"
                       }`}
                     >
-                      {item.status}
+                      {item.shipment.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4">{item.notes}</td>
+                  <td className="px-6 py-4">Không có</td>
                   <td className="px-6 py-4 text-center">
                     <button
                       onClick={() => handleEdit(item.id)}

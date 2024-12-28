@@ -1,10 +1,12 @@
+import { UserInfoModel } from "./Auth";
+
 export interface Shipment {
   id: number;
   type: string;
-  date: string;
+  date: Date;
   carrier: string;
   status: string;
-  employeeId: number;
+  pic: UserInfoModel;
 }
 
 export interface CreateShipmentRequest {
