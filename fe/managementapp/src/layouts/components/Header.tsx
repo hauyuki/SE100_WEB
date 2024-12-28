@@ -15,9 +15,22 @@ const Header: React.FC<HeaderProps> = ({
   // Convert path to title (first letter uppercase)
   const getTitle = (path: string) => {
     if (path === "product") return "Quản lý sản phẩm";
+    if (path === "import" || path === "export" || path === "shipping")
+      return "Quản lý xuất nhập hàng";
     if (path.startsWith("product/")) {
       const sku = path.split("/")[1];
       return `Chi tiết sản phẩm ${sku}`;
+    }
+    if (path.startsWith("import/")) {
+      const id = path.split("/")[1];
+      return `Chi tiết phiếu nhập #IM${id.padStart(3, "0")}`;
+    }
+    if (path.startsWith("export/")) {
+      const id = path.split("/")[1];
+      return `Chi tiết phiếu xuất #EX${id.padStart(3, "0")}`;
+    }
+    if (path.startsWith("import") || path.startsWith("export")) {
+      return "Quản lý xuất nhập hàng";
     }
     return path.charAt(0).toUpperCase() + path.slice(1);
   };
