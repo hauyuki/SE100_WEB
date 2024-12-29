@@ -1,5 +1,6 @@
 export const USER_PROFILE = "USER_PROFILE";
 export const LIST_PRODUCT_KEY = "LIST_PRODUCT_KEY";
+export const LIST_CATEGORY_KEY = "LIST_CATEGORY_KEY";
 export const LIST_INBOUND_REPORT_KEY = "LIST_INBOUND_REPORT_KEY";
 export const QUERY_KEYS = {
   // ... existing keys

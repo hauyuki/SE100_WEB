@@ -21,6 +21,7 @@ export type Product = {
 export interface UpsertProductModel {
   id?: number;
   name: string;
+  description: string;
   sku: string;
   marketPrice: number; // Assumes BigDecimal maps to number
   productionCost: number; // Assumes BigDecimal maps to number

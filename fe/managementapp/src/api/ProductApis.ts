@@ -3,7 +3,7 @@ import {
   Product,
   UpsertProductModel,
 } from "../models/Product";
-import { apiGet, apiPut, apiDelete } from "../utils";
+import { apiGet, apiPut, apiDelete, apiPost } from "../utils";
 
 export const ProductApis = {
   /**
@@ -28,7 +28,7 @@ export const ProductApis = {
     return apiPut(`/products/${request.id}`, request);
   },
   postProduct(request: UpsertProductModel): Promise<Product> {
-    return apiPut(`/products/`, request);
+    return apiPost(`/products`, request);
   },
 
   /**

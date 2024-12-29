@@ -6,8 +6,8 @@ export const CategoriesApi = {
     return apiPost("/categories", request);
   },
 
-  getCategories(request: FormData): Promise<Category> {
-    const response = apiGet("/categories", getFormData(request));
+  getCategories(): Promise<Category[]> {
+    const response = apiGet("/categories");
     return response;
   },
 

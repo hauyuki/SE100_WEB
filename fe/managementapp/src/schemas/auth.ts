@@ -97,3 +97,23 @@ export const InboundReportItemSchema = z
       path: ["manufactoringDate"], // This will show the error on the manufactoringDate field
     }
   );
+export const UpsertProductModelSchema = z.object({
+  id: z.number().optional(), // Optional ID field
+  name: z.string().min(1, "Product name is required"), // Name is required and cannot be empty
+  description: z.string().min(1, "Product description is required"), // Name is required and cannot be empty
+  sku: z.string().min(1, "SKU is required"), // SKU is required and cannot be empty
+  marketPrice: z.number().min(0, "Market price must be a positive number"), // Market price must be a non-negative number
+  productionCost: z
+    .number()
+    .min(0, "Production cost must be a positive number"), // Production cost must be a non-negative number
+  image: z.string().url("Invalid image URL format"), // Image must be a valid URL
+  minQuantity: z.number().min(0, "Minimum quantity must be a positive number"), // Minimum quantity must be a non-negative number
+  maxQuantity: z.number().min(0, "Maximum quantity must be a positive number"), // Maximum quantity must be a non-negative number
+  categoryId: z.coerce.number().int().min(1, "Category ID is required"), // Category ID must be a positive number
+  companyId: z.coerce.number().int().min(1, "Company ID is required"), // Company ID must be a positive number
+  tagIds: z
+    .array(
+      z.coerce.number().int().min(1, "Each tag ID must be a positive number")
+    )
+    .nonempty("At least one tag ID is required"), // Tag IDs must be an array of positive numbers and cannot be empty
+});

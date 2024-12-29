@@ -3,6 +3,7 @@ import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
 import { Product } from "../../../models/Product";
 import { useGetProducts } from "../../../hooks/products";
+import AddProductForm from "../../admin/products/component/AddProductForm";
 
 const ProductPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -19,6 +20,7 @@ const ProductPage = () => {
     isPending: loading,
     isError: error,
   } = useGetProducts();
+  const [showForm, setShowForm] = useState(false);
 
   // Get unique categories, companies, and storage areas for filters
   const categories = useMemo(() => {
@@ -181,6 +183,10 @@ const ProductPage = () => {
             </button>
           </div>
         </div>
+        <AddProductForm
+          showForm={showForm}
+          onClose={() => setShowForm(false)}
+        />
 
         {loading ? (
           <div className="text-center py-4">Loading...</div>

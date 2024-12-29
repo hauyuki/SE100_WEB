@@ -5,6 +5,7 @@ import ImportTabs from "./components/ImportTabs";
 import UpdateImportForm from "./components/UpdateImportForm";
 import InboundReportForm from "../../../components/InboundReportForm";
 import { useGetInboundReports } from "../../../hooks/inboundReports";
+import AddProductForm from "../../admin/products/component/AddProductForm";
 
 interface Product {
   id: string;
@@ -245,7 +246,11 @@ const Import = () => {
           onSubmit={handleSubmit}
           onChange={handleInputChange}
         /> */}
-        <InboundReportForm
+        {/* <InboundReportForm
+          showForm={showForm}
+          onClose={() => setShowForm(false)}
+        /> */}
+        <AddProductForm
           showForm={showForm}
           onClose={() => setShowForm(false)}
         />
