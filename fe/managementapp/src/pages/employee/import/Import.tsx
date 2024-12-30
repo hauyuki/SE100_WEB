@@ -246,14 +246,14 @@ const Import = () => {
           onSubmit={handleSubmit}
           onChange={handleInputChange}
         /> */}
-        {/* <InboundReportForm
-          showForm={showForm}
-          onClose={() => setShowForm(false)}
-        /> */}
-        <AddProductForm
+        <InboundReportForm
           showForm={showForm}
           onClose={() => setShowForm(false)}
         />
+        {/* <AddProductForm
+          showForm={showForm}
+          onClose={() => setShowForm(false)}
+        /> */}
         {selectedImport && (
           <UpdateImportForm
             showForm={showUpdateForm}

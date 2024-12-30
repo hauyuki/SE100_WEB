@@ -25,7 +25,7 @@ const InboundReportForm = ({
       shipment: {
         date: "",
         carrier: "",
-        employeeId: user?.id, // Adjust if necessary
+        employeeId: user?.id ?? 1, // Adjust if necessary
       },
       items: [], // Initially no items
     },
@@ -155,7 +155,7 @@ const InboundReportForm = ({
                     >
                       {productDatas?.productList?.map((product) => (
                         <option key={product.id} value={product.id}>
-                          {product.name}
+                          {product.name} - {product.marketPrice}
                         </option>
                       ))}
                     </select>

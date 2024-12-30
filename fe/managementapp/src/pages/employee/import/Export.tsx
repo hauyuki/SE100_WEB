@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import ExportForm from "./components/ExportForm";
 import ImportTabs from "./components/ImportTabs";
 import UpdateExportForm from "./components/UpdateExportForm";
+import OutboundReportForm from "../../../components/OutboundReportForm";
+import { useGetOutboundReports } from "../../../hooks/outboundReports";
 
 interface Product {
   id: string;
@@ -114,6 +116,7 @@ const Export = () => {
     });
     setShowForm(false);
   };
+  const { data: outboundData } = useGetOutboundReports();
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -246,12 +249,9 @@ const Export = () => {
           </button>
         </div>
 
-        <ExportForm
+        <OutboundReportForm
           showForm={showForm}
-          formData={formData}
           onClose={() => setShowForm(false)}
-          onSubmit={handleSubmit}
-          onChange={handleInputChange}
         />
 
         {selectedExport && (
@@ -283,7 +283,7 @@ const Export = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredData.map((item) => (
+              {outboundData?.data.map((item) => (
                 <tr
                   key={item.id}
                   className="border-b border-gray-200 hover:bg-gray-100"
@@ -294,31 +294,33 @@ const Export = () => {
                       to={`/export/${item.id}`}
                       className="text-indigo-500 hover:text-indigo-600"
                     >
-                      {item.orderId}
+                      {item.id}
                     </Link>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    {formatCurrency(item.totalValue)}
+                    {formatCurrency(item.price)}
                   </td>
-                  <td className="px-6 py-4">{item.shipper}</td>
-                  <td className="px-6 py-4 text-center">{item.shippingDate}</td>
+                  <td className="px-6 py-4">{item.shipment.carrier}</td>
                   <td className="px-6 py-4 text-center">
-                    {item.completionDate || "-"}
+                    {new Date(item.shipment.date).toString()}
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    {/* {item.completionDate || "-"} */}
                   </td>
                   <td className="px-6 py-4 text-center">
                     <span
                       className={`inline-flex items-center justify-center px-3 py-1 text-sm font-medium rounded-full ${
-                        item.status === "Vận chuyển thành công"
+                        item.shipment.status === "Vận chuyển thành công"
                           ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20"
-                          : item.status === "Đang vận chuyển"
+                          : item.shipment.status === "Đang vận chuyển"
                           ? "bg-amber-50 text-amber-700 ring-1 ring-amber-600/20"
                           : "bg-rose-50 text-rose-700 ring-1 ring-rose-600/20"
                       }`}
                     >
-                      {item.status}
+                      {item.shipment.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4">{item.notes}</td>
+                  {/* <td className="px-6 py-4">{item.}</td> */}
                   <td className="px-6 py-4 text-center">
                     <button
                       onClick={() => handleEdit(item.id)}

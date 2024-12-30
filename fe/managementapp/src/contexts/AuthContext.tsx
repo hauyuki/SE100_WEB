@@ -20,7 +20,7 @@ export const AuthContext = createContext<AuthContextProps>({
 const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<UserInfoModel | undefined>(undefined);
   const [userId, setUserId] = useState<number>(0);
-  const { data: userInfo } = useGetUserProfile(userId);
+  const { data: userInfo } = useGetUserProfile();
   useEffect(() => {
     setUser(userInfo);
   }, [userInfo]);

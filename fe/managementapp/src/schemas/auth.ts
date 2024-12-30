@@ -117,3 +117,15 @@ export const UpsertProductModelSchema = z.object({
     )
     .nonempty("At least one tag ID is required"), // Tag IDs must be an array of positive numbers and cannot be empty
 });
+const OutboundReportItemSchema = z.object({
+  quantity: z.number().min(1, "Số lượng phải lớn hơn 0"), // Quantity must be greater than 0
+  unitPrice: z.number().min(0, "Đơn giá không thể nhỏ hơn 0"),
+  productId: z.number().int(), // Product ID must be an integer
+});
+export const OutboundReportRequestSchema = z.object({
+  date: z.string().refine((val) => !isNaN(Date.parse(val)), {
+    message: "Ngày không hợp lệ",
+  }), // Date should be a valid ISO string
+  shipment: ShipmentRequestSchema, // Nested shipment schema
+  items: z.array(OutboundReportItemSchema).min(1, "Cần ít nhất một sản phẩm"), // Ensure at least one item is provided
+});
