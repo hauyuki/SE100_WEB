@@ -16,6 +16,7 @@ import AdminDashboard from "../pages/admin/dashboard";
 import TagManagementPage from "../pages/admin/tags";
 import AccountManagementPage from "../pages/admin/accounts";
 import ExportDetail from "../pages/employee/import/ExportDetail";
+import Audit from "../pages/employee/audit/Audit";
 
 export const routes = [
   { path: "/", component: Login, layout: AuthLayout },
@@ -33,6 +34,7 @@ export const routes = [
     layout: DefaultLayout,
   },
   { path: "/tag", component: Tag, layout: DefaultLayout },
+  { path: "/audit", component: Audit, layout: DefaultLayout },
 
   {
     path: "/admin/dashboard",

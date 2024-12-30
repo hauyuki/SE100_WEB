@@ -17,6 +17,9 @@ const Header: React.FC<HeaderProps> = ({
     if (path === "product") return "Quản lý sản phẩm";
     if (path === "import" || path === "export" || path === "shipping")
       return "Quản lý xuất nhập hàng";
+    if (path === "report") return "Báo cáo";
+    if (path === "report/generate") return "Tạo báo cáo";
+    if (path === "audit") return "Kiểm toán";
     if (path.startsWith("product/")) {
       const sku = path.split("/")[1];
       return `Chi tiết sản phẩm ${sku}`;
