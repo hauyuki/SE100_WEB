@@ -3,69 +3,19 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeftIcon, PencilIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import productImage1 from "../../../assets/images/itempic.png";
+import { useGetProductDetail } from "../../../hooks/products";
+import EditProductForm from "../../admin/products/component/EditProductForm";
 
 const ProductDetail = () => {
-  const { sku } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
-  const [editedProduct, setEditedProduct] = useState({
-    name: "Beplain Clean Ocean Moisture Sunscreen",
-    sku: sku,
-    category: "Mỹ phẩm",
-    origin: "Hàn Quốc",
-    manufacturer: "Cosdenwhite Inc.",
-    unit: "Hộp",
-    tags: ["Mỹ phẩm"],
-    images: [productImage1, productImage1, productImage1, productImage1],
-    details: [
-      {
-        stt: 1,
-        importId: "IM001",
-        color: "Xanh dương",
-        capacity: "100ml",
-        quantity: 20,
-        importPrice: "500,000",
-        retailPrice: "750,000",
-        location: "A.A1",
-      },
-      {
-        stt: 2,
-        importId: "IM002",
-        color: "Hồng nhạt",
-        capacity: "100ml",
-        quantity: 15,
-        importPrice: "500,000",
-        retailPrice: "750,000",
-        location: "A.A2",
-      },
-      {
-        stt: 3,
-        importId: "IM003",
-        color: "Trắng",
-        capacity: "50ml",
-        quantity: 30,
-        importPrice: "300,000",
-        retailPrice: "450,000",
-        location: "A.A3",
-      },
-    ],
-    description: `
-      Thành phần chủ yếu:
-      1. Kem Chống Nắng Beplain Sunmune Tone Up & Correcting Sunscreen SPF50+ PA++++ Nâng Tông, Cấp Ẩm Công Nghệ Bông Sơn
-      (Màu Tím Sáng)
-
-      Thành phần chủ yếu:
-      Chứa thành phần chính Daucus Carota Sativa (Carrot) Root Extract (chiết xuất Cà rốt) kết hợp công nghệ Microfine giúp bổ sung độ ẩm và hỗ trợ làm dịu da.
-
-      Sản phẩm với thành phần Macadamia (Vitamin B5) hỗ trợ tăng tông da, mang lại làn da sáng mịn và mềm mại.
-
-      Water (Aqua), Ethylhexyl Triazone 4, Dibutyl Adipate, Propanediol, Diethylamino Hydroxybenzoyl Hexyl Benzoate 3, Butylene Glycol 3, Butyloctyl Salicylate 3, Bis-Ethylhexyloxyphenol Methoxyphenyl Triazine 3, Niacinamide, Hexyl Benzoate 3, Butyloctyl Salicylate 3, Bis-Ethylhexyloxyphenol Methoxyphenyl Triazine 3, Butylene Glycol 3
-    `,
-  });
-
+  const [isShowEditForm, setIsShowEditForm] = useState(false);
+  const { data: editedProduct } = useGetProductDetail(Number(id));
   const handleEdit = () => {
-    setIsEditing(true);
+    // setIsEditing(true);
+    setIsShowEditForm(true);
   };
 
   const handleSave = () => {
@@ -77,16 +27,16 @@ const ProductDetail = () => {
   const handleDelete = () => {
     if (window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
       // TODO: Implement delete functionality
-      console.log("Deleting product:", sku);
+      // console.log("Deleting product:", sku);
       navigate("/product");
     }
   };
 
   const handleInputChange = (field: string, value: string | string[]) => {
-    setEditedProduct((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    // setEditedProduct((prev) => ({
+    //   ...prev,
+    //   [field]: value,
+    // }));
   };
 
   const handleDetailChange = (
@@ -94,12 +44,12 @@ const ProductDetail = () => {
     field: string,
     value: string | number
   ) => {
-    setEditedProduct((prev) => ({
-      ...prev,
-      details: prev.details.map((detail, i) =>
-        i === index ? { ...detail, [field]: value } : detail
-      ),
-    }));
+    // setEditedProduct((prev) => ({
+    //   ...prev,
+    //   details: prev.details.map((detail, i) =>
+    //     i === index ? { ...detail, [field]: value } : detail
+    //   ),
+    // }));
   };
 
   return (
@@ -117,24 +67,42 @@ const ProductDetail = () => {
           Sửa
         </button>
       </div>
-
+      {editedProduct && (
+        <EditProductForm
+          showForm={isShowEditForm}
+          onClose={() => setIsShowEditForm(false)}
+          product={editedProduct}
+        />
+      )}{" "}
       {/* Rest of the existing code until the general information section */}
-
       {/* General information */}
       <div className="bg-white rounded-lg p-6 mb-6">
         <h2 className="text-lg font-medium mb-4">Thông tin chung</h2>
         <div className="grid grid-cols-2 gap-6">
           <div>
+            <p className="text-gray-600 mb-2">Tên sản phẩm</p>
+            {isEditing ? (
+              <input
+                type="text"
+                value={editedProduct?.category?.name}
+                // onChange={(e) => handleInputChange("category", e.target.value)}
+                className="w-full p-2 border rounded"
+              />
+            ) : (
+              <p>{editedProduct?.name}</p>
+            )}
+          </div>
+          <div>
             <p className="text-gray-600 mb-2">Danh mục</p>
             {isEditing ? (
               <input
                 type="text"
-                value={editedProduct.category}
-                onChange={(e) => handleInputChange("category", e.target.value)}
+                value={editedProduct?.category?.name}
+                // onChange={(e) => handleInputChange("category", e.target.value)}
                 className="w-full p-2 border rounded"
               />
             ) : (
-              <p>{editedProduct.category}</p>
+              <p>{editedProduct?.category?.name}</p>
             )}
           </div>
           <div>
@@ -142,12 +110,12 @@ const ProductDetail = () => {
             {isEditing ? (
               <input
                 type="text"
-                value={editedProduct.origin}
+                value={editedProduct?.company?.address}
                 onChange={(e) => handleInputChange("origin", e.target.value)}
                 className="w-full p-2 border rounded"
               />
             ) : (
-              <p>{editedProduct.origin}</p>
+              <p>{editedProduct?.company?.address}</p>
             )}
           </div>
           <div>
@@ -155,27 +123,87 @@ const ProductDetail = () => {
             {isEditing ? (
               <input
                 type="text"
-                value={editedProduct.manufacturer}
+                value={editedProduct?.company?.name}
                 onChange={(e) =>
                   handleInputChange("manufacturer", e.target.value)
                 }
                 className="w-full p-2 border rounded"
               />
             ) : (
-              <p>{editedProduct.manufacturer}</p>
+              <p>{editedProduct?.company?.name}</p>
             )}
           </div>
           <div>
-            <p className="text-gray-600 mb-2">Đơn vị tính</p>
+            <p className="text-gray-600 mb-2">Số lượng nhỏ nhất</p>
             {isEditing ? (
               <input
                 type="text"
-                value={editedProduct.unit}
+                value={editedProduct?.company?.name}
+                onChange={(e) =>
+                  handleInputChange("manufacturer", e.target.value)
+                }
+                className="w-full p-2 border rounded"
+              />
+            ) : (
+              <p>{editedProduct?.minQuantity}</p>
+            )}
+          </div>
+          <div>
+            <p className="text-gray-600 mb-2">Số lượng lớn nhất</p>
+            {isEditing ? (
+              <input
+                type="text"
+                value={editedProduct?.company?.name}
+                onChange={(e) =>
+                  handleInputChange("manufacturer", e.target.value)
+                }
+                className="w-full p-2 border rounded"
+              />
+            ) : (
+              <p>{editedProduct?.maxQuantity}</p>
+            )}
+          </div>
+          <div>
+            <p className="text-gray-600 mb-2">Giá thị trường</p>
+            {isEditing ? (
+              <input
+                type="text"
+                value={editedProduct?.company?.name}
+                onChange={(e) =>
+                  handleInputChange("manufacturer", e.target.value)
+                }
+                className="w-full p-2 border rounded"
+              />
+            ) : (
+              <p>{editedProduct?.marketPrice}</p>
+            )}
+          </div>
+          <div>
+            <p className="text-gray-600 mb-2">Giá sản xuất</p>
+            {isEditing ? (
+              <input
+                type="text"
+                value={editedProduct?.company?.name}
+                onChange={(e) =>
+                  handleInputChange("manufacturer", e.target.value)
+                }
+                className="w-full p-2 border rounded"
+              />
+            ) : (
+              <p>{editedProduct?.productionCost}</p>
+            )}
+          </div>
+          <div>
+            <p className="text-gray-600 mb-2">Mã SKU</p>
+            {isEditing ? (
+              <input
+                type="text"
+                value={editedProduct?.sku}
                 onChange={(e) => handleInputChange("unit", e.target.value)}
                 className="w-full p-2 border rounded"
               />
             ) : (
-              <p>{editedProduct.unit}</p>
+              <p>{editedProduct?.sku}</p>
             )}
           </div>
           <div className="col-span-2">
@@ -184,7 +212,7 @@ const ProductDetail = () => {
               {isEditing ? (
                 <input
                   type="text"
-                  value={editedProduct.tags.join(", ")}
+                  value={editedProduct?.tags.join(", ")}
                   onChange={(e) =>
                     handleInputChange("tags", e.target.value.split(", "))
                   }
@@ -192,12 +220,12 @@ const ProductDetail = () => {
                   placeholder="Nhập các tag, phân cách bằng dấu phẩy"
                 />
               ) : (
-                editedProduct.tags.map((tag, index) => (
+                editedProduct?.tags?.map((tag, index) => (
                   <span
                     key={index}
                     className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-sm"
                   >
-                    {tag}
+                    {tag.name}
                   </span>
                 ))
               )}
@@ -205,7 +233,6 @@ const ProductDetail = () => {
           </div>
         </div>
       </div>
-
       {/* Detailed information */}
       <div className="bg-white rounded-lg p-6 mb-6">
         <h2 className="text-lg font-medium mb-4">Thông tin chi tiết</h2>
@@ -213,56 +240,53 @@ const ProductDetail = () => {
           <table className="min-w-full">
             <thead>
               <tr className="bg-gray-50">
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   STT
-                </th>
+                </th> */}
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Mã phiếu nhập
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Màu sắc
+                  Số lượng nhập
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Dung tích
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Số lượng
+                  Số lượng tồn
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Giá nhập
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Giá bán lẻ
+                  Tổng tiền
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Vị trí
+                  Ngày sản xuất
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Ngày hết hạn
                 </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {editedProduct.details.map((detail, index) => (
-                <tr key={detail.stt}>
-                  <td className="px-6 py-4 whitespace-nowrap">{detail.stt}</td>
+              {editedProduct?.items?.map((detail, index) => (
+                <tr key={detail.id}>
+                  <td className="px-6 py-4 whitespace-nowrap">{detail.id}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-primary">
-                    {detail.importId}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {detail.color}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {detail.capacity}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
                     {detail.quantity}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {detail.importPrice}
+                    {detail.stockQuantity}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {detail.retailPrice}
+                    {detail.unitPrice}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {detail.location}
+                    {detail.totalPrice}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {new Date(detail.expirationDate).toDateString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {new Date(detail.expirationDate).toDateString()}
                   </td>
                 </tr>
               ))}
@@ -270,31 +294,29 @@ const ProductDetail = () => {
           </table>
         </div>
       </div>
-
       {/* Description */}
       <div className="bg-white rounded-lg p-6 mb-6">
         <h2 className="text-lg font-medium mb-4">Mô tả</h2>
         {isEditing ? (
           <textarea
-            value={editedProduct.description}
+            value={editedProduct?.description}
             onChange={(e) => handleInputChange("description", e.target.value)}
             className="w-full p-2 border rounded min-h-[200px]"
           />
         ) : (
           <div className="whitespace-pre-line text-gray-600">
-            {editedProduct.description}
+            {editedProduct?.description}
           </div>
         )}
       </div>
-
       {/* Action buttons */}
       <div className="bg-white rounded-lg p-6 flex justify-end gap-4">
-        <button
+        {/* <button
           onClick={handleSave}
           className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
         >
           Lưu
-        </button>
+        </button> */}
         <button
           onClick={handleDelete}
           className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"

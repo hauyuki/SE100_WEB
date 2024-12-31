@@ -1,6 +1,7 @@
 import {
   ListProductResponse,
   Product,
+  ProductDetail,
   UpsertProductModel,
 } from "../models/Product";
 import { apiGet, apiPut, apiDelete, apiPost } from "../utils";
@@ -11,7 +12,7 @@ export const ProductApis = {
    * @param id - The ID of the product.
    * @returns A promise resolving to a Product.
    */
-  getProductById(id: number): Promise<Product> {
+  getProductById(id: number): Promise<ProductDetail> {
     return apiGet(`/products/${id}`);
   },
   getAllProducts(): Promise<ListProductResponse> {

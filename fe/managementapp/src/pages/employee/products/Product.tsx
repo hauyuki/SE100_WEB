@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Product } from "../../../models/Product";
 import { useGetProducts } from "../../../hooks/products";
 import AddProductForm from "../../admin/products/component/AddProductForm";
+import { FaPlus } from "react-icons/fa";
 
 const ProductPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -105,8 +106,8 @@ const ProductPage = () => {
     pageNumbers.push(i);
   }
 
-  const handleRowClick = (sku: string) => {
-    navigate(`/product/${sku}`);
+  const handleRowClick = (id: number) => {
+    navigate(`/product/${id}`);
   };
 
   return (
@@ -181,6 +182,12 @@ const ProductPage = () => {
                 ? "↓"
                 : ""}
             </button>
+            <button
+              className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center hover:bg-indigo-600 transition-colors"
+              onClick={() => setShowForm(true)}
+            >
+              <FaPlus className="text-white" />
+            </button>
           </div>
         </div>
         <AddProductForm
@@ -225,7 +232,7 @@ const ProductPage = () => {
                   <tr
                     key={product.id}
                     className="hover:bg-gray-50 cursor-pointer"
-                    onClick={() => handleRowClick(product.sku)}
+                    onClick={() => handleRowClick(product.id)}
                   >
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {indexOfFirstProduct + index + 1}
