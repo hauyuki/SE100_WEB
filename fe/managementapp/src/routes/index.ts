@@ -17,6 +17,15 @@ import TagManagementPage from "../pages/admin/tags";
 import AccountManagementPage from "../pages/admin/accounts";
 import ExportDetail from "../pages/employee/import/ExportDetail";
 import Audit from "../pages/employee/audit/Audit";
+import AdminProductPage from "../pages/admin/products";
+import AdminImportPage from "../pages/admin/import/Import";
+import AdminExportPage from "../pages/admin/import/Export";
+import AdminShippingPage from "../pages/admin/import/Shipping";
+import AdminImportDetailPage from "../pages/admin/import/ImportDetail";
+import AdminExportDetailPage from "../pages/admin/import/ExportDetail";
+import AdminReportPage from "../pages/admin/reports/Report";
+import AdminReportGeneratorPage from "../pages/admin/reports/ReportGenerator";
+import AdminAuditPage from "../pages/admin/audit/Audit";
 
 export const routes = [
   { path: "/", component: Login, layout: AuthLayout },
@@ -41,9 +50,30 @@ export const routes = [
     component: AdminDashboard,
     layout: AdminLayout,
   },
-  { path: "/admin/products", component: AdminDashboard, layout: AdminLayout },
-  { path: "/admin/import", component: AdminDashboard, layout: AdminLayout },
-  { path: "/admin/reports", component: AdminDashboard, layout: AdminLayout },
+  { path: "/admin/products", component: AdminProductPage, layout: AdminLayout },
+  { path: "/admin/import", component: AdminImportPage, layout: AdminLayout },
+  { path: "/admin/export", component: AdminExportPage, layout: AdminLayout },
+  {
+    path: "/admin/shipping",
+    component: AdminShippingPage,
+    layout: AdminLayout,
+  },
+  {
+    path: "/admin/import/:id",
+    component: AdminImportDetailPage,
+    layout: AdminLayout,
+  },
+  {
+    path: "/admin/export/:id",
+    component: AdminExportDetailPage,
+    layout: AdminLayout,
+  },
+  { path: "/admin/reports", component: AdminReportPage, layout: AdminLayout },
+  {
+    path: "/admin/reports/generate",
+    component: AdminReportGeneratorPage,
+    layout: AdminLayout,
+  },
   { path: "/admin/tags", component: TagManagementPage, layout: AdminLayout },
   {
     path: "/admin/accounts",
@@ -56,4 +86,5 @@ export const routes = [
     component: ExportDetail,
     layout: DefaultLayout,
   },
+  { path: "/admin/audit", component: AdminAuditPage, layout: AdminLayout },
 ];

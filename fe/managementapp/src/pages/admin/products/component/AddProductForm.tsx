@@ -2,13 +2,11 @@ import React from "react";
 import { FaTimes } from "react-icons/fa";
 
 export interface ProductFormData {
-  sku: string;
   name: string;
-  description: string;
   category: string;
-  company: string;
-  marketPrice: string;
-  image: string;
+  manufacturer: string;
+  quantity: string;
+  storageArea: string;
 }
 
 interface AddProductFormProps {
@@ -37,10 +35,16 @@ const AddProductForm: React.FC<AddProductFormProps> = ({
     { id: "3", name: "Food" },
   ];
 
-  const companies = [
-    { id: "1", name: "Company A" },
-    { id: "2", name: "Company B" },
-    { id: "3", name: "Company C" },
+  const manufacturers = [
+    { id: "1", name: "Manufacturer A" },
+    { id: "2", name: "Manufacturer B" },
+    { id: "3", name: "Manufacturer C" },
+  ];
+
+  const storageAreas = [
+    { id: "1", name: "Kho A" },
+    { id: "2", name: "Kho B" },
+    { id: "3", name: "Kho C" },
   ];
 
   return (
@@ -56,20 +60,7 @@ const AddProductForm: React.FC<AddProductFormProps> = ({
           </button>
         </div>
         <form onSubmit={onSubmit} className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                SKU
-              </label>
-              <input
-                type="text"
-                name="sku"
-                value={formData.sku}
-                onChange={onChange}
-                className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                required
-              />
-            </div>
+          <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Tên sản phẩm
@@ -78,19 +69,6 @@ const AddProductForm: React.FC<AddProductFormProps> = ({
                 type="text"
                 name="name"
                 value={formData.name}
-                onChange={onChange}
-                className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                required
-              />
-            </div>
-            <div className="col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Mô tả
-              </label>
-              <input
-                type="text"
-                name="description"
-                value={formData.description}
                 onChange={onChange}
                 className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
@@ -117,31 +95,31 @@ const AddProductForm: React.FC<AddProductFormProps> = ({
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Công ty
+                Hàng sản xuất
               </label>
               <select
-                name="company"
-                value={formData.company}
+                name="manufacturer"
+                value={formData.manufacturer}
                 onChange={onChange}
                 className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
               >
-                <option value="">Chọn công ty</option>
-                {companies.map((company) => (
-                  <option key={company.id} value={company.id}>
-                    {company.name}
+                <option value="">Chọn nhà sản xuất</option>
+                {manufacturers.map((manufacturer) => (
+                  <option key={manufacturer.id} value={manufacturer.id}>
+                    {manufacturer.name}
                   </option>
                 ))}
               </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Giá thị trường
+                Số lượng
               </label>
               <input
                 type="number"
-                name="marketPrice"
-                value={formData.marketPrice}
+                name="quantity"
+                value={formData.quantity}
                 onChange={onChange}
                 className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
@@ -150,16 +128,22 @@ const AddProductForm: React.FC<AddProductFormProps> = ({
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Hình ảnh URL
+                Khu vực lưu trữ
               </label>
-              <input
-                type="text"
-                name="image"
-                value={formData.image}
+              <select
+                name="storageArea"
+                value={formData.storageArea}
                 onChange={onChange}
                 className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
-              />
+              >
+                <option value="">Chọn khu vực</option>
+                {storageAreas.map((area) => (
+                  <option key={area.id} value={area.id}>
+                    {area.name}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 

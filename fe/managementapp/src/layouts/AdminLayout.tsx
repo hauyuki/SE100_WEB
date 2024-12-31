@@ -1,26 +1,22 @@
 import React from "react";
+import { useLocation } from "react-router-dom";
 import AdminSidebar from "../components/Sidebar/AdminSidebar";
 import Header from "./components/Header";
-import { useLocation } from "react-router-dom";
 
-interface AdminLayoutProps {
+interface Props {
   children: React.ReactNode;
 }
 
-const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
+const AdminLayout: React.FC<Props> = ({ children }) => {
   const location = useLocation();
-  const currentPath = location.pathname.split("/").pop() || "dashboard";
+  const currentPath = location.pathname.split("/").slice(1).join("/");
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <AdminSidebar activeItem={currentPath} setActiveItem={() => {}} />
+      <AdminSidebar currentPath={currentPath} />
       <div className="flex-1 flex flex-col">
-        <Header
-          currentPath={currentPath}
-          userName="Admin"
-          userRole="Quản trị viên"
-        />
-        <main className="flex-1 overflow-auto">{children}</main>
+        <Header currentPath={currentPath} />
+        <main className="flex-1 overflow-y-auto p-5">{children}</main>
       </div>
     </div>
   );
