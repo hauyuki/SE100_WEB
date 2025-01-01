@@ -5,8 +5,7 @@ import { useAuthContext } from "../../contexts/AuthContext";
 
 interface HeaderProps {
   currentPath?: string;
-  userName?: string;
-  userRole?: string;
+  setCurrentPath?: (path: string) => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ currentPath = "dashboard" }) => {
@@ -82,14 +81,40 @@ const Header: React.FC<HeaderProps> = ({ currentPath = "dashboard" }) => {
       </h1>
 
       {/* Right side - User info */}
-      <div className="flex items-center gap-3">
-        <div className="text-right">
-          <p className="font-medium text-gray-800">{userName}</p>
-          <p className="text-sm text-gray-500">{userRole}</p>
+      <div className="relative" ref={dropdownRef}>
+        <div
+          className="flex items-center gap-3 cursor-pointer"
+          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+        >
+          <div className="text-right">
+            <p className="font-medium text-gray-800">{user?.name}</p>
+            <p className="text-sm text-gray-500">
+              {user?.role === "EMPLOYEE_ROLE" ? "Nhân viên" : "Quản lý"}
+            </p>
+          </div>
+          <div className="h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center">
+            <UserCircleIcon className="h-8 w-8 text-gray-400" />
+          </div>
         </div>
-        <div className="h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center">
-          <UserCircleIcon className="h-8 w-8 text-gray-400" />
-        </div>
+
+        {/* Dropdown Menu */}
+        {isDropdownOpen && (
+          <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
+            <Link
+              to="/profile"
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              onClick={() => setIsDropdownOpen(false)}
+            >
+              Thông tin cá nhân
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            >
+              Đăng xuất
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );
