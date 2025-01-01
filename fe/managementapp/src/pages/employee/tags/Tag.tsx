@@ -1,7 +1,11 @@
 import React, { useState } from "react";
-import { PencilIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { PencilIcon } from "@heroicons/react/24/outline";
 import EditTagModal from "../../../components/modals/EditTagModal";
-import AddTagModal from "../../../components/modals/AddTagModal";
+import AddTagForm from "../../admin/tags/components/AddTagForm";
+import { useGetTags } from "../../../hooks/tags";
+import { useGetProducts } from "../../../hooks/products";
+import { useGetAreas } from "../../../hooks/areas";
+import { Area } from "../../../models/Area";
 
 interface AreaProduct {
   name: string;
@@ -16,7 +20,7 @@ interface WarehouseArea {
 }
 
 const Tag = () => {
-  const [selectedArea, setSelectedArea] = useState<WarehouseArea | null>(null);
+  const [selectedArea, setSelectedArea] = useState<Area | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState<{
     name: string;
@@ -66,40 +70,15 @@ const Tag = () => {
   ];
 
   // Tag list data
-  const tags = [
-    {
-      stt: 1,
-      name: "Perishable",
-      meaning: "Dễ hỏng",
-      dateCreated: "13/07/2024",
-    },
-    {
-      stt: 2,
-      name: "Refrigerated",
-      meaning: "Bảo quản lạnh",
-      dateCreated: "09/05/2020",
-    },
-    {
-      stt: 3,
-      name: "Fragile",
-      meaning: "Dễ vỡ",
-      dateCreated: "19/11/2020",
-    },
-    {
-      stt: 4,
-      name: "Flammable",
-      meaning: "Dễ cháy",
-      dateCreated: "13/12/2022",
-    },
-    {
-      stt: 5,
-      name: "Hazardous",
-      meaning: "Nguy hiểm",
-      dateCreated: "04/08/2022",
-    },
-  ];
+  const { data: tags } = useGetTags();
+  const { data: areas } = useGetAreas();
+  const {
+    data: products,
+    isPending: loading,
+    isError: error,
+  } = useGetProducts();
 
-  const handleAreaClick = (area: WarehouseArea) => {
+  const handleAreaClick = (area: Area) => {
     setSelectedArea(area);
   };
 
@@ -149,204 +128,160 @@ const Tag = () => {
         <div className="border-2 border-primary rounded-lg p-4">
           <div className="grid grid-cols-2 gap-4 mb-4">
             {/* A1 and A2 */}
-            <div
-              className={`border p-4 rounded-lg cursor-pointer hover:bg-gray-50 ${
-                selectedArea?.id === "A1" ? "ring-2 ring-primary" : ""
-              }`}
-              onClick={() => handleAreaClick(warehouseAreas[0])}
-            >
-              <h3 className="font-medium mb-2">A1</h3>
-              <div className="flex gap-2 flex-wrap">
-                {warehouseAreas[0].tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className={`px-2 py-1 rounded-full text-xs ${getTagColor(
-                      tag
-                    )}`}
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div
-              className={`border p-4 rounded-lg cursor-pointer hover:bg-gray-50 ${
-                selectedArea?.id === "A2" ? "ring-2 ring-primary" : ""
-              }`}
-              onClick={() => handleAreaClick(warehouseAreas[1])}
-            >
-              <h3 className="font-medium mb-2">A2</h3>
-              <div className="flex gap-2 flex-wrap">
-                {warehouseAreas[1].tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className={`px-2 py-1 rounded-full text-xs ${getTagColor(
-                      tag
-                    )}`}
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* A3 and A4 */}
-            <div
-              className={`border p-4 rounded-lg cursor-pointer hover:bg-gray-50 ${
-                selectedArea?.id === "A3" ? "ring-2 ring-primary" : ""
-              }`}
-              onClick={() => handleAreaClick(warehouseAreas[2])}
-            >
-              <h3 className="font-medium mb-2">A3</h3>
-              <div className="flex gap-2 flex-wrap">
-                {warehouseAreas[2].tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className={`px-2 py-1 rounded-full text-xs ${getTagColor(
-                      tag
-                    )}`}
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div
-              className={`border p-4 rounded-lg cursor-pointer hover:bg-gray-50 ${
-                selectedArea?.id === "A4" ? "ring-2 ring-primary" : ""
-              }`}
-              onClick={() => handleAreaClick(warehouseAreas[3])}
-            >
-              <h3 className="font-medium mb-2">A4</h3>
-              <div className="flex gap-2 flex-wrap">
-                {warehouseAreas[3].tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className={`px-2 py-1 rounded-full text-xs ${getTagColor(
-                      tag
-                    )}`}
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Admin Office */}
-          <div className="border p-4 rounded-lg w-1/3 mx-auto text-center">
-            <h3 className="font-medium">Văn phòng quản lý</h3>
-          </div>
-        </div>
-
-        {/* Selected Area Products */}
-        {selectedArea && (
-          <div className="mt-6 p-4 border rounded-lg">
-            <h3 className="font-medium mb-4">
-              Sản phẩm trong khu vực {selectedArea.name}:
-            </h3>
-            <div className="grid grid-cols-3 gap-4">
-              {selectedArea.products.map((product, index) => (
-                <div key={index} className="border p-3 rounded-lg">
-                  <p className="font-medium">{product.name}</p>
-                  <div className="flex gap-2 mt-2 flex-wrap">
-                    {product.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className={`px-2 py-1 rounded-full text-xs ${getTagColor(
-                          tag
-                        )}`}
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
+            {areas?.map((area) => (
+              <div
+                className={`border p-4 rounded-lg cursor-pointer hover:bg-gray-50 ${
+                  selectedArea?.id === area.id ? "ring-2 ring-primary" : ""
+                }`}
+                onClick={() => handleAreaClick(area)}
+              >
+                <h3 className="font-medium mb-2">{area.name}</h3>
+                <div className="flex gap-2 flex-wrap">
+                  {area?.tags?.map((tag) => (
+                    <span
+                      key={tag.id}
+                      className={`px-2 py-1 rounded-full text-xs ${getTagColor(
+                        tag.name
+                      )}`}
+                    >
+                      {tag.name}
+                    </span>
+                  ))}
                 </div>
-              ))}
+              </div>
+            ))}
+
+            {/* Admin Office */}
+            <div className="border p-4 rounded-lg w-1/3 mx-auto text-center">
+              <h3 className="font-medium">Văn phòng quản lý</h3>
             </div>
           </div>
-        )}
-      </div>
 
-      {/* Tags Table */}
-      <div className="bg-white rounded-lg p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-medium">DANH SÁCH THẺ TAG</h2>
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90"
-          >
-            Tạo mới Tag
-          </button>
+          {/* Selected Area Products */}
+          {selectedArea && (
+            <div className="mt-6 p-4 border rounded-lg">
+              <h3 className="font-medium mb-4">
+                Sản phẩm trong khu vực {selectedArea.name}:
+              </h3>
+              <div className="grid grid-cols-3 gap-4">
+                {products?.productList?.map((product, index) => {
+                  if (
+                    selectedArea.tags?.some((tag) =>
+                      product?.tags?.some(
+                        (productTag) => productTag.id === tag.id
+                      )
+                    ) ||
+                    (selectedArea.name === "A2" && product?.tags.length === 0)
+                  ) {
+                    return (
+                      <div key={index} className="border p-3 rounded-lg">
+                        <p className="font-medium">{product.name}</p>
+                        <div className="flex gap-2 mt-2 flex-wrap">
+                          {product.tags?.map((tag) => (
+                            <span
+                              key={tag.id}
+                              className={`px-2 py-1 rounded-full text-xs ${getTagColor(
+                                tag.name
+                              )}`}
+                            >
+                              {tag.name}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  } else return <></>;
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
-        <table className="min-w-full">
-          <thead>
-            <tr className="bg-gray-50">
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                STT
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Tên thẻ tag
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Ý nghĩa
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Ngày tạo
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Ghi chú
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {tags.map((tag) => (
-              <tr key={tag.stt} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {tag.stt}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-primary">
-                  {tag.name}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {tag.meaning}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {tag.dateCreated}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  <button
-                    className="text-gray-600 hover:text-primary"
-                    onClick={() => handleEditClick(tag)}
-                  >
-                    <PencilIcon className="h-5 w-5" />
-                  </button>
-                </td>
+        {/* Tags Table */}
+        <div className="bg-white rounded-lg p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-lg font-medium">DANH SÁCH THẺ TAG</h2>
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90"
+            >
+              Tạo mới Tag
+            </button>
+          </div>
+
+          <table className="min-w-full">
+            <thead>
+              <tr className="bg-gray-50">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  STT
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Tên thẻ tag
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Ý nghĩa
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Khu vực
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Ngày tạo
+                </th>
+                {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Ghi chú
+                </th> */}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {tags?.map((tag) => (
+                <tr key={tag.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {tag.id}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-primary">
+                    {tag.name}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {tag.description}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {tag?.area?.name}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {new Date(tag.createdDate).toDateString()}
+                  </td>
+                  {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"> */}
+                  {/* <button
+                      className="text-gray-600 hover:text-primary"
+                      // onClick={() => handleEditClick(tag)}
+                    >
+                      <PencilIcon className="h-5 w-5" />
+                    </button> */}
+                  {/* </td> */}
+                </tr>
+              ))}
+            </tbody>
+          </table>
 
-        {/* Add Modal */}
-        <AddTagModal
-          isOpen={isAddModalOpen}
-          onClose={() => setIsAddModalOpen(false)}
-          onSubmit={handleAddSubmit}
-        />
-
-        {/* Edit Modal */}
-        {selectedTag && (
-          <EditTagModal
-            isOpen={isEditModalOpen}
-            onClose={() => {
-              setIsEditModalOpen(false);
-              setSelectedTag(null);
-            }}
-            onSubmit={handleEditSubmit}
-            initialData={selectedTag}
+          {/* Add Modal */}
+          <AddTagForm
+            isOpen={isAddModalOpen}
+            onClose={() => setIsAddModalOpen(false)}
           />
-        )}
+
+          {/* Edit Modal */}
+          {selectedTag && (
+            <EditTagModal
+              isOpen={isEditModalOpen}
+              onClose={() => {
+                setIsEditModalOpen(false);
+                setSelectedTag(null);
+              }}
+              onSubmit={handleEditSubmit}
+              initialData={selectedTag}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

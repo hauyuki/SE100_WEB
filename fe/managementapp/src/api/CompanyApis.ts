@@ -8,7 +8,7 @@ import { apiGet, apiPost, apiPut, apiDelete } from "../utils/ApiRequest";
 
 export const CompanyApis = {
   // Get all companies
-  getAllCompanies(): Promise<ListCompanyResponse> {
+  getAllCompanies(): Promise<Company[]> {
     return apiGet("/companies");
   },
 

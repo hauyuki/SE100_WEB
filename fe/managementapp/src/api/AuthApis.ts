@@ -9,6 +9,6 @@ export const AuthsApis = {
     return apiPost("/auth/sign-up", request);
   },
   getUserInfo(): Promise<UserInfoModel> {
-    return apiGet("/users/profile");
+    return apiGet(`/auth`);
   },
 };

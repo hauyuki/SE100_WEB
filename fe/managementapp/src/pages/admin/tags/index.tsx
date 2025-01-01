@@ -86,9 +86,6 @@ const TagManagementPage = () => {
       <AddTagForm
         isOpen={isAddPopupOpen}
         onClose={() => setIsAddPopupOpen(false)}
-        newTag={newTag}
-        setNewTag={setNewTag}
-        onSubmit={handleSubmit}
       />
 
       <EditTagForm

@@ -8,3 +8,9 @@ export const useGetProducts = () => {
     queryFn: () => ProductApis.getAllProducts(),
   });
 };
+export const useGetProductDetail = (productId: number) => {
+  return useQuery({
+    queryKey: [LIST_PRODUCT_KEY],
+    queryFn: () => ProductApis.getProductById(productId),
+  });
+};

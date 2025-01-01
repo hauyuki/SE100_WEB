@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FaCalendarAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import ImportTabs from "./components/ImportTabs";
+import { useGetShipments } from "../../../hooks/shipments";
 
 interface ShippingData {
   id: number;
@@ -20,6 +21,7 @@ const Shipping = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [combinedData, setCombinedData] = useState<ShippingData[]>([]);
+  const { data: shipment } = useGetShipments();
 
   // Dữ liệu mẫu cho phiếu nhập
   const importData = [
@@ -167,7 +169,7 @@ const Shipping = () => {
                 <th className="px-6 py-3 text-center">STT</th>
                 <th className="px-6 py-3 text-left">Mã vận đơn</th>
                 <th className="px-6 py-3 text-center">Loại</th>
-                <th className="px-6 py-3 text-right">Tổng giá trị</th>
+                <th className="px-6 py-3 text-right">Trạng thái </th>
                 <th className="px-6 py-3 text-left">Đơn vị vận chuyển</th>
                 <th className="px-6 py-3 text-center">Ngày vận chuyển</th>
                 <th className="px-6 py-3 text-center">Ngày hoàn thành</th>
@@ -175,7 +177,7 @@ const Shipping = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredData.map((item, index) => (
+              {shipment?.shipmentList.map((item, index) => (
                 <tr
                   key={item.id}
                   className="border-b border-gray-200 hover:bg-gray-100 cursor-pointer"
@@ -186,29 +188,34 @@ const Shipping = () => {
                       to={`/${item.type}/${item.id}`}
                       className="text-indigo-500 hover:text-indigo-600"
                     >
-                      {item.orderId}
+                      {item.id}
                     </Link>
                   </td>
                   <td className="px-6 py-4 text-center">
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        item.type === "import"
+                        item.type === "INBOUND"
                           ? "bg-green-100 text-green-800"
                           : "bg-blue-100 text-blue-800"
                       }`}
                     >
-                      {item.type === "import" ? "Nhập" : "Xuất"}
+                      {item.type === "INBOUND" ? "Nhập" : "Xuất"}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-right">
-                    {formatCurrency(item.totalValue)}
-                  </td>
-                  <td className="px-6 py-4">{item.shipper}</td>
-                  <td className="px-6 py-4 text-center">{item.shippingDate}</td>
+                  <td className="px-6 py-4 ">{item.status}</td>
+                  <td className="px-6 py-4">{item.carrier}</td>
                   <td className="px-6 py-4 text-center">
-                    {item.completionDate}
+                    {new Date(item.date).toDateString()}
                   </td>
-                  <td className="px-6 py-4">{item.notes}</td>
+                  <td className="px-6 py-4 text-center">
+                    {item.completedDate
+                      ? new Date(item.date).toDateString()
+                      : ""}
+                  </td>
+                  <td className="px-6 py-4">
+                    {item.fromPosition ? item.fromPosition : ""}
+                    {item.toPosition ? item.toPosition : ""}
+                  </td>
                 </tr>
               ))}
             </tbody>

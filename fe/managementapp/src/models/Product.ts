@@ -1,5 +1,6 @@
 import { Category } from "./Category";
 import { Company } from "./Company";
+import { InboundReportItem } from "./InboundReport";
 import { Tag } from "./Tag";
 
 export type Product = {
@@ -16,11 +17,16 @@ export type Product = {
   tags: Tag[];
   quantity: number;
   storageArea: string;
+  description: string;
+};
+export type ProductDetail = Product & {
+  items: InboundReportItem[];
 };
 
 export interface UpsertProductModel {
   id?: number;
   name: string;
+  description: string;
   sku: string;
   marketPrice: number; // Assumes BigDecimal maps to number
   productionCost: number; // Assumes BigDecimal maps to number

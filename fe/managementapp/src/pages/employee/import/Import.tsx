@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { FaCalendarAlt, FaPlus } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import ImportForm from "./components/ImportForm";
 import ImportTabs from "./components/ImportTabs";
-import UpdateImportForm from "./components/UpdateImportForm";
-
+import UpdateImportForm from "./components/UpdateShipmentForm";
+import InboundReportForm from "../../../components/InboundReportForm";
+import { useGetInboundReports } from "../../../hooks/inboundReports";
+import AddProductForm from "../../admin/products/component/AddProductForm";
+import { InboundReport } from "../../../models";
 interface Product {
   id: string;
   name: string;
@@ -29,10 +31,9 @@ const Import = () => {
   const [endDate, setEndDate] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [showUpdateForm, setShowUpdateForm] = useState(false);
-  const [selectedImport, setSelectedImport] = useState<{
-    orderId: string;
-    status: string;
-  } | null>(null);
+  const [selectedImport, setSelectedImport] = useState<InboundReport | null>(
+    null
+  );
   const [formData, setFormData] = useState<FormData>({
     orderId: "",
     shipper: "",
@@ -42,7 +43,7 @@ const Import = () => {
     notes: "",
     products: [],
   });
-
+  const { data: inboundData } = useGetInboundReports();
   const [data, setData] = useState([
     {
       id: 1,
@@ -121,29 +122,27 @@ const Import = () => {
     }).format(value);
   };
 
-  const filteredData = data
+  const filteredData = inboundData?.data
     .filter(
       (item) =>
-        item.orderId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.shipper.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.notes.toLowerCase().includes(searchQuery.toLowerCase())
+        item.shipment.carrier
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        item.shipment.status.toLowerCase().includes(searchQuery.toLowerCase())
     )
     .sort((a, b) => {
       if (selectedValue === "asc") {
-        return a.totalValue - b.totalValue;
+        return a.price - b.price;
       } else if (selectedValue === "desc") {
-        return b.totalValue - a.totalValue;
+        return b.price - a.price;
       }
       return 0;
     });
 
   const handleEdit = (id: number) => {
-    const itemToEdit = data.find((item) => item.id === id);
+    const itemToEdit = inboundData?.data.find((item) => item.id === id);
     if (itemToEdit) {
-      setSelectedImport({
-        orderId: itemToEdit.orderId,
-        status: itemToEdit.status,
-      });
+      setSelectedImport(itemToEdit);
       setShowUpdateForm(true);
     }
   };
@@ -152,13 +151,6 @@ const Import = () => {
     e.preventDefault();
     if (!selectedImport) return;
 
-    setData((prev) =>
-      prev.map((item) =>
-        item.orderId === selectedImport.orderId
-          ? { ...item, status: selectedImport.status }
-          : item
-      )
-    );
     setShowUpdateForm(false);
     setSelectedImport(null);
   };
@@ -237,14 +229,21 @@ const Import = () => {
           </button>
         </div>
 
-        <ImportForm
+        {/* <ImportForm
           showForm={showForm}
           formData={formData}
           onClose={() => setShowForm(false)}
           onSubmit={handleSubmit}
           onChange={handleInputChange}
+        /> */}
+        <InboundReportForm
+          showForm={showForm}
+          onClose={() => setShowForm(false)}
         />
-
+        {/* <AddProductForm
+          showForm={showForm}
+          onClose={() => setShowForm(false)}
+        /> */}
         {selectedImport && (
           <UpdateImportForm
             showForm={showUpdateForm}
@@ -253,8 +252,6 @@ const Import = () => {
               setShowUpdateForm(false);
               setSelectedImport(null);
             }}
-            onSubmit={handleUpdateSubmit}
-            onChange={handleUpdateChange}
           />
         )}
 
@@ -274,7 +271,7 @@ const Import = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredData.map((item) => (
+              {inboundData?.data?.map((item) => (
                 <tr
                   key={item.id}
                   className="border-b border-gray-200 hover:bg-gray-100"
@@ -285,31 +282,37 @@ const Import = () => {
                       to={`/import/${item.id}`}
                       className="text-indigo-500 hover:text-indigo-600"
                     >
-                      {item.orderId}
+                      {item.id}
                     </Link>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    {formatCurrency(item.totalValue)}
+                    {formatCurrency(item.price)}
                   </td>
-                  <td className="px-6 py-4">{item.shipper}</td>
-                  <td className="px-6 py-4 text-center">{item.shippingDate}</td>
+                  <td className="px-6 py-4">{item.shipment.carrier}</td>
                   <td className="px-6 py-4 text-center">
-                    {item.completionDate || "-"}
+                    {item.shipment.date.toDateString()}
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    {item.shipment.completedDate
+                      ? item.shipment.completedDate.toDateString()
+                      : "Pending"}
                   </td>
                   <td className="px-6 py-4 text-center">
                     <span
                       className={`inline-flex items-center justify-center px-3 py-1 text-sm font-medium rounded-full ${
-                        item.status === "Vận chuyển thành công"
+                        item.shipment.status === "COMPLETED"
                           ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20"
-                          : item.status === "Đang vận chuyển"
+                          : item.shipment.status === "IN_PROGRESS"
                           ? "bg-amber-50 text-amber-700 ring-1 ring-amber-600/20"
+                          : item.shipment.status === "PENDING"
+                          ? "bg-blue-50 text-blue-700 ring-1 "
                           : "bg-rose-50 text-rose-700 ring-1 ring-rose-600/20"
                       }`}
                     >
-                      {item.status}
+                      {item.shipment.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4">{item.notes}</td>
+                  <td className="px-6 py-4">Không có</td>
                   <td className="px-6 py-4 text-center">
                     <button
                       onClick={() => handleEdit(item.id)}

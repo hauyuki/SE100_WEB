@@ -1,9 +1,10 @@
 import {
   ListProductResponse,
   Product,
+  ProductDetail,
   UpsertProductModel,
 } from "../models/Product";
-import { apiGet, apiPut, apiDelete } from "../utils";
+import { apiGet, apiPut, apiDelete, apiPost } from "../utils";
 
 export const ProductApis = {
   /**
@@ -11,7 +12,7 @@ export const ProductApis = {
    * @param id - The ID of the product.
    * @returns A promise resolving to a Product.
    */
-  getProductById(id: number): Promise<Product> {
+  getProductById(id: number): Promise<ProductDetail> {
     return apiGet(`/products/${id}`);
   },
   getAllProducts(): Promise<ListProductResponse> {
@@ -28,7 +29,7 @@ export const ProductApis = {
     return apiPut(`/products/${request.id}`, request);
   },
   postProduct(request: UpsertProductModel): Promise<Product> {
-    return apiPut(`/products/`, request);
+    return apiPost(`/products`, request);
   },
 
   /**
