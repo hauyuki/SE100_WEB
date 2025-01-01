@@ -1,17 +1,13 @@
 import React from "react";
 import { UserCircleIcon } from "@heroicons/react/24/outline";
+import { useAuthContext } from "../../contexts/AuthContext";
 
 interface HeaderProps {
   currentPath?: string;
-  userName?: string;
-  userRole?: string;
 }
 
-const Header: React.FC<HeaderProps> = ({
-  currentPath = "dashboard",
-  userName = "Bích Huyền",
-  userRole = "Nhân viên",
-}) => {
+const Header: React.FC<HeaderProps> = ({ currentPath = "dashboard" }) => {
+  const { user } = useAuthContext();
   // Convert path to title (first letter uppercase)
   const getTitle = (path: string) => {
     // Admin routes
@@ -60,8 +56,10 @@ const Header: React.FC<HeaderProps> = ({
       {/* Right side - User info */}
       <div className="flex items-center gap-3">
         <div className="text-right">
-          <p className="font-medium text-gray-800">{userName}</p>
-          <p className="text-sm text-gray-500">{userRole}</p>
+          <p className="font-medium text-gray-800">{user?.name}</p>
+          <p className="text-sm text-gray-500">
+            {user?.role === "EMPLOYEE_ROLE" ? "Nhân viên" : "Quản lý"}
+          </p>
         </div>
         <div className="h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center">
           <UserCircleIcon className="h-8 w-8 text-gray-400" />

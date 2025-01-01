@@ -22,6 +22,8 @@ export const ShipmentRequestSchema = z.object({
     message: "Invalid date format",
   }), // ISO 8601 format
   carrier: z.string(),
+  toLocation: z.string(),
+  fromLocation: z.string(),
   employeeId: z.number().int(),
 });
 
@@ -117,6 +119,12 @@ export const UpsertProductModelSchema = z.object({
     )
     .nonempty("At least one tag ID is required"), // Tag IDs must be an array of positive numbers and cannot be empty
 });
+export const UpsertTagModelSchema = z.object({
+  id: z.number().optional(), // Optional ID field
+  name: z.string().min(1, "Tag name is required"), // Name is required and cannot be empty
+  description: z.string().min(1, "Tag description is required"), // Name is required and cannot be empty
+  areaId: z.coerce.number().int().min(0, "Must select area"), // Market price must be a non-negative number
+});
 const OutboundReportItemSchema = z.object({
   quantity: z.number().min(1, "Số lượng phải lớn hơn 0"), // Quantity must be greater than 0
   unitPrice: z.number().min(0, "Đơn giá không thể nhỏ hơn 0"),
@@ -128,4 +136,16 @@ export const OutboundReportRequestSchema = z.object({
   }), // Date should be a valid ISO string
   shipment: ShipmentRequestSchema, // Nested shipment schema
   items: z.array(OutboundReportItemSchema).min(1, "Cần ít nhất một sản phẩm"), // Ensure at least one item is provided
+});
+export const UpdateShipmentSchema = z.object({
+  type: z.string(),
+  date: z.string().refine((val) => !isNaN(Date.parse(val)), {
+    message: "Invalid date format",
+  }), // ISO 8601 format
+  completedDate: z.string().optional(), // ISO 8601 format
+  carrier: z.string(),
+  status: z.string(),
+  employeeId: z.number().int(),
+  fromPosition: z.string().optional(),
+  toPosition: z.string().optional(),
 });

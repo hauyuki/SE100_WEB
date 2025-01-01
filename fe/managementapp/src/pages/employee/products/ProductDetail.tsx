@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeftIcon, PencilIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import productImage1 from "../../../assets/images/itempic.png";
-import { useGetProductDetail } from "../../../hooks/products";
+import { useDeleteProduct, useGetProductDetail } from "../../../hooks/products";
 import EditProductForm from "../../admin/products/component/EditProductForm";
 
 const ProductDetail = () => {

@@ -1,7 +1,7 @@
 import { FaTimes, FaPlus } from "react-icons/fa"; // Assuming these are imported for icons
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { InboundReportRequest } from "../models";
 import { InboundReportRequestSchema } from "../schemas/auth";
 import { useGetProducts } from "../hooks/products";
@@ -25,11 +25,17 @@ const InboundReportForm = ({
       shipment: {
         date: "",
         carrier: "",
-        employeeId: user?.id ?? 1, // Adjust if necessary
+        fromLocation: "",
+        toLocation: "",
+        employeeId: user?.id ?? 2, // Adjust if necessary
       },
       items: [], // Initially no items
     },
   });
+  // useEffect(() => {
+  //   setValue("shipment.employeeId", user?.id ?? 2);
+  // }, [user]);
+
   const { mutate: addInboundReport, isPending } = usePostInboundReports();
 
   const { data: productDatas } = useGetProducts();
@@ -44,7 +50,6 @@ const InboundReportForm = ({
   } = form;
   console.log(form.formState.errors);
   const items = watch("items"); // Watching the items array to dynamically add products
-
   const handleAddProduct = () => {
     const newItem = {
       quantity: 0,
@@ -59,7 +64,6 @@ const InboundReportForm = ({
     // Add the new item to the items array
     setValue("items", [...items, newItem]);
   };
-
   const onSubmit = (data: InboundReportRequest) => {
     console.log("Form Data:", data);
     addInboundReport(
@@ -123,8 +127,43 @@ const InboundReportForm = ({
                 </p>
               )}
             </div>
+          </div>{" "}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Vận chuyển từ
+              </label>
+              <input
+                type="text"
+                {...register("shipment.fromLocation")}
+                className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                required
+                placeholder="Vận chuyển từ"
+              />
+              {errors.shipment?.fromLocation && (
+                <p className="text-red-500 text-sm">
+                  {errors.shipment.fromLocation.message}
+                </p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Vận chuyển đến
+              </label>
+              <input
+                type="text"
+                {...register("shipment.toLocation")}
+                className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                required
+                placeholder="Vận chuyển đến"
+              />
+              {errors.shipment?.toLocation && (
+                <p className="text-red-500 text-sm">
+                  {errors.shipment.toLocation.message}
+                </p>
+              )}
+            </div>
           </div>
-
           {/* Products Section */}
           <div className="space-y-4">
             <div className="flex justify-between items-center">
@@ -241,7 +280,6 @@ const InboundReportForm = ({
               </div>
             ))}
           </div>
-
           <div className="flex justify-end">
             <ButtonPrimary
               type="submit"

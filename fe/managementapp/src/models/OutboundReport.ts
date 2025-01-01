@@ -8,6 +8,11 @@ export type ShipmentRequest = {
   date: string; // ISO 8601 format date
   carrier: string;
   employeeId: number;
+  fromLocation: string;
+  toLocation: string;
+  type: string;
+  status: string;
+  completedDate: string;
 };
 
 // Define the ItemRequest type (same as inbound)
@@ -40,7 +45,7 @@ export type OutboundReport = {
   id: number;
   date: string; // ISO date for the report
   quantity: number; // Total quantity of items
-  price: number; // Total price of the shipped items
+  totalPrice: number; // Total price of the shipped items
   shipment: Shipment; // Shipment object
   items: OutboundReportItem[]; // Array of items that were shipped
 };

@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ProductDetail, UpsertProductModel } from "../../../../models/Product";
 import { UpsertProductModelSchema } from "../../../../schemas/auth";
-import { usePostProducts } from "../../../../hooks/products";
+import { usePostProducts, useUpdateProduct } from "../../../../hooks/products";
 import { useGetCategories } from "../../../../hooks/categories";
 import { useGetCompanies } from "../../../../hooks/companies";
 import { useGetTags } from "../../../../hooks/tags";
@@ -45,7 +45,7 @@ const EditProductForm = ({
     setValue,
     watch,
   } = form;
-  const { mutate: addProduct, isPending } = usePostProducts();
+  const { mutate: addProduct, isPending } = useUpdateProduct();
   const { data: categories } = useGetCategories();
   const { data: companies } = useGetCompanies();
   const { data: tags } = useGetTags();
@@ -71,7 +71,7 @@ const EditProductForm = ({
   }, [selectedTags]);
   const onSubmit = (data: UpsertProductModel) => {
     addProduct(
-      { ...data, tagIds: selectedTags },
+      { id: product.id, ...data, tagIds: selectedTags },
       {
         onSuccess: () => {
           console.log("Product added successfully");
@@ -246,7 +246,7 @@ const EditProductForm = ({
               </label>
               <div className="flex flex-wrap gap-2 mb-4">
                 {/* Display Selected Tags as Chips */}
-                {selectedTags.length > 0 ? (
+                {selectedTags?.length > 0 ? (
                   selectedTags.map((tagId) => {
                     const tag = tags?.find((t) => t.id === tagId);
                     return (

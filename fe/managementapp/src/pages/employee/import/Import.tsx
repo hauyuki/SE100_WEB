@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import { FaCalendarAlt, FaPlus } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import ImportTabs from "./components/ImportTabs";
-import UpdateImportForm from "./components/UpdateImportForm";
+import UpdateImportForm from "./components/UpdateShipmentForm";
 import InboundReportForm from "../../../components/InboundReportForm";
 import { useGetInboundReports } from "../../../hooks/inboundReports";
 import AddProductForm from "../../admin/products/component/AddProductForm";
-
+import { InboundReport } from "../../../models";
 interface Product {
   id: string;
   name: string;
@@ -31,10 +31,9 @@ const Import = () => {
   const [endDate, setEndDate] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [showUpdateForm, setShowUpdateForm] = useState(false);
-  const [selectedImport, setSelectedImport] = useState<{
-    orderId: string;
-    status: string;
-  } | null>(null);
+  const [selectedImport, setSelectedImport] = useState<InboundReport | null>(
+    null
+  );
   const [formData, setFormData] = useState<FormData>({
     orderId: "",
     shipper: "",
@@ -123,29 +122,27 @@ const Import = () => {
     }).format(value);
   };
 
-  const filteredData = data
+  const filteredData = inboundData?.data
     .filter(
       (item) =>
-        item.orderId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.shipper.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.notes.toLowerCase().includes(searchQuery.toLowerCase())
+        item.shipment.carrier
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        item.shipment.status.toLowerCase().includes(searchQuery.toLowerCase())
     )
     .sort((a, b) => {
       if (selectedValue === "asc") {
-        return a.totalValue - b.totalValue;
+        return a.price - b.price;
       } else if (selectedValue === "desc") {
-        return b.totalValue - a.totalValue;
+        return b.price - a.price;
       }
       return 0;
     });
 
   const handleEdit = (id: number) => {
-    const itemToEdit = data.find((item) => item.id === id);
+    const itemToEdit = inboundData?.data.find((item) => item.id === id);
     if (itemToEdit) {
-      setSelectedImport({
-        orderId: itemToEdit.orderId,
-        status: itemToEdit.status,
-      });
+      setSelectedImport(itemToEdit);
       setShowUpdateForm(true);
     }
   };
@@ -154,13 +151,6 @@ const Import = () => {
     e.preventDefault();
     if (!selectedImport) return;
 
-    setData((prev) =>
-      prev.map((item) =>
-        item.orderId === selectedImport.orderId
-          ? { ...item, status: selectedImport.status }
-          : item
-      )
-    );
     setShowUpdateForm(false);
     setSelectedImport(null);
   };
@@ -246,10 +236,10 @@ const Import = () => {
           onSubmit={handleSubmit}
           onChange={handleInputChange}
         /> */}
-        {/* <InboundReportForm
+        <InboundReportForm
           showForm={showForm}
           onClose={() => setShowForm(false)}
-        /> */}
+        />
         {/* <AddProductForm
           showForm={showForm}
           onClose={() => setShowForm(false)}
@@ -262,8 +252,6 @@ const Import = () => {
               setShowUpdateForm(false);
               setSelectedImport(null);
             }}
-            onSubmit={handleUpdateSubmit}
-            onChange={handleUpdateChange}
           />
         )}
 
@@ -302,18 +290,22 @@ const Import = () => {
                   </td>
                   <td className="px-6 py-4">{item.shipment.carrier}</td>
                   <td className="px-6 py-4 text-center">
-                    {item.shipment.date.toISOString()}
+                    {item.shipment.date.toDateString()}
                   </td>
                   <td className="px-6 py-4 text-center">
-                    {item.shipment.status || "-"}
+                    {item.shipment.completedDate
+                      ? item.shipment.completedDate.toDateString()
+                      : "Pending"}
                   </td>
                   <td className="px-6 py-4 text-center">
                     <span
                       className={`inline-flex items-center justify-center px-3 py-1 text-sm font-medium rounded-full ${
-                        item.shipment.status === "Vận chuyển thành công"
+                        item.shipment.status === "COMPLETED"
                           ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20"
-                          : item.shipment.status === "Đang vận chuyển"
+                          : item.shipment.status === "IN_PROGRESS"
                           ? "bg-amber-50 text-amber-700 ring-1 ring-amber-600/20"
+                          : item.shipment.status === "PENDING"
+                          ? "bg-blue-50 text-blue-700 ring-1 "
                           : "bg-rose-50 text-rose-700 ring-1 ring-rose-600/20"
                       }`}
                     >

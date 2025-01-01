@@ -5,6 +5,7 @@ import { Product } from "../../../models/Product";
 import { useGetProducts } from "../../../hooks/products";
 import AddProductForm from "../../admin/products/component/AddProductForm";
 import { FaPlus } from "react-icons/fa";
+import { useGetStatistics } from "../../../hooks/statistics";
 
 const ProductPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -15,6 +16,7 @@ const ProductPage = () => {
   const [sortQuantity, setSortQuantity] = useState<"asc" | "desc" | "">("");
   const productsPerPage = 10;
   const navigate = useNavigate();
+  const { data: statistic } = useGetStatistics();
 
   const {
     data: products,
@@ -22,7 +24,6 @@ const ProductPage = () => {
     isError: error,
   } = useGetProducts();
   const [showForm, setShowForm] = useState(false);
-
   // Get unique categories, companies, and storage areas for filters
   const categories = useMemo(() => {
     if (!products?.productList) return [];
@@ -100,7 +101,12 @@ const ProductPage = () => {
     else if (sortQuantity === "asc") setSortQuantity("desc");
     else setSortQuantity("");
   };
-
+  const getQuantity = (id: number): number => {
+    let item = statistic?.items.find((item) => item.product.id === id);
+    if (item) {
+      return item.quantity;
+    } else return 0;
+  };
   const pageNumbers = [];
   for (let i = 1; i <= totalPages; i++) {
     pageNumbers.push(i);
@@ -251,15 +257,15 @@ const ProductPage = () => {
                     </td>
                     <td
                       className={`px-6 py-4 whitespace-nowrap text-sm ${
-                        product.quantity <= 10
+                        getQuantity(product.id) <= product.minQuantity
                           ? "text-red-500"
                           : "text-gray-900"
                       }`}
                     >
-                      {product.quantity}
+                      {getQuantity(product.id)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {product.storageArea}
+                      {product.tags?.[0]?.area.name ?? "A1"}
                     </td>
                   </tr>
                 ))}

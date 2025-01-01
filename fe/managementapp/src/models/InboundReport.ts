@@ -6,6 +6,11 @@ export type ShipmentRequest = {
   date: string; // ISO 8601 format date
   carrier: string;
   employeeId: number;
+  fromLocation: string;
+  toLocation: string;
+  type: string;
+  status: string;
+  completedDate: string;
 };
 
 // Define the Item export type

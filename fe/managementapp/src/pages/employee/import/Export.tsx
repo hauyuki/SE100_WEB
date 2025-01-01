@@ -298,11 +298,11 @@ const Export = () => {
                     </Link>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    {formatCurrency(item.price)}
+                    {formatCurrency(item.totalPrice)}
                   </td>
                   <td className="px-6 py-4">{item.shipment.carrier}</td>
                   <td className="px-6 py-4 text-center">
-                    {new Date(item.shipment.date).toString()}
+                    {new Date(item.shipment.date).toDateString()}
                   </td>
                   <td className="px-6 py-4 text-center">
                     {/* {item.completionDate || "-"} */}
