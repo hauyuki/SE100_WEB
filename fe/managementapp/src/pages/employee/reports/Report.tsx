@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   LineChart,
   Line,
@@ -13,6 +13,15 @@ import {
   ChevronDownIcon,
   ArrowDownTrayIcon,
 } from "@heroicons/react/24/outline";
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
+
+interface ReportItem {
+  id: string;
+  title: string;
+  type: string;
+  createdDate: string;
+}
 
 const Report = () => {
   const navigate = useNavigate();
@@ -43,36 +52,53 @@ const Report = () => {
 
   // Sample data for the line chart
   const chartData = [
-    { day: "Wed", nhap: 10, xuat: 25 },
-    { day: "Thu", nhap: 15, xuat: 20 },
-    { day: "Fri", nhap: 20, xuat: 10 },
-    { day: "Sat", nhap: 25, xuat: 15 },
-    { day: "Sun", nhap: 22, xuat: 20 },
-    { day: "Mon", nhap: 18, xuat: 30 },
-    { day: "Tue", nhap: 5, xuat: 35 },
+    { day: "Wed", nhap: 1.5, xuat: 2.5 },
+    { day: "Thu", nhap: 1.8, xuat: 2.0 },
+    { day: "Fri", nhap: 2.0, xuat: 1.8 },
+    { day: "Sat", nhap: 2.5, xuat: 1.5 },
+    { day: "Sun", nhap: 2.2, xuat: 2.0 },
+    { day: "Mon", nhap: 1.8, xuat: 3.0 },
+    { day: "Tue", nhap: 0.5, xuat: 3.5 },
   ];
 
-  // Sample data for the reports table
-  const reports = [
+  // Mock data - replace with actual API call
+  const reports: ReportItem[] = [
     {
-      stt: 1,
-      name: "Báo cáo nhập xuất tháng 3/2024",
+      id: "BC001",
+      title: "Báo cáo nhập xuất tháng 3/2024",
       type: "Báo cáo nhập xuất",
-      dateCreated: "15/03/2024",
+      createdDate: "2024-03-15",
     },
     {
-      stt: 2,
-      name: "Báo cáo tồn kho Q1/2024",
+      id: "BC002",
+      title: "Báo cáo tồn kho Q1/2024",
       type: "Báo cáo tồn kho",
-      dateCreated: "20/03/2024",
+      createdDate: "2024-03-20",
     },
     {
-      stt: 3,
-      name: "Báo cáo doanh thu Q1/2024",
+      id: "BC003",
+      title: "Báo cáo doanh thu Q1/2024",
       type: "Báo cáo doanh thu",
-      dateCreated: "25/03/2024",
+      createdDate: "2024-03-25",
     },
   ];
+
+  const handleRowClick = (id: string) => {
+    navigate(`/report/${id}`);
+  };
+
+  const handleDownload = async (id: string, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent row click when clicking download button
+
+    // In a real application, you would:
+    // 1. Fetch the report data from the API
+    // 2. Generate the PDF using the data
+    // For now, we'll create a simple PDF
+
+    const pdf = new jsPDF();
+    pdf.text(`Báo cáo ${id}`, 20, 20);
+    pdf.save(`report-${id}.pdf`);
+  };
 
   return (
     <div className="p-6">
@@ -189,66 +215,68 @@ const Report = () => {
       </div>
 
       {/* Reports Table Section */}
-      <div className="bg-white rounded-lg p-6">
+      <div className="bg-white rounded-lg shadow p-6">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg font-medium">Danh sách báo cáo</h2>
-          <button
-            onClick={() => navigate("/report/generate")}
-            className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
+          <Link
+            to="/report/generate"
+            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
           >
             Tạo báo cáo
-          </button>
+          </Link>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  STT
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Tên báo cáo
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Loại báo cáo
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Ngày lập
-                </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
-                  Thao tác
-                </th>
+        <table className="min-w-full">
+          <thead>
+            <tr className="bg-gray-50">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                STT
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Tên báo cáo
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Loại báo cáo
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Ngày lập
+              </th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Thao tác
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {reports.map((report, index) => (
+              <tr
+                key={report.id}
+                onClick={() => handleRowClick(report.id)}
+                className="hover:bg-gray-50 cursor-pointer"
+              >
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {index + 1}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  {report.title}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {report.type}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {new Date(report.createdDate).toLocaleDateString("vi-VN")}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <button
+                    onClick={(e) => handleDownload(report.id, e)}
+                    className="text-indigo-600 hover:text-indigo-900"
+                  >
+                    <ArrowDownTrayIcon className="h-5 w-5" />
+                  </button>
+                </td>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {reports.map((report) => (
-                <tr key={report.stt} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {report.stt}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-indigo-600">
-                    {report.name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {report.type}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {report.dateCreated}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
-                    <button
-                      className="text-gray-600 hover:text-indigo-600 transition-colors"
-                      title="Tải xuống"
-                    >
-                      <ArrowDownTrayIcon className="h-5 w-5" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
