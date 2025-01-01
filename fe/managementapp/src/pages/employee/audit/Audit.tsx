@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import CreateAuditForm from "./components/CreateAuditForm";
+import { useNavigate } from "react-router-dom";
 
 interface AuditProduct {
   sku: string;
@@ -20,6 +21,7 @@ interface AuditRecord {
 }
 
 const Audit = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [sortValue, setSortValue] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -29,42 +31,42 @@ const Audit = () => {
     {
       id: 1,
       auditId: "KT001",
-      createdDate: "16/01/2021",
-      createdBy: "Sarah Hill",
-      totalDeficit: 42,
-      notes: "Postman",
+      createdDate: "2024-03-15",
+      createdBy: "Bích Huyền",
+      totalDeficit: 1200000,
+      notes: "Kiểm kê định kỳ tháng 3/2024",
     },
     {
       id: 2,
-      auditId: "KT001",
-      createdDate: "22/01/2022",
-      createdBy: "Stephanie Johnson",
-      totalDeficit: 63,
-      notes: "Account Manager",
+      auditId: "KT002",
+      createdDate: "2024-03-10",
+      createdBy: "Bích Huyền",
+      totalDeficit: 850000,
+      notes: "Kiểm kê đột xuất",
     },
     {
       id: 3,
-      auditId: "KT001",
-      createdDate: "08/02/2021",
-      createdBy: "Jacob Jackson",
-      totalDeficit: 33,
-      notes: "Industrial Designer",
+      auditId: "KT003",
+      createdDate: "2024-03-05",
+      createdBy: "Bích Huyền",
+      totalDeficit: 950000,
+      notes: "Kiểm kê cuối tháng 2/2024",
     },
     {
       id: 4,
-      auditId: "KT001",
-      createdDate: "05/11/2024",
-      createdBy: "Daniel Jackson",
-      totalDeficit: 33,
-      notes: "Clinical Psychologist",
+      auditId: "KT004",
+      createdDate: "2024-02-28",
+      createdBy: "Bích Huyền",
+      totalDeficit: 750000,
+      notes: "Kiểm kê theo yêu cầu",
     },
     {
       id: 5,
-      auditId: "KT001",
-      createdDate: "06/02/2020",
-      createdBy: "William Davis",
-      totalDeficit: 56,
-      notes: "Public Health Inspector",
+      auditId: "KT005",
+      createdDate: "2024-02-25",
+      createdBy: "Bích Huyền",
+      totalDeficit: 1100000,
+      notes: "Kiểm kê định kỳ tháng 2/2024",
     },
   ]);
 
@@ -83,6 +85,17 @@ const Audit = () => {
       }
       return 0;
     });
+
+  const handleRowClick = (id: string) => {
+    navigate(`/audit/${id}`);
+  };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(value);
+  };
 
   return (
     <div className="p-6">
@@ -153,7 +166,8 @@ const Audit = () => {
               {filteredRecords.map((record) => (
                 <tr
                   key={record.id}
-                  className="border-b border-gray-200 hover:bg-gray-100"
+                  className="border-b border-gray-200 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => handleRowClick(record.auditId)}
                 >
                   <td className="px-6 py-4">{record.id}</td>
                   <td className="px-6 py-4 text-indigo-600">
@@ -161,7 +175,9 @@ const Audit = () => {
                   </td>
                   <td className="px-6 py-4">{record.createdDate}</td>
                   <td className="px-6 py-4">{record.createdBy}</td>
-                  <td className="px-6 py-4">{record.totalDeficit}đ</td>
+                  <td className="px-6 py-4">
+                    {formatCurrency(record.totalDeficit)}
+                  </td>
                   <td className="px-6 py-4">{record.notes}</td>
                   <td className="px-6 py-4 text-center">
                     <button className="text-indigo-600 hover:text-indigo-900">
