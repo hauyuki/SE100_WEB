@@ -5,7 +5,3 @@ export interface Statistic {
   date: string;
   items: StockReport[];
 }
-
-export interface ListStatisticResponse {
-  statistics: Statistic[];
-}

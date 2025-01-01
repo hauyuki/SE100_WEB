@@ -13,7 +13,7 @@ export const TagApis = {
   },
 
   // Get all tags
-  getAllTags(): Promise<ListTagResponse> {
+  getAllTags(): Promise<Tag[]> {
     return apiGet("/tags/list");
   },
 

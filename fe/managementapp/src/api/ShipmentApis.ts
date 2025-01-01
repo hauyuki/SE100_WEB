@@ -9,7 +9,7 @@ import { apiGet, apiPost, apiPut } from "../utils/ApiRequest";
 export const ShipmentApis = {
   // Get all shipments
   getAllShipments(): Promise<ListShipmentResponse> {
-    return apiGet("/shipments/list");
+    return apiPost("/shipments/list", {});
   },
 
   // Create new shipment

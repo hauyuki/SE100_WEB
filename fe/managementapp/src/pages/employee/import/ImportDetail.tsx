@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ChevronLeftIcon, PencilIcon } from "@heroicons/react/24/outline";
-import UpdateImportForm from "./components/UpdateImportForm";
+import UpdateImportForm from "./components/UpdateShipmentForm";
 
 interface Product {
   id: string;
@@ -246,7 +246,7 @@ const ImportDetail = () => {
         </div>
       </div>
 
-      <UpdateImportForm
+      {/* <UpdateImportForm
         showForm={showUpdateForm}
         importData={{
           orderId: currentData.orderId,
@@ -258,7 +258,7 @@ const ImportDetail = () => {
         }}
         onSubmit={handleUpdate}
         onChange={handleUpdateChange}
-      />
+      /> */}
     </div>
   );
 };

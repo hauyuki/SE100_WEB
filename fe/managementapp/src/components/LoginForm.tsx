@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Cookies from "js-cookie";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuthContext } from "../contexts/AuthContext";
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -26,9 +27,10 @@ const LoginForm = () => {
     formState: { errors },
   } = form;
   const queryClient = useQueryClient();
-
+  const { setUserId } = useAuthContext();
   const onLoginSuccess = (res: AuthResponse) => {
     Cookies.set("token", res.accessToken, { expires: 7 });
+    setUserId(res.id);
     queryClient.invalidateQueries({
       queryKey: [USER_PROFILE],
     });
