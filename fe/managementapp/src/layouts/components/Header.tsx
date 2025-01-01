@@ -14,25 +14,40 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   // Convert path to title (first letter uppercase)
   const getTitle = (path: string) => {
+    // Admin routes
+    if (path.startsWith("admin/")) {
+      const adminPath = path.replace("admin/", "");
+
+      if (adminPath === "dashboard") return "Dashboard";
+      if (adminPath === "products") return "Quản lý sản phẩm";
+      if (
+        adminPath.startsWith("import") ||
+        adminPath.startsWith("export") ||
+        adminPath === "shipping"
+      )
+        return "Quản lý xuất nhập hàng";
+      if (adminPath.startsWith("reports")) return "Báo cáo";
+      if (adminPath === "audit") return "Kiểm toán";
+      if (adminPath === "tags") return "Quản lý tag";
+      if (adminPath === "accounts") return "Quản lý tài khoản";
+      if (adminPath === "settings") return "Cài đặt";
+    }
+
+    // Employee routes
+    if (path === "dashboard") return "Dashboard";
     if (path === "product") return "Quản lý sản phẩm";
+    if (path.startsWith("import/"))
+      return `Chi tiết phiếu nhập #${path.split("/")[1]}`;
+    if (path.startsWith("export/"))
+      return `Chi tiết phiếu xuất #${path.split("/")[1]}`;
     if (path === "import" || path === "export" || path === "shipping")
       return "Quản lý xuất nhập hàng";
-    if (path.startsWith("product/")) {
-      const sku = path.split("/")[1];
-      return `Chi tiết sản phẩm ${sku}`;
-    }
-    if (path.startsWith("import/")) {
-      const id = path.split("/")[1];
-      return `Chi tiết phiếu nhập #IM${id.padStart(3, "0")}`;
-    }
-    if (path.startsWith("export/")) {
-      const id = path.split("/")[1];
-      return `Chi tiết phiếu xuất #EX${id.padStart(3, "0")}`;
-    }
-    if (path.startsWith("import") || path.startsWith("export")) {
-      return "Quản lý xuất nhập hàng";
-    }
-    return path.charAt(0).toUpperCase() + path.slice(1);
+    if (path === "report") return "Báo cáo";
+    if (path === "report/generate") return "Tạo báo cáo";
+    if (path === "audit") return "Kiểm toán";
+    if (path === "tag") return "Tag";
+
+    return path;
   };
 
   return (

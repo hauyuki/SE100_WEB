@@ -17,6 +17,29 @@ import {
 const Report = () => {
   const navigate = useNavigate();
   const [timeFilter, setTimeFilter] = useState("7 ngày qua");
+  const [showTimeFilterDropdown, setShowTimeFilterDropdown] = useState(false);
+  const [showCustomDateRange, setShowCustomDateRange] = useState(false);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  const timeFilterOptions = ["7 ngày qua", "30 ngày qua", "Tùy chọn"];
+
+  const handleTimeFilterSelect = (option: string) => {
+    setTimeFilter(option);
+    setShowTimeFilterDropdown(false);
+    if (option === "Tùy chọn") {
+      setShowCustomDateRange(true);
+    } else {
+      setShowCustomDateRange(false);
+    }
+  };
+
+  const handleCustomDateSubmit = () => {
+    if (startDate && endDate) {
+      setTimeFilter(`${startDate} - ${endDate}`);
+      setShowCustomDateRange(false);
+    }
+  };
 
   // Sample data for the line chart
   const chartData = [
@@ -33,24 +56,21 @@ const Report = () => {
   const reports = [
     {
       stt: 1,
-      name: "Content",
-      type: "Content",
-      dateCreated: "Content",
-      createdBy: "Content",
+      name: "Báo cáo nhập xuất tháng 3/2024",
+      type: "Báo cáo nhập xuất",
+      dateCreated: "15/03/2024",
     },
     {
       stt: 2,
-      name: "Content",
-      type: "Content",
-      dateCreated: "Content",
-      createdBy: "Content",
+      name: "Báo cáo tồn kho Q1/2024",
+      type: "Báo cáo tồn kho",
+      dateCreated: "20/03/2024",
     },
     {
       stt: 3,
-      name: "Content",
-      type: "Content",
-      dateCreated: "Content",
-      createdBy: "Content",
+      name: "Báo cáo doanh thu Q1/2024",
+      type: "Báo cáo doanh thu",
+      dateCreated: "25/03/2024",
     },
   ];
 
@@ -61,10 +81,72 @@ const Report = () => {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg font-medium">Thống kê Nhập/Xuất</h2>
           <div className="relative">
-            <button className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-gray-50">
+            <button
+              className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-gray-50"
+              onClick={() => setShowTimeFilterDropdown(!showTimeFilterDropdown)}
+            >
               {timeFilter}
               <ChevronDownIcon className="h-4 w-4" />
             </button>
+
+            {/* Time Filter Dropdown */}
+            {showTimeFilterDropdown && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border z-10">
+                {timeFilterOptions.map((option) => (
+                  <button
+                    key={option}
+                    className="block w-full text-left px-4 py-2 hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg"
+                    onClick={() => handleTimeFilterSelect(option)}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Custom Date Range Popup */}
+            {showCustomDateRange && (
+              <div className="absolute right-0 mt-2 p-4 bg-white rounded-lg shadow-lg border z-10">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Từ ngày
+                    </label>
+                    <input
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Đến ngày
+                    </label>
+                    <input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <button
+                      className="px-3 py-2 text-sm border rounded-md hover:bg-gray-50"
+                      onClick={() => setShowCustomDateRange(false)}
+                    >
+                      Hủy
+                    </button>
+                    <button
+                      className="px-3 py-2 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                      onClick={handleCustomDateSubmit}
+                    >
+                      Áp dụng
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -112,62 +194,61 @@ const Report = () => {
           <h2 className="text-lg font-medium">Danh sách báo cáo</h2>
           <button
             onClick={() => navigate("/report/generate")}
-            className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90"
+            className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
           >
             Tạo báo cáo
           </button>
         </div>
 
-        <table className="min-w-full">
-          <thead>
-            <tr className="bg-gray-50">
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                STT
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Tên báo cáo
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Loại báo cáo
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Ngày lập
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Người lập
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Thao tác
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {reports.map((report) => (
-              <tr key={report.stt} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {report.stt}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-primary cursor-pointer hover:underline">
-                  {report.name}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {report.type}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {report.dateCreated}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {report.createdBy}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  <button className="text-gray-600 hover:text-primary">
-                    <ArrowDownTrayIcon className="h-5 w-5" />
-                  </button>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="min-w-full">
+            <thead>
+              <tr className="bg-gray-50">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  STT
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Tên báo cáo
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Loại báo cáo
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Ngày lập
+                </th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                  Thao tác
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {reports.map((report) => (
+                <tr key={report.stt} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {report.stt}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-indigo-600">
+                    {report.name}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {report.type}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {report.dateCreated}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                    <button
+                      className="text-gray-600 hover:text-indigo-600 transition-colors"
+                      title="Tải xuống"
+                    >
+                      <ArrowDownTrayIcon className="h-5 w-5" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
