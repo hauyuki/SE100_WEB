@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
+import Loading from "../../../components/Loading";
 
 interface AuditProduct {
   sku: string;
@@ -22,41 +23,61 @@ interface AuditDetail {
 
 const AuditDetail = () => {
   const { id } = useParams();
+  const [loading, setLoading] = useState(true);
+  const [auditData, setAuditData] = useState<AuditDetail | null>(null);
 
-  // Mock data - replace with actual API call
-  const auditData: AuditDetail = {
-    id: "KT001",
-    createdDate: "2024-03-15",
-    createdBy: "Bích Huyền",
-    totalDeficit: 1200000,
-    notes: "Kiểm kê định kỳ tháng 3/2024",
-    products: [
-      {
-        sku: "SKU001",
-        name: "Cell Fusion C Toning Sunscreen 100",
-        stockQuantity: 50,
-        actualQuantity: 48,
-        deficit: 2,
-        price: 300000,
-      },
-      {
-        sku: "SKU002",
-        name: "La Roche-Posay Anthelios UVMUNE 400 Oil Control",
-        stockQuantity: 60,
-        actualQuantity: 57,
-        deficit: 3,
-        price: 200000,
-      },
-      {
-        sku: "SKU003",
-        name: "Vichy Capital Soleil Dry Touch Face Fluid SPF50",
-        stockQuantity: 40,
-        actualQuantity: 38,
-        deficit: 2,
-        price: 150000,
-      },
-    ],
-  };
+  useEffect(() => {
+    // Simulate API call
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        // In a real app, this would be an API call
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
+
+        // Mock data
+        const data: AuditDetail = {
+          id: "KT001",
+          createdDate: "2024-03-15",
+          createdBy: "Bích Huyền",
+          totalDeficit: 1200000,
+          notes: "Kiểm kê định kỳ tháng 3/2024",
+          products: [
+            {
+              sku: "SKU001",
+              name: "Cell Fusion C Toning Sunscreen 100",
+              stockQuantity: 50,
+              actualQuantity: 48,
+              deficit: 2,
+              price: 300000,
+            },
+            {
+              sku: "SKU002",
+              name: "La Roche-Posay Anthelios UVMUNE 400 Oil Control",
+              stockQuantity: 60,
+              actualQuantity: 57,
+              deficit: 3,
+              price: 200000,
+            },
+            {
+              sku: "SKU003",
+              name: "Vichy Capital Soleil Dry Touch Face Fluid SPF50",
+              stockQuantity: 40,
+              actualQuantity: 38,
+              deficit: 2,
+              price: 150000,
+            },
+          ],
+        };
+        setAuditData(data);
+      } catch (error) {
+        console.error("Error fetching audit data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [id]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -64,6 +85,18 @@ const AuditDetail = () => {
       currency: "VND",
     }).format(value);
   };
+
+  if (loading) {
+    return <Loading />;
+  }
+
+  if (!auditData) {
+    return (
+      <div className="p-6 text-center text-gray-500">
+        Không tìm thấy thông tin phiếu kiểm toán
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
