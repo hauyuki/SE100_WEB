@@ -28,9 +28,9 @@ const Dashboard = () => {
   // Sample data for pie chart
   const pieData = [
     { name: "Others", value: 35 },
-    { name: "Thực phẩm", value: 15 },
-    { name: "Hàng điện tử", value: 30 },
-    { name: "Đồ gia dụng", value: 20 },
+    { name: "Make up", value: 15 },
+    { name: "Hair care", value: 30 },
+    { name: "Fragrance", value: 20 },
   ];
 
   const COLORS = ["#4F46E5", "#F97316", "#F43F5E", "#EC4899"];
@@ -39,30 +39,30 @@ const Dashboard = () => {
   const products = [
     {
       stt: 1,
-      sku: "SKU1",
-      name: "Content",
-      brand: "Dior",
+      sku: "SKU001",
+      name: "Cell Fusion C Toning Sunscreen 100",
+      brand: "Cell Fusion",
       category: "Kem chống nắng",
       stock: 5,
-      price: "500.000",
+      price: "575.000",
     },
     {
       stt: 2,
-      sku: "SKU1",
-      name: "Content",
-      brand: "Dior",
+      sku: "SKU002",
+      name: "La Roche-Posay Anthelios UVMUNE 400 Oil Control",
+      brand: "Anthelios",
       category: "Kem chống nắng",
       stock: 6,
-      price: "500.000",
+      price: "560.000",
     },
     {
       stt: 3,
-      sku: "SKU1",
-      name: "Content",
-      brand: "Dior",
+      sku: "SKU003",
+      name: "Vichy Capital Soleil Dry Touch Face Fluid SPF50",
+      brand: "Oleil",
       category: "Kem chống nắng",
       stock: 6,
-      price: "500.000",
+      price: "560.000",
     },
   ];
 
