@@ -1,86 +1,133 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaTimes, FaPlus } from "react-icons/fa";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { InventoryCheckRequestSchema } from "../../../../schemas/auth";
+import {
+  InventoryCheckRequest,
+  InventoryCheckRequestItem,
+} from "../../../../models/InventoryCheck";
+import { useAuthContext } from "../../../../contexts/AuthContext";
+import { usePostInventoryChecks } from "../../../../hooks/inventoryChecks";
+import { useGetProducts } from "../../../../hooks/products";
+import { Product } from "../../../../models/Product";
+import ButtonPrimary from "../../../../components/Button/ButtonPrimary";
 
-interface AuditProduct {
-  sku: string;
-  name: string;
-  stockQuantity: number;
-  actualQuantity: number;
-  deficit: number;
-}
-
-interface CreateAuditFormProps {
-  showForm: boolean;
-  onClose: () => void;
-}
-
-const CreateAuditForm: React.FC<CreateAuditFormProps> = ({
-  showForm,
+const InventoryCheckForm = ({
   onClose,
+  showForm,
+}: {
+  onClose: () => void;
+  showForm: boolean;
 }) => {
-  const [products, setProducts] = useState<AuditProduct[]>([
-    {
-      sku: "",
-      name: "",
-      stockQuantity: 0,
-      actualQuantity: 0,
-      deficit: 0,
+  // Setup for the form
+  const { user } = useAuthContext();
+  useEffect(() => {
+    setValue("employeeId", user?.id ?? 2);
+  }, [user]);
+
+  const form = useForm<InventoryCheckRequest>({
+    resolver: zodResolver(InventoryCheckRequestSchema),
+    defaultValues: {
+      date: new Date().toISOString(),
+      name: "Bao cao", // Default name can be set to Bao cao or anything dynamic you want
+      employeeId: user?.id ?? 2,
+      items: [], // Initially no items
     },
-  ]);
+  });
 
-  // Sample SKU list (replace with actual data from API)
-  const sampleProducts = [
-    { sku: "SKU001", name: "Product A", stockQuantity: 100 },
-    { sku: "SKU002", name: "Product B", stockQuantity: 150 },
-    { sku: "SKU003", name: "Product C", stockQuantity: 200 },
-  ];
+  const { mutate: addInventoryCheckRequest, isPending } =
+    usePostInventoryChecks();
+  const { data: products } = useGetProducts();
+  const [stockDatas, setStockDatas] = useState<Product[]>([]);
 
-  const handleAddProduct = () => {
-    setProducts([
-      ...products,
-      {
-        sku: "",
-        name: "",
-        stockQuantity: 0,
-        actualQuantity: 0,
-        deficit: 0,
-      },
-    ]);
+  useEffect(() => {
+    let availableProducts =
+      products?.productList.filter((item) => item.quantity > 0) ?? [];
+    setStockDatas(availableProducts);
+  }, [products]);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    watch,
+  } = form;
+
+  const items = watch("items"); // Watching the items array to dynamically add products
+
+  const [currentItem, setCurrentItem] = useState<InventoryCheckRequestItem>({
+    productId: stockDatas.length > 0 ? stockDatas[0].id : 0,
+    loss: 0,
+  });
+
+  const [validationError, setValidationError] = useState<string>("");
+
+  useEffect(() => {
+    setCurrentItem({
+      ...currentItem,
+      productId: stockDatas.length > 0 ? stockDatas[0].id : 0,
+    });
+  }, [stockDatas]);
+
+  const handleItemChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setCurrentItem({
+      ...currentItem,
+      [name]: name === "loss" ? parseInt(value, 10) : parseInt(value, 10),
+    });
   };
 
   const handleRemoveProduct = (index: number) => {
-    const newProducts = products.filter((_, i) => i !== index);
-    setProducts(newProducts);
+    const updatedItems = items.filter((_, i) => i !== index);
+    setValue("items", updatedItems);
   };
 
-  const handleProductChange = (
-    index: number,
-    field: keyof AuditProduct,
-    value: string | number
-  ) => {
-    const newProducts = [...products];
-    const product = { ...newProducts[index] };
+  const addItem = () => {
+    const product = stockDatas.find((p) => p.id === currentItem.productId);
 
-    if (field === "sku") {
-      const selectedProduct = sampleProducts.find((p) => p.sku === value);
-      if (selectedProduct) {
-        product.sku = selectedProduct.sku;
-        product.name = selectedProduct.name;
-        product.stockQuantity = selectedProduct.stockQuantity;
-        product.deficit = 0;
-      }
-    } else if (field === "actualQuantity") {
-      product.actualQuantity = Number(value);
-      product.deficit =
-        (product.stockQuantity - product.actualQuantity) * 10000; // Example price per unit
+    if (!product) return;
+
+    // Validate loss quantity
+    if (currentItem.loss <= 0) {
+      setValidationError("Số lượng mất phải lớn hơn 0.");
+      return;
     }
 
-    newProducts[index] = product;
-    setProducts(newProducts);
+    if (currentItem.loss > product.quantity) {
+      setValidationError(
+        `Số lượng mất không thể lớn hơn số lượng tồn (${product.quantity}).`
+      );
+      return;
+    }
+
+    setValidationError(""); // Clear validation error if everything is correct
+
+    const updatedItems = [...items, currentItem];
+    setValue("items", updatedItems); // Update the form state with new items
+
+    setCurrentItem({
+      productId: stockDatas.length > 0 ? stockDatas[0].id : 0,
+      loss: 0,
+    }); // Reset current item with first product as default
   };
 
-  const calculateTotalDeficit = () => {
-    return products.reduce((sum, product) => sum + product.deficit, 0);
+  const onSubmit = (data: InventoryCheckRequest) => {
+    addInventoryCheckRequest(
+      { ...data },
+      {
+        onSuccess: () => {
+          console.log("Inventory check request created successfully.");
+          onClose();
+        },
+        onError: () => {
+          console.log("Error creating inventory check request.");
+        },
+      }
+    );
   };
 
   if (!showForm) return null;
@@ -89,7 +136,7 @@ const CreateAuditForm: React.FC<CreateAuditFormProps> = ({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-semibold">Tạo phiếu kiểm toán mới</h3>
+          <h3 className="text-xl font-semibold">Thêm Phiếu Kiểm Kê Kho</h3>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
@@ -97,41 +144,22 @@ const CreateAuditForm: React.FC<CreateAuditFormProps> = ({
             <FaTimes />
           </button>
         </div>
-
-        <form className="space-y-6">
-          <div className="grid grid-cols-3 gap-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Mã phiếu kiểm toán
+                Tên kiểm kê
               </label>
               <input
                 type="text"
-                value="KT002"
-                disabled
-                className="w-full border rounded-md px-4 py-2 bg-gray-50 text-gray-500"
+                {...register("name")}
+                className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                required
+                placeholder="Nhập tên báo cáo"
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Ngày tạo phiếu
-              </label>
-              <input
-                type="text"
-                value={new Date().toLocaleDateString("vi-VN")}
-                disabled
-                className="w-full border rounded-md px-4 py-2 bg-gray-50 text-gray-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Người tạo phiếu
-              </label>
-              <input
-                type="text"
-                value="Bích Huyền"
-                disabled
-                className="w-full border rounded-md px-4 py-2 bg-gray-50 text-gray-500"
-              />
+              {errors.name && (
+                <p className="text-red-500 text-sm">{errors.name.message}</p>
+              )}
             </div>
           </div>
 
@@ -139,111 +167,128 @@ const CreateAuditForm: React.FC<CreateAuditFormProps> = ({
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <h4 className="text-lg font-medium">Danh sách sản phẩm</h4>
-              <button
-                type="button"
-                onClick={handleAddProduct}
-                className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700"
-              >
-                <FaPlus className="w-4 h-4" />
-                Thêm sản phẩm
-              </button>
             </div>
+            {errors?.items && (
+              <p className="text-red-500 text-sm">{errors.items?.message}</p>
+            )}
+            {items.map((item, index) => (
+              <div key={index} className="border rounded-lg p-4 mb-4">
+                <div className="grid grid-cols-10 gap-4">
+                  <div className="col-span-9">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Sản phẩm
+                        </label>
+                        <select
+                          {...register(`items.${index}.productId` as const)}
+                          className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          disabled
+                        >
+                          {products?.productList.map((p) => (
+                            <option key={p.id} value={p.id}>
+                              {p.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
-            {products.map((product, index) => (
-              <div
-                key={index}
-                className="grid grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg"
-              >
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Sản phẩm
-                  </label>
-                  <select
-                    value={product.sku}
-                    onChange={(e) =>
-                      handleProductChange(index, "sku", e.target.value)
-                    }
-                    className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    required
-                  >
-                    <option value="">Chọn sản phẩm</option>
-                    {sampleProducts.map((p) => (
-                      <option key={p.sku} value={p.sku}>
-                        {p.sku} - {p.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Giá nhập
-                  </label>
-                  <input
-                    type="number"
-                    value={0}
-                    disabled
-                    className="w-full border rounded-md px-4 py-2 bg-gray-50 text-gray-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Số lượng
-                  </label>
-                  <input
-                    type="number"
-                    value={1}
-                    className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    required
-                    min="1"
-                  />
-                </div>
-                <div className="flex items-end">
-                  {products.length > 1 && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Số lượng mất
+                        </label>
+                        <input
+                          type="number"
+                          {...register(`items.${index}.loss` as const)}
+                          className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          min="1"
+                          disabled
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="col-span-1 mt-6 flex items-center justify-end">
                     <button
                       type="button"
                       onClick={() => handleRemoveProduct(index)}
-                      className="text-red-500 hover:text-red-700 p-2"
+                      className="p-2 rounded-md bg-red-50 hover:bg-red-100  text-red-600 hover:text-red-800 "
                     >
                       <FaTimes />
                     </button>
-                  )}
+                  </div>
                 </div>
               </div>
             ))}
+
+            {stockDatas.length > 0 && (
+              <div className="border rounded-lg p-4 mb-4">
+                <div className="grid grid-cols-10 gap-4">
+                  <div className="col-span-9">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Sản phẩm
+                        </label>
+                        <select
+                          name="productId"
+                          value={currentItem.productId}
+                          onChange={handleItemChange}
+                          className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        >
+                          {stockDatas?.map((product) => (
+                            <option key={product.id} value={product.id}>
+                              {product.name} - {product.quantity}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Số lượng mất
+                        </label>
+                        <input
+                          type="number"
+                          name="loss"
+                          value={currentItem.loss}
+                          onChange={handleItemChange}
+                          className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="col-span-1 flex items-center justify-end">
+                    <button
+                      type="button"
+                      onClick={addItem}
+                      className="p-2 rounded-md mt-5 bg-blue-50 hover:bg-blue-100  text-indigo-600 hover:text-indigo-700 "
+                    >
+                      <FaPlus className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Show Validation Error */}
+                {validationError && (
+                  <div className="text-red-500 text-sm mt-2">
+                    {validationError}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
-          {/* Total Section */}
-          <div className="flex justify-end items-center p-4 bg-gray-50 rounded-lg">
-            <span className="font-medium text-lg mr-4">Tổng hao hụt:</span>
-            <span className="text-xl font-semibold text-indigo-600">
-              {calculateTotalDeficit().toLocaleString("vi-VN")}đ
-            </span>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Ghi chú
-            </label>
-            <textarea
-              className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              rows={3}
-            />
-          </div>
-
-          <div className="flex justify-end space-x-4 mt-6">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 border rounded-md text-gray-600 hover:bg-gray-50"
-            >
-              Hủy
-            </button>
-            <button
+          <div className="flex justify-end">
+            <ButtonPrimary
               type="submit"
-              className="px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600"
+              disabled={isPending}
+              loading={isPending}
+              className="px-6 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none"
             >
-              Tạo
-            </button>
+              Lưu Phiếu Kiểm Kê
+            </ButtonPrimary>
           </div>
         </form>
       </div>
@@ -251,4 +296,4 @@ const CreateAuditForm: React.FC<CreateAuditFormProps> = ({
   );
 };
 
-export default CreateAuditForm;
+export default InventoryCheckForm;
