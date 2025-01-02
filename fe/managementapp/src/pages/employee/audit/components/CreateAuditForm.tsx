@@ -12,6 +12,7 @@ import { usePostInventoryChecks } from "../../../../hooks/inventoryChecks";
 import { useGetProducts } from "../../../../hooks/products";
 import { Product } from "../../../../models/Product";
 import ButtonPrimary from "../../../../components/Button/ButtonPrimary";
+import Snackbar from "../../../../components/Snackbar";
 
 const InventoryCheckForm = ({
   onClose,
@@ -25,6 +26,15 @@ const InventoryCheckForm = ({
   useEffect(() => {
     setValue("employeeId", user?.id ?? 2);
   }, [user]);
+  const [snackbar, setSnackbar] = useState<{
+    show: boolean;
+    message: string;
+    type: "success" | "error";
+  }>({
+    show: false,
+    message: "",
+    type: "success",
+  });
 
   const form = useForm<InventoryCheckRequest>({
     resolver: zodResolver(InventoryCheckRequestSchema),
@@ -61,6 +71,16 @@ const InventoryCheckForm = ({
     productId: stockDatas.length > 0 ? stockDatas[0].id : 0,
     loss: 0,
   });
+  const handleCloseSnackbar = () => {
+    setSnackbar((prev) => ({ ...prev, show: false }));
+  };
+  const handleCreateError = (error: string) => {
+    setSnackbar({
+      show: true,
+      message: error || "Tạo phiếu kiểm toán thất bại",
+      type: "error",
+    });
+  };
 
   const [validationError, setValidationError] = useState<string>("");
 
@@ -121,6 +141,12 @@ const InventoryCheckForm = ({
       {
         onSuccess: () => {
           console.log("Inventory check request created successfully.");
+          setSnackbar({
+            show: true,
+            message: "Tạo phiếu kiểm toán thành công",
+            type: "success",
+          });
+
           onClose();
         },
         onError: () => {
@@ -128,22 +154,6 @@ const InventoryCheckForm = ({
         },
       }
     );
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      // TODO: Implement API call
-      console.log("Form submitted:", {
-        products,
-        totalDeficit: calculateTotalDeficit(),
-      });
-      onClose();
-      onSuccess?.();
-    } catch (error: any) {
-      console.error("Error creating audit:", error);
-      onError?.(error.message || "Error creating audit");
-    }
   };
 
   if (!showForm) return null;
@@ -308,6 +318,12 @@ const InventoryCheckForm = ({
           </div>
         </form>
       </div>
+      <Snackbar
+        show={snackbar.show}
+        message={snackbar.message}
+        type={snackbar.type}
+        onClose={handleCloseSnackbar}
+      />
     </div>
   );
 };

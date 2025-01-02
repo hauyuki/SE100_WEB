@@ -7,6 +7,7 @@ import { useGetInventoryChecks } from "../../../hooks/inventoryChecks";
 import { useAuthContext } from "../../../contexts/AuthContext";
 import { Role } from "../../../models/Auth";
 import InventoryCheckForm from "./components/CreateAuditForm";
+import Snackbar from "../../../components/Snackbar";
 
 const Audit = () => {
   const navigate = useNavigate();
@@ -20,8 +21,6 @@ const Audit = () => {
     isError,
   } = useGetInventoryChecks();
   const { user } = useAuthContext();
-  const filteredRecords = inventoryChecks?.data;
-  const [auditRecords, setAuditRecords] = useState<AuditRecord[]>([]);
   const [snackbar, setSnackbar] = useState<{
     show: boolean;
     message: string;
@@ -38,11 +37,6 @@ const Audit = () => {
 
   const handleCreateSuccess = () => {
     setShowCreateForm(false);
-    setSnackbar({
-      show: true,
-      message: "Tạo phiếu kiểm toán thành công",
-      type: "success",
-    });
   };
 
   const handleCreateError = (error: string) => {
@@ -53,68 +47,7 @@ const Audit = () => {
     });
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        // Mock data
-        const data: AuditRecord[] = [
-          {
-            id: 1,
-            auditId: "KT001",
-            createdDate: "2024-03-15",
-            createdBy: "Bích Huyền",
-            totalDeficit: 1200000,
-            notes: "Kiểm kê định kỳ tháng 3/2024",
-          },
-          {
-            id: 2,
-            auditId: "KT002",
-            createdDate: "2024-03-10",
-            createdBy: "Bích Huyền",
-            totalDeficit: 850000,
-            notes: "Kiểm kê đột xuất",
-          },
-          {
-            id: 3,
-            auditId: "KT003",
-            createdDate: "2024-03-05",
-            createdBy: "Bích Huyền",
-            totalDeficit: 950000,
-            notes: "Kiểm kê cuối tháng 2/2024",
-          },
-          {
-            id: 4,
-            auditId: "KT004",
-            createdDate: "2024-02-28",
-            createdBy: "Bích Huyền",
-            totalDeficit: 750000,
-            notes: "Kiểm kê theo yêu cầu",
-          },
-          {
-            id: 5,
-            auditId: "KT005",
-            createdDate: "2024-02-25",
-            createdBy: "Bích Huyền",
-            totalDeficit: 1100000,
-            notes: "Kiểm kê định kỳ tháng 2/2024",
-          },
-        ];
-        setAuditRecords(data);
-      } catch (error) {
-        console.error("Error fetching audit records:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const filteredRecords = auditRecords
+  const filteredRecords = inventoryChecks?.data
     .filter(
       (record) =>
         record.employee.name
@@ -245,8 +178,6 @@ const Audit = () => {
       <InventoryCheckForm
         showForm={showCreateForm}
         onClose={() => setShowCreateForm(false)}
-        onSuccess={handleCreateSuccess}
-        onError={handleCreateError}
       />
 
       <Snackbar

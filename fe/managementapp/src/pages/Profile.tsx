@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
+import Snackbar from "../components/Snackbar";
 
 interface UserProfile {
   role: string;
@@ -12,7 +13,7 @@ interface UserProfile {
   dob: string;
 }
 
-const Profile = () => {
+const EditProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [snackbar, setSnackbar] = useState<{
     show: boolean;
@@ -59,13 +60,6 @@ const Profile = () => {
     }
   };
 
-  const handleBack = () => {
-    // Navigate to dashboard based on user role
-    const dashboardPath =
-      user?.role === "ADMIN_ROLE" ? "/admin/dashboard" : "/dashboard";
-    navigate(dashboardPath);
-  };
-
   const handleCloseSnackbar = () => {
     setSnackbar((prev) => ({ ...prev, show: false }));
   };
@@ -74,10 +68,7 @@ const Profile = () => {
     <div className="container mx-auto p-6 max-w-3xl">
       {/* Back button */}
       <div className="mb-6">
-        <button
-          onClick={handleBack}
-          className="inline-flex items-center text-indigo-600 hover:text-indigo-700"
-        >
+        <button className="inline-flex items-center text-indigo-600 hover:text-indigo-700">
           <ChevronLeftIcon className="h-5 w-5 mr-1" />
           Trở về
         </button>

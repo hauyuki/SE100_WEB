@@ -3,7 +3,8 @@ import supabase from "./supabase";
 import { v4 as uuidv4 } from "uuid";
 
 export const HOST = process.env.NEXT_PUBLIC_HOST;
-export const API_HOST = "http://localhost:8086" + "/api";
+export const API_HOST =
+  "https://inventory-management-server-fkr8.onrender.com" + "/api";
 
 export const getFormData = (data: { [name: string]: any }): FormData => {
   const formData = new FormData();
