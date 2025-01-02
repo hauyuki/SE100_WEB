@@ -21,7 +21,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
       </div>
       <div className="flex items-center justify-between mt-2">
         <span className="text-[#6E74E9FF] text-2xl font-semibold">{value}</span>
-        <span className="text-green-500">{percentage}% so với tháng trước</span>
+        <span className="text-green-500">{percentage} so với tháng trước</span>
       </div>
     </div>
   );
