@@ -37,6 +37,7 @@ const Header: React.FC<HeaderProps> = ({ currentPath = "dashboard" }) => {
       if (adminPath === "dashboard") return "Dashboard";
       if (adminPath.startsWith("product/")) return "Chi tiết sản phẩm";
       if (adminPath === "products") return "Quản lý sản phẩm";
+      if (adminPath === "profile") return "Thông tin cá nhân";
       if (
         adminPath.startsWith("import") ||
         adminPath.startsWith("export") ||

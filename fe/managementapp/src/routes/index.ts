@@ -26,7 +26,7 @@ import AdminExportDetailPage from "../pages/admin/import/ExportDetail";
 import AdminReportPage from "../pages/admin/reports/Report";
 import AdminReportGeneratorPage from "../pages/admin/reports/ReportGenerator";
 import AdminAuditPage from "../pages/admin/audit/Audit";
-import Profile from "../pages/Profile";
+import Profile from "../pages/Profile copy";
 import ReportDetail from "../pages/employee/reports/ReportDetail";
 import AuditDetail from "../pages/employee/audit/AuditDetail";
 
@@ -48,6 +48,7 @@ export const routes = [
   { path: "/tag", component: Tag, layout: DefaultLayout },
   { path: "/audit", component: Audit, layout: DefaultLayout },
   { path: "/profile", component: Profile, layout: DefaultLayout },
+  { path: "/admin/profile", component: Profile, layout: AdminLayout },
 
   {
     path: "/admin/dashboard",

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
+import { useGetUserProfile } from "../hooks/auth/query";
 
 interface UserProfile {
   role: string;
@@ -12,7 +13,7 @@ interface UserProfile {
   dob: string;
 }
 
-const Profile = () => {
+const EditProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState<UserProfile>({
     role: "EMPLOYEE_ROLE",
@@ -22,7 +23,6 @@ const Profile = () => {
     department: "Kho",
     dob: "2003-01-01",
   });
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setProfile((prev) => ({
@@ -195,4 +195,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default EditProfile;

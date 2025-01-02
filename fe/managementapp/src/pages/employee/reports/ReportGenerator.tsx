@@ -1,10 +1,13 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CalendarIcon, ChevronLeftIcon } from "@heroicons/react/24/outline";
+import { useCreateStockReport } from "../../../hooks/stocks";
+import ButtonPrimary from "../../../components/Button/ButtonPrimary";
 
 const ReportGenerator = () => {
   const [reportType, setReportType] = useState("week");
   const [startDate, setStartDate] = useState("");
+  const [name, setName] = useState("");
   const [endDate, setEndDate] = useState("");
   const [selectedContents, setSelectedContents] = useState({
     imports: false,
@@ -12,14 +15,14 @@ const ReportGenerator = () => {
     products: false,
     revenue: false,
   });
-
   const handleContentChange = (content: keyof typeof selectedContents) => {
     setSelectedContents((prev) => ({
       ...prev,
       [content]: !prev[content],
     }));
   };
-
+  const { mutate: createStockReport, isPending } = useCreateStockReport();
+  const navigate = useNavigate();
   return (
     <div className="p-6 max-w-4xl mx-auto">
       {/* Back button */}
@@ -39,21 +42,17 @@ const ReportGenerator = () => {
         </h1>
 
         <div className="space-y-6">
-          {/* Report Type Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Chọn loại báo cáo
-            </label>
-            <select
-              value={reportType}
-              onChange={(e) => setReportType(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            >
-              <option value="week">Tuần</option>
-              <option value="month">Tháng</option>
-              <option value="custom">Giai đoạn</option>
-            </select>
-          </div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Tên báo cáo
+          </label>
+          <input
+            type="text"
+            name="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            required
+          />
 
           {/* Date Selection */}
           <div className="grid grid-cols-2 gap-4">
@@ -88,7 +87,7 @@ const ReportGenerator = () => {
           </div>
 
           {/* Report Contents */}
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Chọn nội dung báo cáo
             </label>
@@ -130,13 +129,33 @@ const ReportGenerator = () => {
                 <span className="ml-2 text-gray-700">Doanh thu</span>
               </label>
             </div>
-          </div>
+          </div> */}
 
           {/* Generate Button */}
           <div className="pt-4">
-            <button className="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 transition-colors">
+            <ButtonPrimary
+              type="submit"
+              onClick={() => {
+                if (startDate && endDate && name !== "")
+                  createStockReport(
+                    {
+                      startDate: startDate,
+                      endDate: endDate,
+                      name: name,
+                    },
+                    {
+                      onSuccess: () => {
+                        navigate("/admin/reports");
+                      },
+                    }
+                  );
+              }}
+              disabled={isPending}
+              loading={isPending}
+              className="px-6 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none"
+            >
               Tạo báo cáo
-            </button>
+            </ButtonPrimary>
           </div>
         </div>
       </div>
