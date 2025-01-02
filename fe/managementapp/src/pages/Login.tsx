@@ -3,16 +3,16 @@ import LoginForm from "../components/LoginForm";
 
 const Login = () => {
   return (
-    <div className="h-full w-full grid grid-cols-2">
-      <div className="flex items-center justify-center">
+    <div className="h-screen overflow-hidden py-5 w-screen grid grid-cols-3">
+      <div className="flex items-start mx-4 mt-20 justify-center">
         <LoginForm />
       </div>
-      <div className="p-5">
-        <div className="rounded-2xl bg-blue-400 h-[540px] overflow-hidden">
+      <div className="p-5 col-span-2">
+        <div className=" h-full overflow-hidden">
           <img
             alt="banner"
             src={Images.landingImg}
-            className={`object-cover bg-center`}
+            className={`object-cover bg-center overflow-hidden`}
           ></img>
         </div>
       </div>
