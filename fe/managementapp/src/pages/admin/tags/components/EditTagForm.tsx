@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { FiX, FiTrash2 } from "react-icons/fi";
+import Snackbar from "../../../../components/Snackbar";
 
 interface Tag {
   id: number;
@@ -25,6 +26,50 @@ const EditTagForm: React.FC<EditTagFormProps> = ({
   onSubmit,
   onDelete,
 }) => {
+  const [snackbar, setSnackbar] = useState<{
+    show: boolean;
+    message: string;
+    type: "success" | "error";
+  }>({
+    show: false,
+    message: "",
+    type: "success",
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    try {
+      onSubmit(e);
+      setSnackbar({
+        show: true,
+        message: "Cập nhật tag thành công",
+        type: "success",
+      });
+    } catch (error) {
+      setSnackbar({
+        show: true,
+        message: "Có lỗi xảy ra khi cập nhật tag",
+        type: "error",
+      });
+    }
+  };
+
+  const handleDelete = (id: number) => {
+    try {
+      onDelete(id);
+      setSnackbar({
+        show: true,
+        message: "Xóa tag thành công",
+        type: "success",
+      });
+    } catch (error) {
+      setSnackbar({
+        show: true,
+        message: "Có lỗi xảy ra khi xóa tag",
+        type: "error",
+      });
+    }
+  };
+
   if (!isOpen || !editingTag) return null;
 
   return (
@@ -39,7 +84,7 @@ const EditTagForm: React.FC<EditTagFormProps> = ({
             <FiX className="w-6 h-6" />
           </button>
         </div>
-        <form onSubmit={onSubmit}>
+        <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Tag Name
@@ -92,7 +137,7 @@ const EditTagForm: React.FC<EditTagFormProps> = ({
           <div className="flex justify-end gap-3">
             <button
               type="button"
-              onClick={() => onDelete(editingTag.id)}
+              onClick={() => handleDelete(editingTag.id)}
               className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 flex items-center gap-2"
             >
               <FiTrash2 className="w-4 h-4" />
@@ -107,6 +152,12 @@ const EditTagForm: React.FC<EditTagFormProps> = ({
           </div>
         </form>
       </div>
+      <Snackbar
+        show={snackbar.show}
+        message={snackbar.message}
+        type={snackbar.type}
+        onClose={() => setSnackbar({ ...snackbar, show: false })}
+      />
     </div>
   );
 };

@@ -6,6 +6,7 @@ import {
   useGetInventoryCheckDetail,
   useGetInventoryChecks,
 } from "../../../hooks/inventoryChecks";
+import Snackbar from "../../../components/Snackbar";
 
 interface AuditProduct {
   sku: string;
@@ -28,6 +29,90 @@ interface AuditDetail {
 const AuditDetail = () => {
   const { id } = useParams();
   const { data: auditData, isLoading } = useGetInventoryCheckDetail(Number(id));
+  const [loading, setLoading] = useState(true);
+  const [auditData, setAuditData] = useState<AuditDetail | null>(null);
+  const [snackbar, setSnackbar] = useState<{
+    show: boolean;
+    message: string;
+    type: "success" | "error";
+  }>({
+    show: false,
+    message: "",
+    type: "success",
+  });
+
+  const handleCloseSnackbar = () => {
+    setSnackbar((prev) => ({ ...prev, show: false }));
+  };
+
+  const handleUpdateSuccess = () => {
+    setSnackbar({
+      show: true,
+      message: "Cập nhật phiếu kiểm toán thành công",
+      type: "success",
+    });
+  };
+
+  const handleUpdateError = (error: string) => {
+    setSnackbar({
+      show: true,
+      message: error || "Cập nhật phiếu kiểm toán thất bại",
+      type: "error",
+    });
+  };
+
+  useEffect(() => {
+    // Simulate API call
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        // In a real app, this would be an API call
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
+
+        // Mock data
+        const data: AuditDetail = {
+          id: "KT001",
+          createdDate: "2024-03-15",
+          createdBy: "Bích Huyền",
+          totalDeficit: 1200000,
+          notes: "Kiểm kê định kỳ tháng 3/2024",
+          products: [
+            {
+              sku: "SKU001",
+              name: "Cell Fusion C Toning Sunscreen 100",
+              stockQuantity: 50,
+              actualQuantity: 48,
+              deficit: 2,
+              price: 300000,
+            },
+            {
+              sku: "SKU002",
+              name: "La Roche-Posay Anthelios UVMUNE 400 Oil Control",
+              stockQuantity: 60,
+              actualQuantity: 57,
+              deficit: 3,
+              price: 200000,
+            },
+            {
+              sku: "SKU003",
+              name: "Vichy Capital Soleil Dry Touch Face Fluid SPF50",
+              stockQuantity: 40,
+              actualQuantity: 38,
+              deficit: 2,
+              price: 150000,
+            },
+          ],
+        };
+        setAuditData(data);
+      } catch (error) {
+        console.error("Error fetching audit data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [id]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -167,6 +252,13 @@ const AuditDetail = () => {
           </table>
         </div>
       </div>
+
+      <Snackbar
+        show={snackbar.show}
+        message={snackbar.message}
+        type={snackbar.type}
+        onClose={handleCloseSnackbar}
+      />
     </div>
   );
 };

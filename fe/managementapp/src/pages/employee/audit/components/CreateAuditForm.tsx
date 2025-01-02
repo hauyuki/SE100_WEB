@@ -130,6 +130,22 @@ const InventoryCheckForm = ({
     );
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      // TODO: Implement API call
+      console.log("Form submitted:", {
+        products,
+        totalDeficit: calculateTotalDeficit(),
+      });
+      onClose();
+      onSuccess?.();
+    } catch (error: any) {
+      console.error("Error creating audit:", error);
+      onError?.(error.message || "Error creating audit");
+    }
+  };
+
   if (!showForm) return null;
 
   return (

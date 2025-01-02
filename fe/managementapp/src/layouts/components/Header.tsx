@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { UserCircleIcon } from "@heroicons/react/24/outline";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuthContext } from "../../contexts/AuthContext";
 import { Role } from "../../models/Auth";
 
@@ -11,6 +11,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ currentPath = "dashboard" }) => {
   const { user } = useAuthContext();
+  const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -72,8 +73,10 @@ const Header: React.FC<HeaderProps> = ({ currentPath = "dashboard" }) => {
   };
 
   const handleLogout = () => {
-    // TODO: Implement logout logic
-    console.log("Logging out...");
+    // Close dropdown menu
+    setIsDropdownOpen(false);
+    // Navigate to login page
+    navigate("/");
   };
 
   return (
@@ -84,31 +87,36 @@ const Header: React.FC<HeaderProps> = ({ currentPath = "dashboard" }) => {
       </h1>
 
       {/* Right side - User info */}
-
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 relative">
         <div className="text-right">
           <p className="font-medium text-gray-800">{user?.name}</p>
           <p className="text-sm text-gray-500">
             {user?.role === Role.EMPLOYEE_ROLE ? "Nhân viên" : "Quản lý"}
           </p>
         </div>
-        <div className="h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center">
+        <button
+          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          className="h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors duration-200"
+        >
           <UserCircleIcon className="h-8 w-8 text-gray-400" />
-        </div>
+        </button>
 
         {/* Dropdown Menu */}
         {isDropdownOpen && (
-          <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
+          <div
+            ref={dropdownRef}
+            className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg py-1 border border-gray-100 transform transition-all duration-200 ease-out"
+          >
             <Link
               to="/profile"
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
               onClick={() => setIsDropdownOpen(false)}
             >
               Thông tin cá nhân
             </Link>
             <button
               onClick={handleLogout}
-              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
             >
               Đăng xuất
             </button>

@@ -15,9 +15,13 @@ import { v4 as uuidv4 } from "uuid";
 const AddProductForm = ({
   showForm,
   onClose,
+  onSuccess,
+  onError,
 }: {
   showForm: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
+  onError?: (error: string) => void;
 }) => {
   const form = useForm<UpsertProductModel>({
     resolver: zodResolver(UpsertProductModelSchema),
@@ -75,9 +79,11 @@ const AddProductForm = ({
         onSuccess: () => {
           console.log("Product added successfully");
           onClose();
+          onSuccess?.();
         },
-        onError: () => {
-          console.log("Error adding product");
+        onError: (error) => {
+          console.log("Error adding product", error);
+          onError?.(error.message || "Error adding product");
         },
       }
     );

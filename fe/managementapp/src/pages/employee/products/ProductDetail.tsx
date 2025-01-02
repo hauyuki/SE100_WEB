@@ -8,6 +8,7 @@ import EditProductForm from "../../admin/products/component/EditProductForm";
 import { Role } from "../../../models/Auth";
 import { useAuthContext } from "../../../contexts/AuthContext";
 import Loading from "../../../components/Loading";
+import Snackbar from "../../../components/Snackbar";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -16,12 +17,43 @@ const ProductDetail = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isShowEditForm, setIsShowEditForm] = useState(false);
   const { user } = useAuthContext();
+  const [snackbar, setSnackbar] = useState<{
+    show: boolean;
+    message: string;
+    type: "success" | "error";
+  }>({
+    show: false,
+    message: "",
+    type: "success",
+  });
   const {
     data: editedProduct,
     isLoading,
     isRefetching,
     isError,
   } = useGetProductDetail(Number(id));
+
+  const handleCloseSnackbar = () => {
+    setSnackbar((prev) => ({ ...prev, show: false }));
+  };
+
+  const handleUpdateSuccess = () => {
+    setIsShowEditForm(false);
+    setSnackbar({
+      show: true,
+      message: "Cập nhật sản phẩm thành công",
+      type: "success",
+    });
+  };
+
+  const handleUpdateError = (error: string) => {
+    setSnackbar({
+      show: true,
+      message: error || "Cập nhật sản phẩm thất bại",
+      type: "error",
+    });
+  };
+
   const handleEdit = () => {
     // setIsEditing(true);
     setIsShowEditForm(true);
@@ -96,6 +128,8 @@ const ProductDetail = () => {
               showForm={isShowEditForm}
               onClose={() => setIsShowEditForm(false)}
               product={editedProduct}
+              onSuccess={handleUpdateSuccess}
+              onError={handleUpdateError}
             />
           )}{" "}
           {/* Rest of the existing code until the general information section */}
@@ -354,6 +388,12 @@ const ProductDetail = () => {
               Xóa
             </button>
           </div>
+          <Snackbar
+            show={snackbar.show}
+            message={snackbar.message}
+            type={snackbar.type}
+            onClose={handleCloseSnackbar}
+          />
         </div>
       )}
     </>
