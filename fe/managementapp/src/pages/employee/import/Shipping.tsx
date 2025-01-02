@@ -214,11 +214,11 @@ const Shipping = () => {
                     </td>
                     <td className="px-6 py-4 text-center">
                       {item.completedDate
-                        ? new Date(item.date).toDateString()
-                        : ""}
+                        ? new Date(item.completedDate).toDateString()
+                        : "Pending"}
                     </td>
                     <td className="px-6 py-4">
-                      {item.fromPosition ? item.fromPosition : ""}
+                      {item.fromPosition ? item.fromPosition : ""}-
                       {item.toPosition ? item.toPosition : ""}
                     </td>
                   </tr>

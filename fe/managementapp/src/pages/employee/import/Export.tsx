@@ -8,6 +8,8 @@ import { useGetOutboundReports } from "../../../hooks/outboundReports";
 import { OutboundReport } from "../../../models/OutboundReport";
 import Loading from "../../../components/Loading";
 import Snackbar from "../../../components/Snackbar";
+import { Role } from "../../../models/Auth";
+import { useAuthContext } from "../../../contexts/AuthContext";
 
 interface Product {
   id: string;
@@ -217,6 +219,7 @@ const Export = () => {
       type: "error",
     });
   };
+  const { user } = useAuthContext();
 
   return (
     <div className="container mx-auto p-6">
@@ -310,14 +313,12 @@ const Export = () => {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-gray-50 text-gray-500 uppercase text-sm">
-                  <th className="px-6 py-3 text-center">STT</th>
                   <th className="px-6 py-3 text-center">Mã phiếu xuất</th>
                   <th className="px-6 py-3 text-center">Tổng giá trị</th>
                   <th className="px-6 py-3 text-center">Đơn vị vận chuyển</th>
                   <th className="px-6 py-3 text-center">Ngày vận chuyển</th>
                   <th className="px-6 py-3 text-center">Ngày hoàn thành</th>
                   <th className="px-6 py-3 text-center">Trạng thái</th>
-                  <th className="px-6 py-3 text-center">Ghi chú</th>
                   <th className="px-6 py-3 text-center">Thao tác</th>
                 </tr>
               </thead>
@@ -327,10 +328,13 @@ const Export = () => {
                     key={item.id}
                     className="border-b border-gray-200 hover:bg-gray-100"
                   >
-                    <td className="px-6 py-4 text-center">{item.id}</td>
                     <td className="px-6 py-4">
                       <Link
-                        to={`/export/${item.id}`}
+                        to={
+                          user?.role === Role.ADMIN_ROLE
+                            ? `/admin/import/${item.id}`
+                            : `/import/${item.id}`
+                        }
                         className="text-indigo-500 hover:text-indigo-600"
                       >
                         {item.id}
@@ -344,7 +348,9 @@ const Export = () => {
                       {new Date(item.shipment.date).toDateString()}
                     </td>
                     <td className="px-6 py-4 text-center">
-                      {/* {item.completionDate || "-"} */}
+                      {item.shipment.completedDate
+                        ? new Date(item.shipment.date).toDateString()
+                        : "Pending"}
                     </td>
                     <td className="px-6 py-4 text-center">
                       <span

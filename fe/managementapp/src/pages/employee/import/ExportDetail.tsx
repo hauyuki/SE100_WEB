@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ChevronLeftIcon, PencilIcon } from "@heroicons/react/24/outline";
 import UpdateExportForm from "./components/UpdateExportForm";
+import { Role } from "../../../models/Auth";
+import { useAuthContext } from "../../../contexts/AuthContext";
 
 interface Product {
   id: string;
@@ -100,13 +102,14 @@ const ExportDetail = () => {
       [e.target.name]: e.target.value,
     }));
   };
+  const { user } = useAuthContext();
 
   return (
     <div className="container mx-auto p-6">
       {/* Back button */}
       <div className="flex justify-between items-center mb-6">
         <Link
-          to="/import"
+          to={user?.role === Role.EMPLOYEE_ROLE ? "/import" : "/admin/import"}
           className="inline-flex items-center text-indigo-600 hover:text-indigo-700"
         >
           <ChevronLeftIcon className="h-5 w-5 mr-1" />
