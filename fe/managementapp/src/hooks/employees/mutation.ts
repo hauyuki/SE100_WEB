@@ -28,3 +28,13 @@ export const useUpdateEmployee = () => {
     },
   });
 };
+export const useUpdateEmployeeWithPassword = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (request: EmployeeRequest) =>
+      EmployeeApis.updateEmployeeWithPassword(request.id ?? 0, request),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [LIST_EMPLOYEE_KEY] });
+    },
+  });
+};

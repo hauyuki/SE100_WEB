@@ -10,6 +10,7 @@ import { useGetCompanies } from "../../../../hooks/companies";
 import { useGetTags } from "../../../../hooks/tags";
 import { XCircleIcon } from "@heroicons/react/24/outline";
 import { apiUploadImage } from "../../../../utils";
+import React from "react";
 
 const EditProductForm = ({
   showForm,
@@ -28,7 +29,7 @@ const EditProductForm = ({
       sku: product.sku,
       marketPrice: Number(product.marketPrice),
       productionCost: Number(product.productionCost),
-      image: product.image,
+      image: product.image ?? "",
       minQuantity: product.minQuantity,
       maxQuantity: product.maxQuantity,
       categoryId: Number(product?.category?.id) ?? 0,
@@ -36,22 +37,44 @@ const EditProductForm = ({
       tagIds: product.tags?.map((item) => item.id),
     },
   });
-  const [image, setImage] = useState<any>(product.image);
+
+  const [image, setImage] = useState<any>(product.image ?? "");
 
   const {
+    reset,
     register,
     handleSubmit,
     formState: { errors },
     setValue,
     watch,
   } = form;
+  React.useEffect(() => {
+    if (product) {
+      reset({
+        name: product.name,
+        description: product.description,
+        sku: product.sku,
+        marketPrice: Number(product.marketPrice),
+        productionCost: Number(product.productionCost),
+        image: product.image,
+        minQuantity: product.minQuantity,
+        maxQuantity: product.maxQuantity,
+        categoryId: Number(product?.category?.id) ?? 0,
+        companyId: product?.company?.id ?? 0,
+        tagIds: product?.tags?.map((item) => item.id) || [],
+      });
+      setSelectedTags(product.tags?.map((item) => item.id) ?? []);
+      setImage(product.image ?? "");
+    }
+  }, [product, reset]);
+
   const { mutate: addProduct, isPending } = useUpdateProduct();
   const { data: categories } = useGetCategories();
   const { data: companies } = useGetCompanies();
   const { data: tags } = useGetTags();
 
   const [selectedTags, setSelectedTags] = useState<number[]>(
-    product.tags?.map((item) => item.id)
+    product.tags?.map((item) => item.id) ?? []
   ); // state to track selected tags
   const [availableTags, setAvailableTags] = useState<boolean>(false); // state for options dropdown
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -90,7 +113,7 @@ const EditProductForm = ({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-semibold">Add New Product</h3>
+          <h3 className="text-xl font-semibold">Edit product</h3>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
@@ -107,6 +130,8 @@ const EditProductForm = ({
               </label>
               <input
                 type="text"
+                readOnly
+                disabled
                 {...register("sku")}
                 className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
@@ -178,6 +203,23 @@ const EditProductForm = ({
               {errors.companyId && (
                 <p className="text-red-500 text-sm">
                   {errors.companyId.message}
+                </p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Prouduction cost
+              </label>
+              <input
+                type="number"
+                {...register("productionCost", { valueAsNumber: true })}
+                className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                required
+                min="0"
+              />
+              {errors.productionCost && (
+                <p className="text-red-500 text-sm">
+                  {errors.productionCost.message}
                 </p>
               )}
             </div>
@@ -303,7 +345,7 @@ const EditProductForm = ({
             </div>
           </div>
           <div className="col-span-2">
-            <label>Food image</label>
+            <label>Product image</label>
             <div className="mt-1 relative flex justify-center px-6 pt-5 pb-6 border-2 border-neutral-300 dark:border-neutral-700 border-dashed rounded-md">
               {image && (
                 <>

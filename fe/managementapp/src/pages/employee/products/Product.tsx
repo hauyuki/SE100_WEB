@@ -6,6 +6,8 @@ import { useGetProducts } from "../../../hooks/products";
 import AddProductForm from "../../admin/products/component/AddProductForm";
 import { FaPlus } from "react-icons/fa";
 import { useGetStatistics } from "../../../hooks/statistics";
+import { useAuthContext } from "../../../contexts/AuthContext";
+import { Role } from "../../../models/Auth";
 
 const ProductPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -17,13 +19,13 @@ const ProductPage = () => {
   const productsPerPage = 10;
   const navigate = useNavigate();
   const { data: statistic } = useGetStatistics();
-
   const {
     data: products,
     isPending: loading,
     isError: error,
   } = useGetProducts();
   const [showForm, setShowForm] = useState(false);
+  const { user } = useAuthContext();
   // Get unique categories, companies, and storage areas for filters
   const categories = useMemo(() => {
     if (!products?.productList) return [];
@@ -107,7 +109,11 @@ const ProductPage = () => {
   }
 
   const handleRowClick = (id: number) => {
-    navigate(`/product/${id}`);
+    if (user?.role === Role.ADMIN_ROLE) {
+      navigate(`/admin/product/${id}`);
+    } else {
+      navigate(`/product/${id}`);
+    }
   };
 
   return (
@@ -129,7 +135,6 @@ const ProductPage = () => {
                 <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
               </div>
             </div>
-
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
@@ -142,7 +147,6 @@ const ProductPage = () => {
                 </option>
               ))}
             </select>
-
             <select
               value={selectedCompany}
               onChange={(e) => setSelectedCompany(e.target.value)}
@@ -155,7 +159,6 @@ const ProductPage = () => {
                 </option>
               ))}
             </select>
-
             <select
               value={selectedStorageArea}
               onChange={(e) => setSelectedStorageArea(e.target.value)}
@@ -168,7 +171,6 @@ const ProductPage = () => {
                 </option>
               ))}
             </select>
-
             <button
               onClick={handleQuantitySort}
               className={`px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
@@ -182,12 +184,14 @@ const ProductPage = () => {
                 ? "↓"
                 : ""}
             </button>
-            <button
-              className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center hover:bg-indigo-600 transition-colors"
-              onClick={() => setShowForm(true)}
-            >
-              <FaPlus className="text-white" />
-            </button>
+            {user && user.role === Role.ADMIN_ROLE && (
+              <button
+                className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center hover:bg-indigo-600 transition-colors"
+                onClick={() => setShowForm(true)}
+              >
+                <FaPlus className="text-white" />
+              </button>
+            )}{" "}
           </div>
         </div>
         <AddProductForm

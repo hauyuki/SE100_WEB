@@ -2,10 +2,14 @@ export type AuthModel = {
   username: string;
   password: string;
 };
+export enum Role {
+  ADMIN_ROLE = "ADMIN_ROLE",
+  EMPLOYEE_ROLE = "EMPLOYEE_ROLE",
+}
 export type AuthResponse = {
   id: number;
   username: string;
-  role: string;
+  role: Role;
   accessToken: string;
 };
 export type AuthRequest = Omit<AuthModel, "id">;
@@ -16,7 +20,7 @@ export type UserInfoModel = {
   id: number;
   name: string;
   username: string;
-  role: string; // You could also create an enum for roles if you have predefined roles
+  role: Role; // You could also create an enum for roles if you have predefined roles
   password: string; // Typically you'd store hashed passwords as strings
   phone: string | null; // Phone can be null
   address: string;

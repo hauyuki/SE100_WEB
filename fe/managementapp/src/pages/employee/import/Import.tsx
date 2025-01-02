@@ -123,22 +123,35 @@ const Import = () => {
   };
 
   const filteredData = inboundData?.data
-    .filter(
-      (item) =>
-        item.shipment.carrier
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase()) ||
-        item.shipment.status.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    .sort((a, b) => {
+    ?.filter((item) => {
+      const carrierMatch = item?.shipment?.carrier
+        ?.toLowerCase()
+        .includes(searchQuery?.toLowerCase());
+      const fromPositionMatch = item?.shipment?.fromPosition
+        ?.toLowerCase()
+        .includes(searchQuery?.toLowerCase());
+      const toPositionMatch = item?.shipment?.toPosition
+        ?.toLowerCase()
+        .includes(searchQuery?.toLowerCase());
+
+      const shipmentDate = new Date(item?.shipment?.date);
+      const isWithinDateRange =
+        (!startDate || shipmentDate >= new Date(startDate)) &&
+        (!endDate || shipmentDate <= new Date(endDate));
+
+      return (
+        (carrierMatch || fromPositionMatch || toPositionMatch) &&
+        isWithinDateRange
+      );
+    })
+    ?.sort((a, b) => {
       if (selectedValue === "asc") {
-        return a.price - b.price;
+        return a.quantity - b.quantity;
       } else if (selectedValue === "desc") {
-        return b.price - a.price;
+        return b.quantity - a.quantity;
       }
       return 0;
     });
-
   const handleEdit = (id: number) => {
     const itemToEdit = inboundData?.data.find((item) => item.id === id);
     if (itemToEdit) {
@@ -259,24 +272,21 @@ const Import = () => {
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-gray-50 text-gray-500 uppercase text-sm">
-                <th className="px-6 py-3 text-center">STT</th>
                 <th className="px-6 py-3 text-center">Mã phiếu nhập</th>
                 <th className="px-6 py-3 text-center">Tổng giá trị</th>
                 <th className="px-6 py-3 text-center">Đơn vị vận chuyển</th>
                 <th className="px-6 py-3 text-center">Ngày vận chuyển</th>
                 <th className="px-6 py-3 text-center">Ngày hoàn thành</th>
                 <th className="px-6 py-3 text-center">Trạng thái</th>
-                <th className="px-6 py-3 text-center">Ghi chú</th>
                 <th className="px-6 py-3 text-center">Thao tác</th>
               </tr>
             </thead>
             <tbody>
-              {inboundData?.data?.map((item) => (
+              {filteredData?.map((item) => (
                 <tr
                   key={item.id}
                   className="border-b border-gray-200 hover:bg-gray-100"
                 >
-                  <td className="px-6 py-4 text-center">{item.id}</td>
                   <td className="px-6 py-4">
                     <Link
                       to={`/import/${item.id}`}
@@ -312,14 +322,15 @@ const Import = () => {
                       {item.shipment.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4">Không có</td>
                   <td className="px-6 py-4 text-center">
-                    <button
-                      onClick={() => handleEdit(item.id)}
-                      className="text-indigo-600 hover:text-indigo-900"
-                    >
-                      Sửa
-                    </button>
+                    {item.shipment?.status !== "COMPLETED" && (
+                      <button
+                        onClick={() => handleEdit(item.id)}
+                        className="text-indigo-600 hover:text-indigo-900"
+                      >
+                        Sửa
+                      </button>
+                    )}{" "}
                   </td>
                 </tr>
               ))}

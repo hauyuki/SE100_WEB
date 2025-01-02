@@ -238,7 +238,7 @@ const ExportDetail = () => {
         </div>
       </div>
 
-      {selectedExport && (
+      {/* {selectedExport && (
         <UpdateExportForm
           showForm={showUpdateForm}
           exportData={selectedExport}
@@ -249,7 +249,7 @@ const ExportDetail = () => {
           onSubmit={handleUpdate}
           onChange={handleUpdateChange}
         />
-      )}
+      )} */}
     </div>
   );
 };

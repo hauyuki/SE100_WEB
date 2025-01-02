@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { FaCalendarAlt, FaPlus } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import ExportForm from "./components/ExportForm";
 import ImportTabs from "./components/ImportTabs";
 import UpdateExportForm from "./components/UpdateExportForm";
 import OutboundReportForm from "../../../components/OutboundReportForm";
 import { useGetOutboundReports } from "../../../hooks/outboundReports";
+import { OutboundReport } from "../../../models/OutboundReport";
 
 interface Product {
   id: string;
@@ -25,17 +25,15 @@ interface FormData {
 }
 
 const Export = () => {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedValue, setSelectedValue] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [showUpdateForm, setShowUpdateForm] = useState(false);
-  const [selectedExport, setSelectedExport] = useState<{
-    orderId: string;
-    status: string;
-    completionDate?: string;
-  } | null>(null);
+  const [selectedExport, setSelectedExport] = useState<OutboundReport | null>(
+    null
+  );
   const [formData, setFormData] = useState<FormData>({
     orderId: "",
     shipper: "",
@@ -125,64 +123,43 @@ const Export = () => {
     }).format(value);
   };
 
-  const filteredData = data
-    .filter(
-      (item) =>
-        item.orderId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.shipper.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.notes.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    .sort((a, b) => {
+  const filteredData = outboundData?.data
+    ?.filter((item) => {
+      const carrierMatch = item?.shipment?.carrier
+        ?.toLowerCase()
+        .includes(searchQuery?.toLowerCase());
+      const fromPositionMatch = item?.shipment?.fromPosition
+        ?.toLowerCase()
+        .includes(searchQuery?.toLowerCase());
+      const toPositionMatch = item?.shipment?.toPosition
+        ?.toLowerCase()
+        .includes(searchQuery?.toLowerCase());
+
+      const shipmentDate = new Date(item?.shipment?.date);
+      const isWithinDateRange =
+        (!startDate || shipmentDate >= new Date(startDate)) &&
+        (!endDate || shipmentDate <= new Date(endDate));
+
+      return (
+        (carrierMatch || fromPositionMatch || toPositionMatch) &&
+        isWithinDateRange
+      );
+    })
+    ?.sort((a, b) => {
       if (selectedValue === "asc") {
-        return a.totalValue - b.totalValue;
+        return a.quantity - b.quantity;
       } else if (selectedValue === "desc") {
-        return b.totalValue - a.totalValue;
+        return b.quantity - a.quantity;
       }
       return 0;
     });
 
   const handleEdit = (id: number) => {
-    const itemToEdit = data.find((item) => item.id === id);
+    const itemToEdit = outboundData?.data.find((item) => item.id === id);
     if (itemToEdit) {
-      setSelectedExport({
-        orderId: itemToEdit.orderId,
-        status: itemToEdit.status,
-        completionDate: itemToEdit.completionDate,
-      });
+      setSelectedExport(itemToEdit);
       setShowUpdateForm(true);
     }
-  };
-
-  const handleUpdateSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!selectedExport) return;
-
-    setData((prev) =>
-      prev.map((item) =>
-        item.orderId === selectedExport.orderId
-          ? {
-              ...item,
-              status: selectedExport.status,
-              completionDate:
-                selectedExport.status === "Vận chuyển thành công"
-                  ? selectedExport.completionDate || ""
-                  : "",
-            }
-          : item
-      )
-    );
-    setShowUpdateForm(false);
-    setSelectedExport(null);
-  };
-
-  const handleUpdateChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    if (!selectedExport) return;
-    setSelectedExport((prev) => ({
-      ...prev!,
-      [e.target.name]: e.target.value,
-    }));
   };
 
   return (
@@ -197,7 +174,7 @@ const Export = () => {
               placeholder="Tìm kiếm theo mã phiếu xuất, đơn vị vận chuyển hoặc ghi chú"
               className="w-full border rounded-md pl-4 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-400 text-sm"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => setSearchQuery(e.target.value ?? "")}
             />
             <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
               <svg
@@ -257,16 +234,13 @@ const Export = () => {
         {selectedExport && (
           <UpdateExportForm
             showForm={showUpdateForm}
-            exportData={selectedExport}
+            outboundData={selectedExport}
             onClose={() => {
               setShowUpdateForm(false);
               setSelectedExport(null);
             }}
-            onSubmit={handleUpdateSubmit}
-            onChange={handleUpdateChange}
           />
         )}
-
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
@@ -278,12 +252,11 @@ const Export = () => {
                 <th className="px-6 py-3 text-center">Ngày vận chuyển</th>
                 <th className="px-6 py-3 text-center">Ngày hoàn thành</th>
                 <th className="px-6 py-3 text-center">Trạng thái</th>
-                <th className="px-6 py-3 text-center">Ghi chú</th>
                 <th className="px-6 py-3 text-center">Thao tác</th>
               </tr>
             </thead>
             <tbody>
-              {outboundData?.data.map((item) => (
+              {filteredData?.map((item) => (
                 <tr
                   key={item.id}
                   className="border-b border-gray-200 hover:bg-gray-100"
@@ -300,34 +273,40 @@ const Export = () => {
                   <td className="px-6 py-4 text-right">
                     {formatCurrency(item.totalPrice)}
                   </td>
-                  <td className="px-6 py-4">{item.shipment.carrier}</td>
+                  <td className="px-6 py-4">{item.shipment?.carrier}</td>
                   <td className="px-6 py-4 text-center">
-                    {new Date(item.shipment.date).toDateString()}
+                    {new Date(item.shipment?.date).toDateString()}
                   </td>
                   <td className="px-6 py-4 text-center">
-                    {/* {item.completionDate || "-"} */}
+                    {item.shipment?.completedDate
+                      ? item.shipment?.completedDate.toDateString()
+                      : "Pending"}
                   </td>
                   <td className="px-6 py-4 text-center">
                     <span
                       className={`inline-flex items-center justify-center px-3 py-1 text-sm font-medium rounded-full ${
-                        item.shipment.status === "Vận chuyển thành công"
+                        item.shipment?.status === "COMPLETED"
                           ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20"
-                          : item.shipment.status === "Đang vận chuyển"
+                          : item.shipment?.status === "IN_PROGRESS"
                           ? "bg-amber-50 text-amber-700 ring-1 ring-amber-600/20"
+                          : item.shipment?.status === "PENDING"
+                          ? "bg-blue-50 text-blue-700 ring-1 "
                           : "bg-rose-50 text-rose-700 ring-1 ring-rose-600/20"
                       }`}
                     >
-                      {item.shipment.status}
+                      {item.shipment?.status}
                     </span>
                   </td>
                   {/* <td className="px-6 py-4">{item.}</td> */}
                   <td className="px-6 py-4 text-center">
-                    <button
-                      onClick={() => handleEdit(item.id)}
-                      className="text-indigo-600 hover:text-indigo-900"
-                    >
-                      Sửa
-                    </button>
+                    {item.shipment?.status !== "COMPLETED" && (
+                      <button
+                        onClick={() => handleEdit(item.id)}
+                        className="text-indigo-600 hover:text-indigo-900"
+                      >
+                        Sửa
+                      </button>
+                    )}{" "}
                   </td>
                 </tr>
               ))}

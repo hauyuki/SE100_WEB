@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { FiX } from "react-icons/fi";
 import { EmployeeRequestSchema } from "../../../../schemas/auth";
@@ -28,12 +28,16 @@ const AddAccountForm: React.FC<AddAccountFormProps> = ({ isOpen, onClose }) => {
       password: "",
     },
   });
+
   const {
+    reset,
     register,
     handleSubmit,
     formState: { errors },
   } = form;
-
+  useEffect(() => {
+    reset();
+  }, []);
   const onSubmit = (data: EmployeeRequest) => {
     console.log(data);
     createEmployee(data, {

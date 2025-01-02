@@ -16,4 +16,10 @@ export const EmployeeApis = {
   updateEmployee(id: number, request: EmployeeRequest): Promise<Employee> {
     return apiPut(`/employees/${id}`, request);
   },
+  updateEmployeeWithPassword(
+    id: number,
+    request: EmployeeRequest
+  ): Promise<Employee> {
+    return apiPut(`/employees/password/${id}`, request);
+  },
 };

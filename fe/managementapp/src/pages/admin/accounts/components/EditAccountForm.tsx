@@ -1,6 +1,10 @@
-import React from "react";
-import { FiX } from "react-icons/fi";
-import { useCreateEmployee } from "../../../../hooks/employees";
+import React, { useState } from "react";
+import { FiEdit2, FiX } from "react-icons/fi";
+import {
+  useCreateEmployee,
+  useUpdateEmployee,
+  useUpdateEmployeeWithPassword,
+} from "../../../../hooks/employees";
 import { Employee, EmployeeRequest } from "../../../../models/Employee";
 import { EmployeeRequestSchema } from "../../../../schemas/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,8 +22,10 @@ const EditAccountForm: React.FC<EditAccountFormProps> = ({
   onClose,
   employee,
 }) => {
-  const { mutate: createEmployee, isPending } = useCreateEmployee();
-
+  const { mutate: updateEmployee, isPending } = useUpdateEmployee();
+  const { mutate: updateEmployeeWithPassword, isPending: isLoading } =
+    useUpdateEmployeeWithPassword();
+  const [isEditPassword, setIsEditPassword] = useState<boolean>(false);
   const form = useForm<EmployeeRequest>({
     resolver: zodResolver(EmployeeRequestSchema),
     defaultValues: {
@@ -32,20 +38,52 @@ const EditAccountForm: React.FC<EditAccountFormProps> = ({
         "https://cbpdizdmebasivufwuer.supabase.co/storage/v1/object/sign/default/avatar.png?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJkZWZhdWx0L2F2YXRhci5wbmciLCJpYXQiOjE3MzU3MzI3MDMsImV4cCI6MjA1MTA5MjcwM30.noj-wPlNid8enMv1c-BzIia8k7XNdCpDOq3JmW-spQk",
       username: employee.username,
       password: employee.password,
+      dob: employee.dob.toISOString(),
     },
   });
   const {
+    reset,
     register,
     handleSubmit,
     formState: { errors },
   } = form;
+  React.useEffect(() => {
+    if (employee) {
+      reset({
+        name: employee.name,
+        position: employee.position,
+        phone: employee.phone,
+        department: employee.department,
+        address: employee.address,
+        avatar:
+          "https://cbpdizdmebasivufwuer.supabase.co/storage/v1/object/sign/default/avatar.png?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJkZWZhdWx0L2F2YXRhci5wbmciLCJpYXQiOjE3MzU3MzI3MDMsImV4cCI6MjA1MTA5MjcwM30.noj-wPlNid8enMv1c-BzIia8k7XNdCpDOq3JmW-spQk",
+        username: employee.username,
+        password: employee.password,
+        dob: employee.dob.toISOString(),
+      });
+      setIsEditPassword(false);
+    }
+  }, [employee, reset]);
 
   const onSubmit = (data: EmployeeRequest) => {
     console.log(data);
-    createEmployee(data, {
-      onSuccess: () => onClose(),
-      onError: () => console.error("Error creating employee"),
-    });
+    if (isEditPassword) {
+      updateEmployeeWithPassword(
+        { ...data, id: employee.id },
+        {
+          onSuccess: () => onClose(),
+          onError: () => console.error("Error creating employee"),
+        }
+      );
+    } else {
+      updateEmployee(
+        { ...data, id: employee.id },
+        {
+          onSuccess: () => onClose(),
+          onError: () => console.error("Error creating employee"),
+        }
+      );
+    }
   };
   if (!isOpen) return null;
 
@@ -109,8 +147,10 @@ const EditAccountForm: React.FC<EditAccountFormProps> = ({
               Ngày sinh
             </label>
             <input
-              type="date"
-              {...register("dob")}
+              type="text"
+              readOnly
+              disabled
+              value={employee?.dob.toDateString()}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               required
             />
@@ -133,6 +173,7 @@ const EditAccountForm: React.FC<EditAccountFormProps> = ({
             </label>
             <input
               type="email"
+              disabled
               placeholder="Nhập email liên hệ"
               {...register("username")}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -151,23 +192,33 @@ const EditAccountForm: React.FC<EditAccountFormProps> = ({
               required
             />
           </div>
-          <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Mật khẩu
-            </label>
-            <input
-              type="password"
-              placeholder="Nhập mật khẩu"
-              {...register("password")}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              required
-            />
-          </div>
+          <button
+            type="button"
+            onClick={() => setIsEditPassword(!isEditPassword)}
+            className="text-gray-600 flex items-center gap-2 hover:text-purple-600 transition duration-200"
+          >
+            Cập nhật mật khẩu
+            <FiEdit2 className="w-5 h-5" />
+          </button>
+          {isEditPassword && (
+            <div className="col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Mật khẩu
+              </label>
+              <input
+                type="password"
+                placeholder="Nhập mật khẩu"
+                {...register("password")}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                required
+              />
+            </div>
+          )}{" "}
           <div className="col-span-2 flex justify-end gap-3">
             <ButtonPrimary
               type="submit"
-              disabled={isPending}
-              loading={isPending}
+              disabled={isPending || isLoading}
+              loading={isPending || isLoading}
               className="px-6 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none"
             >
               Lưu

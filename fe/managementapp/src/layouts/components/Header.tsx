@@ -1,6 +1,7 @@
 import React from "react";
 import { UserCircleIcon } from "@heroicons/react/24/outline";
 import { useAuthContext } from "../../contexts/AuthContext";
+import { Role } from "../../models/Auth";
 
 interface HeaderProps {
   currentPath?: string;
@@ -15,6 +16,7 @@ const Header: React.FC<HeaderProps> = ({ currentPath = "dashboard" }) => {
       const adminPath = path.replace("admin/", "");
 
       if (adminPath === "dashboard") return "Dashboard";
+      if (adminPath.startsWith("product/")) return "Chi tiết sản phẩm";
       if (adminPath === "products") return "Quản lý sản phẩm";
       if (
         adminPath.startsWith("import") ||
@@ -58,7 +60,7 @@ const Header: React.FC<HeaderProps> = ({ currentPath = "dashboard" }) => {
         <div className="text-right">
           <p className="font-medium text-gray-800">{user?.name}</p>
           <p className="text-sm text-gray-500">
-            {user?.role === "EMPLOYEE_ROLE" ? "Nhân viên" : "Quản lý"}
+            {user?.role === Role.EMPLOYEE_ROLE ? "Nhân viên" : "Quản lý"}
           </p>
         </div>
         <div className="h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center">

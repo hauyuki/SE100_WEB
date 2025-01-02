@@ -2,7 +2,7 @@ import Input from "./Input";
 import ButtonPrimary from "./Button/ButtonPrimary";
 import { useNavigate } from "react-router-dom";
 import { useLogin } from "../hooks/auth";
-import { AuthRequest, AuthResponse } from "../models/Auth";
+import { AuthRequest, AuthResponse, Role } from "../models/Auth";
 import { AuthSchema } from "../schemas/auth";
 import { USER_PROFILE } from "../utils/query-key";
 import { useForm } from "react-hook-form";
@@ -34,7 +34,11 @@ const LoginForm = () => {
     queryClient.invalidateQueries({
       queryKey: [USER_PROFILE],
     });
-    navigate("/dashboard", { replace: true }); // Change from "/home" to "/dashboard"
+    if (res.role === Role.ADMIN_ROLE) {
+      navigate("/admin/dashboard", { replace: true }); // Change from "/home" to "/dashboard"
+    } else {
+      navigate("/dashboard", { replace: true }); // Change from "/home" to "/dashboard"
+    }
   };
   const onSubmit = (data: AuthRequest) => {
     login(

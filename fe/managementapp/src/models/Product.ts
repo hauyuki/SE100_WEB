@@ -9,7 +9,7 @@ export type Product = {
   sku: string;
   marketPrice: string; // Using string to handle BigDecimal values in Java
   productionCost: string; // Using string to handle BigDecimal values in Java
-  image: string;
+  image?: string;
   minQuantity: number;
   maxQuantity: number;
   category: Category;

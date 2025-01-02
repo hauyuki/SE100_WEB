@@ -18,6 +18,7 @@ import {
   useGetWeekStatistic,
 } from "../../../hooks/statistics";
 import { useGetNeedInboundProducts } from "../../../hooks/products";
+import { useAuthContext } from "../../../contexts/AuthContext";
 
 const Dashboard = () => {
   // Sample data for weekly stats
@@ -30,14 +31,14 @@ const Dashboard = () => {
   const COLORS = ["#4F46E5", "#F97316", "#F43F5E", "#EC4899"];
 
   // Sample data for products table
-
+  const { user } = useAuthContext();
   return (
     <div className="pt-6 px-6">
       {/* Welcome Section */}
       <div className="bg-primary rounded-lg p-6 text-white mb-8 relative overflow-hidden">
         <div>
           <h2 className="text-2xl font-semibold">
-            Have a good day, Bích Huyền
+            Have a good day, {user?.name}
           </h2>
           <p className="mt-2 text-gray-100">
             Chúng mình hãy xem các báo cáo hoạt động.

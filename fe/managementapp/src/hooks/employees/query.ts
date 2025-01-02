@@ -1,11 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { QUERY_KEYS } from "../../utils/query-key";
-import { ShipmentApis } from "../../api/ShipmentApis";
+import { LIST_EMPLOYEE_KEY } from "../../utils/query-key";
 import { EmployeeApis } from "../../api/EmployeeApis";
 
 export const useGetEmployees = () => {
   return useQuery({
-    queryKey: [QUERY_KEYS.SHIPMENT_LIST],
+    queryKey: [LIST_EMPLOYEE_KEY],
     queryFn: () => EmployeeApis.getAllEmployees(),
   });
 };
