@@ -17,9 +17,13 @@ export type RegisterRequest = AuthModel & {
   name: string;
 };
 export type UserInfoModel = {
+  department: string;
+  avatar: string;
+
   id: number;
   name: string;
   username: string;
+  dob: Date;
   role: Role; // You could also create an enum for roles if you have predefined roles
   password: string; // Typically you'd store hashed passwords as strings
   phone: string | null; // Phone can be null

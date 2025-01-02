@@ -25,3 +25,8 @@ export type StockReport = {
   totalPrice: number;
   needInboundQuantity: number | null;
 };
+export type StockReportRequest = {
+  startDate: string;
+  endDate: string;
+  name: string;
+};

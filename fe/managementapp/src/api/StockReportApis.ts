@@ -14,4 +14,11 @@ export const StockReportApis = {
   }): Promise<WeeklyData[]> {
     return apiPost("/stocks/dateRange", request);
   },
+  creeateStockReport(request: {
+    startDate: string;
+    endDate: string;
+    name: string;
+  }): Promise<StockReport> {
+    return apiPost("/stocks", request);
+  },
 };

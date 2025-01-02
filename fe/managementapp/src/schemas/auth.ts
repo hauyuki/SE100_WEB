@@ -175,3 +175,17 @@ export const EmployeeRequestSchema = z.object({
   username: z.string(),
   password: z.string().optional(),
 });
+const InventoryCheckItemSchema = z.object({
+  loss: z.number().min(1, "Số lượng mất phải lớn hơn 0"), // Loss must be greater than 0
+  productId: z.number().int(), // Product ID must be an integer
+});
+
+// Main schema for the report request
+export const InventoryCheckRequestSchema = z.object({
+  date: z.string().refine((val) => !isNaN(Date.parse(val)), {
+    message: "Ngày không hợp lệ", // Date must be a valid ISO string
+  }),
+  name: z.string().min(1, "Tên báo cáo không thể để trống"), // InventoryCheck name cannot be empty
+  employeeId: z.number().int(), // Employee ID must be an integer
+  items: z.array(InventoryCheckItemSchema).min(1, "Cần ít nhất một sản phẩm"), // Ensure at least one item is provided
+});
