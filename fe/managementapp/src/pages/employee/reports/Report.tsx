@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   LineChart,
@@ -13,22 +13,53 @@ import {
   ChevronDownIcon,
   ArrowDownTrayIcon,
 } from "@heroicons/react/24/outline";
+import {
+  useGetStockReportDateRanges,
+  useGetStockReports,
+} from "../../../hooks/stocks";
 
 const Report = () => {
   const navigate = useNavigate();
-  const [timeFilter, setTimeFilter] = useState("7 ngày qua");
+
+  const [timeFilter, setTimeFilter] = useState<string>("7 ngày qua");
   const [showTimeFilterDropdown, setShowTimeFilterDropdown] = useState(false);
   const [showCustomDateRange, setShowCustomDateRange] = useState(false);
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+  const { data: chartData, refetch } = useGetStockReportDateRanges({
+    startDate: startDate,
+    endDate: endDate,
+  });
 
   const timeFilterOptions = ["7 ngày qua", "30 ngày qua", "Tùy chọn"];
+  useEffect(() => {
+    const calculateDateRange = (days: number) => {
+      const currentDate = new Date();
+      const pastDate = new Date();
+      pastDate.setDate(currentDate.getDate() - days);
+      setStartDate(pastDate.toISOString().split("T")[0]); // Format: YYYY-MM-DD
+      setEndDate(currentDate.toISOString().split("T")[0]); // Format: YYYY-MM-DD
+    };
 
+    if (timeFilter === "7 ngày qua") {
+      calculateDateRange(7);
+    } else if (timeFilter === "30 ngày qua") {
+      calculateDateRange(30);
+    }
+  }, [timeFilter]);
+  useEffect(() => {
+    if (startDate && endDate) {
+      refetch();
+    }
+  }, [startDate, endDate, refetch]);
   const handleTimeFilterSelect = (option: string) => {
     setTimeFilter(option);
     setShowTimeFilterDropdown(false);
+
     if (option === "Tùy chọn") {
       setShowCustomDateRange(true);
+      setStartDate(""); // Clear existing dates for custom range
+      setEndDate("");
     } else {
       setShowCustomDateRange(false);
     }
@@ -41,39 +72,7 @@ const Report = () => {
     }
   };
 
-  // Sample data for the line chart
-  const chartData = [
-    { day: "Wed", nhap: 10, xuat: 25 },
-    { day: "Thu", nhap: 15, xuat: 20 },
-    { day: "Fri", nhap: 20, xuat: 10 },
-    { day: "Sat", nhap: 25, xuat: 15 },
-    { day: "Sun", nhap: 22, xuat: 20 },
-    { day: "Mon", nhap: 18, xuat: 30 },
-    { day: "Tue", nhap: 5, xuat: 35 },
-  ];
-
-  // Sample data for the reports table
-  const reports = [
-    {
-      stt: 1,
-      name: "Báo cáo nhập xuất tháng 3/2024",
-      type: "Báo cáo nhập xuất",
-      dateCreated: "15/03/2024",
-    },
-    {
-      stt: 2,
-      name: "Báo cáo tồn kho Q1/2024",
-      type: "Báo cáo tồn kho",
-      dateCreated: "20/03/2024",
-    },
-    {
-      stt: 3,
-      name: "Báo cáo doanh thu Q1/2024",
-      type: "Báo cáo doanh thu",
-      dateCreated: "25/03/2024",
-    },
-  ];
-
+  const { data: reports } = useGetStockReports();
   return (
     <div className="p-6">
       {/* Statistics Section */}
@@ -89,7 +88,6 @@ const Report = () => {
               <ChevronDownIcon className="h-4 w-4" />
             </button>
 
-            {/* Time Filter Dropdown */}
             {showTimeFilterDropdown && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border z-10">
                 {timeFilterOptions.map((option) => (
@@ -104,7 +102,6 @@ const Report = () => {
               </div>
             )}
 
-            {/* Custom Date Range Popup */}
             {showCustomDateRange && (
               <div className="absolute right-0 mt-2 p-4 bg-white rounded-lg shadow-lg border z-10">
                 <div className="space-y-4">
@@ -189,6 +186,7 @@ const Report = () => {
       </div>
 
       {/* Reports Table Section */}
+      {/* Reports Table Section */}
       <div className="bg-white rounded-lg p-6">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg font-medium">Danh sách báo cáo</h2>
@@ -201,53 +199,85 @@ const Report = () => {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="min-w-full">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  STT
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Tên báo cáo
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Loại báo cáo
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Ngày lập
-                </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
-                  Thao tác
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {reports.map((report) => (
-                <tr key={report.stt} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {report.stt}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-indigo-600">
-                    {report.name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {report.type}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {report.dateCreated}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
-                    <button
-                      className="text-gray-600 hover:text-indigo-600 transition-colors"
-                      title="Tải xuống"
-                    >
-                      <ArrowDownTrayIcon className="h-5 w-5" />
-                    </button>
-                  </td>
+          {reports && (
+            <table className="min-w-full">
+              <thead>
+                <tr className="bg-gray-50 text-left">
+                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase">
+                    STT
+                  </th>
+                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase">
+                    Tên báo cáo
+                  </th>
+                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase">
+                    Ngày bắt đầu
+                  </th>
+                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase">
+                    Ngày kết thúc
+                  </th>
+                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase">
+                    Số lượng tồn
+                  </th>
+                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase">
+                    Nhập
+                  </th>
+                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase">
+                    Xuất
+                  </th>
+                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase">
+                    Giá nhập
+                  </th>
+                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase">
+                    Giá xuất
+                  </th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                    Thao tác
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>{" "}
+              <tbody className="divide-y divide-gray-200">
+                {reports?.map((report) => (
+                  <tr key={report.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {report.id}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-indigo-600">
+                      {report.name}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {new Date(report.startDate).toDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {new Date(report.endDate).toDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {report.stockQuantity}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {report.inboundQuantity}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {report.outboundQuantity}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {report.inboundPrice}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {report.outboundPrice}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                      <button
+                        className="text-gray-600 hover:text-indigo-600 transition-colors"
+                        title="Tải xuống"
+                      >
+                        <ArrowDownTrayIcon className="h-5 w-5" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>

@@ -18,6 +18,9 @@ export const ProductApis = {
   getAllProducts(): Promise<ListProductResponse> {
     return apiGet(`/products/all`);
   },
+  getNeedInboundProducts(): Promise<ListProductResponse> {
+    return apiGet(`/products/needInbound`);
+  },
 
   /**
    * Update a product by its ID.

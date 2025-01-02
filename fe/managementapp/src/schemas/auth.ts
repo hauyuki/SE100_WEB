@@ -149,3 +149,29 @@ export const UpdateShipmentSchema = z.object({
   fromPosition: z.string().optional(),
   toPosition: z.string().optional(),
 });
+
+export type EmployeeRequest = {
+  position: string;
+  address: string;
+  phone: string;
+  name: string;
+  department: string;
+  avatar: string;
+  dob: string; // ISO date format
+  username: string;
+  password: string;
+};
+
+export const EmployeeRequestSchema = z.object({
+  position: z.string(),
+  address: z.string(),
+  phone: z.string(),
+  name: z.string(),
+  department: z.string(),
+  avatar: z.string(),
+  dob: z.string().refine((date) => !isNaN(Date.parse(date)), {
+    message: "Invalid date format",
+  }),
+  username: z.string(),
+  password: z.string(),
+});

@@ -101,12 +101,6 @@ const ProductPage = () => {
     else if (sortQuantity === "asc") setSortQuantity("desc");
     else setSortQuantity("");
   };
-  const getQuantity = (id: number): number => {
-    let item = statistic?.items.find((item) => item.product.id === id);
-    if (item) {
-      return item.quantity;
-    } else return 0;
-  };
   const pageNumbers = [];
   for (let i = 1; i <= totalPages; i++) {
     pageNumbers.push(i);
@@ -257,12 +251,12 @@ const ProductPage = () => {
                     </td>
                     <td
                       className={`px-6 py-4 whitespace-nowrap text-sm ${
-                        getQuantity(product.id) <= product.minQuantity
+                        product.quantity <= product.minQuantity
                           ? "text-red-500"
                           : "text-gray-900"
                       }`}
                     >
-                      {getQuantity(product.id)}
+                      {product.quantity}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {product.tags?.[0]?.area.name ?? "A1"}

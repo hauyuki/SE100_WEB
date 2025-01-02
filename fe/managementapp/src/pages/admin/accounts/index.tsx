@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { FiEdit2, FiPlus } from "react-icons/fi";
 import AddAccountForm from "./components/AddAccountForm";
 import EditAccountForm from "./components/EditAccountForm";
+import { useGetEmployees } from "../../../hooks/employees";
+import { Employee } from "../../../models/Employee";
 
 interface Account {
   id: number;
@@ -35,13 +37,13 @@ const AccountManagementPage = () => {
     phone: "",
     password: "",
   });
-  const [editingAccount, setEditingAccount] = useState<Account | null>(null);
+  const [editingAccount, setEditingAccount] = useState<Employee | null>(null);
 
   const handleCreateAccount = () => {
     setIsAddPopupOpen(true);
   };
 
-  const handleEditAccount = (account: Account) => {
+  const handleEditAccount = (account: Employee) => {
     setEditingAccount(account);
     setIsEditPopupOpen(true);
   };
@@ -68,23 +70,7 @@ const AccountManagementPage = () => {
     });
     setIsAddPopupOpen(false);
   };
-
-  const handleEditSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingAccount) return;
-
-    const updatedAccounts = accounts.map((account) =>
-      account.id === editingAccount.id
-        ? {
-            ...editingAccount,
-            createdDate: editingAccount.createdDate,
-          }
-        : account
-    );
-    setAccounts(updatedAccounts);
-    setIsEditPopupOpen(false);
-    setEditingAccount(null);
-  };
+  const { data: employees } = useGetEmployees();
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -102,19 +88,14 @@ const AccountManagementPage = () => {
       <AddAccountForm
         isOpen={isAddPopupOpen}
         onClose={() => setIsAddPopupOpen(false)}
-        newAccount={newAccount}
-        setNewAccount={setNewAccount}
-        onSubmit={handleSubmit}
       />
-
-      <EditAccountForm
-        isOpen={isEditPopupOpen}
-        onClose={() => setIsEditPopupOpen(false)}
-        editingAccount={editingAccount}
-        setEditingAccount={setEditingAccount}
-        onSubmit={handleEditSubmit}
-      />
-
+      {editingAccount && (
+        <EditAccountForm
+          isOpen={isEditPopupOpen}
+          onClose={() => setIsEditPopupOpen(false)}
+          employee={editingAccount}
+        />
+      )}
       <div className="bg-white shadow-lg rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full table-auto">
@@ -124,13 +105,22 @@ const AccountManagementPage = () => {
                   STT
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                  Nhân viên
+                  Email
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+                  Họ tên
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
                   Chức vụ
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                  Ngày tạo
+                  Phòng ban
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+                  Địa chỉ
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+                  Số điện thoại
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
                   Edit
@@ -138,20 +128,29 @@ const AccountManagementPage = () => {
               </tr>
             </thead>
             <tbody>
-              {accounts.map((item) => (
+              {employees?.map((item) => (
                 <tr
                   key={item.id}
                   className="border-b border-gray-200 hover:bg-gray-50 transition duration-200"
                 >
                   <td className="px-6 py-4 text-sm text-gray-600">{item.id}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">
-                    {item.fullName}
+                    {item.username}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">
+                    {item.name}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">
                     {item.position}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">
-                    {item.createdDate}
+                    {item.department}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">
+                    {item.address}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">
+                    {item.phone}
                   </td>
                   <td className="px-6 py-4 text-sm">
                     <button

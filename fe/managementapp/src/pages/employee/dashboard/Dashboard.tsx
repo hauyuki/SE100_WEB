@@ -12,59 +12,24 @@ import {
   Cell,
 } from "recharts";
 import StatsCard from "../../../components/StatsCard";
+import {
+  useGetCategoryStatistic,
+  useGetStatistics,
+  useGetWeekStatistic,
+} from "../../../hooks/statistics";
+import { useGetNeedInboundProducts } from "../../../hooks/products";
 
 const Dashboard = () => {
   // Sample data for weekly stats
-  const weeklyData = [
-    { day: "Sat", nhap: 450, xuat: 200 },
-    { day: "Sun", nhap: 350, xuat: 150 },
-    { day: "Mon", nhap: 300, xuat: 250 },
-    { day: "Tue", nhap: 450, xuat: 380 },
-    { day: "Wed", nhap: 150, xuat: 220 },
-    { day: "Thu", nhap: 380, xuat: 250 },
-    { day: "Fri", nhap: 400, xuat: 320 },
-  ];
-
+  const { data: weeklyData } = useGetWeekStatistic();
+  const { data: pieData } = useGetCategoryStatistic();
+  const { data: statistic } = useGetStatistics();
+  const { data: products } = useGetNeedInboundProducts();
   // Sample data for pie chart
-  const pieData = [
-    { name: "Others", value: 35 },
-    { name: "Thực phẩm", value: 15 },
-    { name: "Hàng điện tử", value: 30 },
-    { name: "Đồ gia dụng", value: 20 },
-  ];
 
   const COLORS = ["#4F46E5", "#F97316", "#F43F5E", "#EC4899"];
 
   // Sample data for products table
-  const products = [
-    {
-      stt: 1,
-      sku: "SKU1",
-      name: "Content",
-      brand: "Dior",
-      category: "Kem chống nắng",
-      stock: 5,
-      price: "500.000",
-    },
-    {
-      stt: 2,
-      sku: "SKU1",
-      name: "Content",
-      brand: "Dior",
-      category: "Kem chống nắng",
-      stock: 6,
-      price: "500.000",
-    },
-    {
-      stt: 3,
-      sku: "SKU1",
-      name: "Content",
-      brand: "Dior",
-      category: "Kem chống nắng",
-      stock: 6,
-      price: "500.000",
-    },
-  ];
 
   return (
     <div className="pt-6 px-6">
@@ -87,9 +52,9 @@ const Dashboard = () => {
       {/* Stats Cards */}
       <div className="grid grid-cols-3 gap-6 mb-8">
         <StatsCard
-          title="Sản phẩm trong kho"
-          value={250}
-          percentage={20}
+          title="Sản phẩm đã nhập"
+          value={statistic?.indboundNumber}
+          percentage={statistic?.inboundPercentChange}
           icon={
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -108,9 +73,9 @@ const Dashboard = () => {
           }
         />
         <StatsCard
-          title="Vận chuyển"
-          value={10}
-          percentage={20}
+          title="Số lượng trong kho"
+          value={statistic?.stockNumber}
+          percentage={statistic?.stockPercentChange}
           icon={
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -130,8 +95,8 @@ const Dashboard = () => {
         />
         <StatsCard
           title="Số lượng hàng cần nhập"
-          value={200}
-          percentage={20}
+          value={statistic?.inboundNeededNumber}
+          percentage={statistic?.inboundNeededPercentChange}
           icon={
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -167,24 +132,26 @@ const Dashboard = () => {
         </div>
         <div className="bg-white p-4 rounded-lg shadow">
           <h3 className="text-gray-600 mb-4">Thống kê sản phẩm</h3>
-          <PieChart width={400} height={300}>
-            <Pie
-              data={pieData}
-              cx={200}
-              cy={150}
-              innerRadius={60}
-              outerRadius={80}
-              fill="#8884d8"
-              paddingAngle={5}
-              dataKey="value"
-            >
-              {pieData.map((entry, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={COLORS[index % COLORS.length]}
-                />
-              ))}
-            </Pie>
+          <PieChart width={400} height={340}>
+            {pieData && (
+              <Pie
+                data={pieData}
+                cx={200}
+                cy={150}
+                innerRadius={60}
+                outerRadius={80}
+                fill="#8884d8"
+                paddingAngle={5}
+                dataKey="value"
+              >
+                {pieData.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                  />
+                ))}
+              </Pie>
+            )}
             <Tooltip />
             <Legend />
           </PieChart>
@@ -222,9 +189,9 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {products.map((product) => (
-                <tr key={product.stt}>
-                  <td className="px-6 py-4 whitespace-nowrap">{product.stt}</td>
+              {products?.productList.map((product) => (
+                <tr key={product.id}>
+                  <td className="px-6 py-4 whitespace-nowrap">{product.id}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-primary">
                     {product.sku}
                   </td>
@@ -232,16 +199,16 @@ const Dashboard = () => {
                     {product.name}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {product.brand}
+                    {product.category?.name}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {product.category}
+                    {product.company?.name}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {product.stock}
+                    {product.quantity}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {product.price}
+                    {product.productionCost}
                   </td>
                 </tr>
               ))}
