@@ -7,6 +7,8 @@ import {
   useGetInventoryChecks,
 } from "../../../hooks/inventoryChecks";
 import Snackbar from "../../../components/Snackbar";
+import { useAuthContext } from "../../../contexts/AuthContext";
+import { Role } from "../../../models/Auth";
 
 interface AuditProduct {
   sku: string;
@@ -59,7 +61,7 @@ const AuditDetail = () => {
       type: "error",
     });
   };
-
+  const { user } = useAuthContext();
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -85,7 +87,7 @@ const AuditDetail = () => {
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center">
           <Link
-            to="/audit"
+            to={user?.role === Role.ADMIN_ROLE ? "/admin/audit" : "/audit"}
             className="inline-flex items-center text-indigo-600"
           >
             <ChevronLeftIcon className="h-5 w-5 mr-1" />
