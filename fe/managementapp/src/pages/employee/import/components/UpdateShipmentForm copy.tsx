@@ -7,38 +7,37 @@ import { UpdateShipmentSchema } from "../../../../schemas/auth";
 import { useUpdateShipment } from "../../../../hooks/shipments";
 import { UpdateShipmentRequest } from "../../../../models/Shipment";
 import ButtonPrimary from "../../../../components/Button/ButtonPrimary";
-import { OutboundReport } from "../../../../models/OutboundReport";
-interface UpdateExportFormProps {
+interface UpdateImportFormProps {
   showForm: boolean;
-  outboundData: OutboundReport;
+  importData: InboundReport;
   onClose: () => void;
 }
 
-const UpdateExportForm: React.FC<UpdateExportFormProps> = ({
+const UpdateImportForm: React.FC<UpdateImportFormProps> = ({
   showForm,
-  outboundData,
+  importData,
   onClose,
 }) => {
   const { mutate: updateShipment, isPending } = useUpdateShipment();
   const form = useForm<UpdateShipmentRequest>({
     resolver: zodResolver(UpdateShipmentSchema),
     defaultValues: {
-      date: outboundData.shipment.date.toISOString(),
-      completedDate: outboundData.shipment.completedDate
-        ? outboundData.shipment.completedDate.toISOString()
+      date: importData.shipment.date.toISOString(),
+      completedDate: importData.shipment.completedDate
+        ? importData.shipment.completedDate.toISOString()
         : "",
-      carrier: outboundData.shipment.carrier,
-      fromLocation: outboundData.shipment.fromPosition ?? "",
-      toLocation: outboundData.shipment.toPosition ?? "",
-      employeeId: outboundData.shipment.pic.id, // Adjust if necessary
-      status: outboundData.shipment.status,
-      type: outboundData.shipment.type,
+      carrier: importData.shipment.carrier,
+      fromLocation: importData.shipment.fromPosition ?? "",
+      toLocation: importData.shipment.toPosition ?? "",
+      employeeId: importData.shipment.pic.id, // Adjust if necessary
+      status: importData.shipment.status,
+      type: importData.shipment.type,
     },
   });
   const onSubmit = (data: UpdateShipmentRequest) => {
     console.log("Form Data:", data);
     updateShipment(
-      { ...data, id: outboundData.shipment.id },
+      { ...data, id: importData.shipment.id },
       {
         onSuccess: () => {
           console.log("success");
@@ -127,4 +126,4 @@ const UpdateExportForm: React.FC<UpdateExportFormProps> = ({
   );
 };
 
-export default UpdateExportForm;
+export default UpdateImportForm;

@@ -6,6 +6,8 @@ import { useGetTags } from "../../../hooks/tags";
 import { useGetProducts } from "../../../hooks/products";
 import { useGetAreas } from "../../../hooks/areas";
 import { Area } from "../../../models/Area";
+import { useAuthContext } from "../../../contexts/AuthContext";
+import { Role } from "../../../models/Auth";
 
 interface AreaProduct {
   name: string;
@@ -77,7 +79,7 @@ const Tag = () => {
     isPending: loading,
     isError: error,
   } = useGetProducts();
-
+  const { user } = useAuthContext();
   const handleAreaClick = (area: Area) => {
     setSelectedArea(area);
   };
@@ -201,12 +203,14 @@ const Tag = () => {
         <div className="bg-white rounded-lg p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-lg font-medium">DANH SÁCH THẺ TAG</h2>
-            <button
-              onClick={() => setIsAddModalOpen(true)}
-              className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90"
-            >
-              Tạo mới Tag
-            </button>
+            {user?.role === Role.ADMIN_ROLE && (
+              <button
+                onClick={() => setIsAddModalOpen(true)}
+                className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90"
+              >
+                Tạo mới Tag
+              </button>
+            )}{" "}
           </div>
 
           <table className="min-w-full">
@@ -264,11 +268,12 @@ const Tag = () => {
           </table>
 
           {/* Add Modal */}
-          <AddTagForm
-            isOpen={isAddModalOpen}
-            onClose={() => setIsAddModalOpen(false)}
-          />
-
+          {user?.role === Role.ADMIN_ROLE && (
+            <AddTagForm
+              isOpen={isAddModalOpen}
+              onClose={() => setIsAddModalOpen(false)}
+            />
+          )}
           {/* Edit Modal */}
           {selectedTag && (
             <EditTagModal

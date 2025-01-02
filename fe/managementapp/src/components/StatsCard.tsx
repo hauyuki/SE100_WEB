@@ -2,8 +2,8 @@ import React from "react";
 
 interface StatsCardProps {
   title: string;
-  value: number;
-  percentage: number;
+  value?: number;
+  percentage?: string;
   icon: React.ReactNode;
 }
 

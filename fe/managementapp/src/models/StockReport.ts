@@ -12,7 +12,16 @@ export type StockReportItem = {
 
 // StockReport: Defines the overall report, including a date and a list of StockReportItems
 export type StockReport = {
-  id: number; // Unique ID for the stock report
-  date: string; // Report date in ISO 8601 format
-  items: StockReportItem[]; // List of items in the report
+  id: number;
+  items: StockReportItem[];
+  name: string;
+  startDate: string; // ISO date string
+  endDate: string; // ISO date string
+  inboundQuantity: number;
+  outboundQuantity: number;
+  stockQuantity: number;
+  inboundPrice: number;
+  outboundPrice: number;
+  totalPrice: number;
+  needInboundQuantity: number | null;
 };

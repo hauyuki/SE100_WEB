@@ -3,6 +3,7 @@ import { FaCalendarAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import ImportTabs from "./components/ImportTabs";
 import { useGetShipments } from "../../../hooks/shipments";
+import Loading from "../../../components/Loading";
 
 interface ShippingData {
   id: number;
@@ -21,7 +22,7 @@ const Shipping = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [combinedData, setCombinedData] = useState<ShippingData[]>([]);
-  const { data: shipment } = useGetShipments();
+  const { data: shipment, isLoading, isError } = useGetShipments();
 
   // Dữ liệu mẫu cho phiếu nhập
   const importData = [
@@ -161,66 +162,71 @@ const Shipping = () => {
             <FaCalendarAlt className="absolute right-3 top-3 text-gray-400" />
           </div>
         </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-gray-50 text-gray-500 uppercase text-sm">
-                <th className="px-6 py-3 text-center">STT</th>
-                <th className="px-6 py-3 text-left">Mã vận đơn</th>
-                <th className="px-6 py-3 text-center">Loại</th>
-                <th className="px-6 py-3 text-right">Trạng thái </th>
-                <th className="px-6 py-3 text-left">Đơn vị vận chuyển</th>
-                <th className="px-6 py-3 text-center">Ngày vận chuyển</th>
-                <th className="px-6 py-3 text-center">Ngày hoàn thành</th>
-                <th className="px-6 py-3 text-left">Ghi chú</th>
-              </tr>
-            </thead>
-            <tbody>
-              {shipment?.shipmentList.map((item, index) => (
-                <tr
-                  key={item.id}
-                  className="border-b border-gray-200 hover:bg-gray-100 cursor-pointer"
-                >
-                  <td className="px-6 py-4 text-center">{index + 1}</td>
-                  <td className="px-6 py-4">
-                    <Link
-                      to={`/${item.type}/${item.id}`}
-                      className="text-indigo-500 hover:text-indigo-600"
-                    >
-                      {item.id}
-                    </Link>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        item.type === "INBOUND"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-blue-100 text-blue-800"
-                      }`}
-                    >
-                      {item.type === "INBOUND" ? "Nhập" : "Xuất"}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 ">{item.status}</td>
-                  <td className="px-6 py-4">{item.carrier}</td>
-                  <td className="px-6 py-4 text-center">
-                    {new Date(item.date).toDateString()}
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    {item.completedDate
-                      ? new Date(item.date).toDateString()
-                      : ""}
-                  </td>
-                  <td className="px-6 py-4">
-                    {item.fromPosition ? item.fromPosition : ""}
-                    {item.toPosition ? item.toPosition : ""}
-                  </td>
+        {isLoading ? (
+          <Loading />
+        ) : isError ? (
+          <div className="text-red-500 text-center py-4">Đã có lỗi xảy ra</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-gray-50 text-gray-500 uppercase text-sm">
+                  <th className="px-6 py-3 text-center">STT</th>
+                  <th className="px-6 py-3 text-left">Mã vận đơn</th>
+                  <th className="px-6 py-3 text-center">Loại</th>
+                  <th className="px-6 py-3 text-right">Trạng thái </th>
+                  <th className="px-6 py-3 text-left">Đơn vị vận chuyển</th>
+                  <th className="px-6 py-3 text-center">Ngày vận chuyển</th>
+                  <th className="px-6 py-3 text-center">Ngày hoàn thành</th>
+                  <th className="px-6 py-3 text-left">Ghi chú</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {shipment?.shipmentList.map((item, index) => (
+                  <tr
+                    key={item.id}
+                    className="border-b border-gray-200 hover:bg-gray-100 cursor-pointer"
+                  >
+                    <td className="px-6 py-4 text-center">{index + 1}</td>
+                    <td className="px-6 py-4">
+                      <Link
+                        to={`/${item.type}/${item.id}`}
+                        className="text-indigo-500 hover:text-indigo-600"
+                      >
+                        {item.id}
+                      </Link>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          item.type === "INBOUND"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-blue-100 text-blue-800"
+                        }`}
+                      >
+                        {item.type === "INBOUND" ? "Nhập" : "Xuất"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 ">{item.status}</td>
+                    <td className="px-6 py-4">{item.carrier}</td>
+                    <td className="px-6 py-4 text-center">
+                      {new Date(item.date).toDateString()}
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      {item.completedDate
+                        ? new Date(item.date).toDateString()
+                        : ""}
+                    </td>
+                    <td className="px-6 py-4">
+                      {item.fromPosition ? item.fromPosition : ""}
+                      {item.toPosition ? item.toPosition : ""}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

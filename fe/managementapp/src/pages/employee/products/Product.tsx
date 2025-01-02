@@ -7,6 +7,8 @@ import AddProductForm from "../../admin/products/component/AddProductForm";
 import { FaPlus } from "react-icons/fa";
 import { useGetStatistics } from "../../../hooks/statistics";
 import Loading from "../../../components/Loading";
+import { Role } from "../../../models/Auth";
+import { useAuthContext } from "../../../contexts/AuthContext";
 
 const ProductPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -18,13 +20,14 @@ const ProductPage = () => {
   const productsPerPage = 10;
   const navigate = useNavigate();
   const { data: statistic } = useGetStatistics();
-
   const {
     data: products,
     isPending: loading,
+    isRefetching,
     isError: error,
   } = useGetProducts();
   const [showForm, setShowForm] = useState(false);
+  const { user } = useAuthContext();
   // Get unique categories, companies, and storage areas for filters
   const categories = useMemo(() => {
     if (!products?.productList) return [];
@@ -102,19 +105,17 @@ const ProductPage = () => {
     else if (sortQuantity === "asc") setSortQuantity("desc");
     else setSortQuantity("");
   };
-  const getQuantity = (id: number): number => {
-    let item = statistic?.items.find((item) => item.product.id === id);
-    if (item) {
-      return item.quantity;
-    } else return 0;
-  };
   const pageNumbers = [];
   for (let i = 1; i <= totalPages; i++) {
     pageNumbers.push(i);
   }
 
   const handleRowClick = (id: number) => {
-    navigate(`/product/${id}`);
+    if (user?.role === Role.ADMIN_ROLE) {
+      navigate(`/admin/product/${id}`);
+    } else {
+      navigate(`/product/${id}`);
+    }
   };
 
   return (
@@ -136,7 +137,6 @@ const ProductPage = () => {
                 <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
               </div>
             </div>
-
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
@@ -149,7 +149,6 @@ const ProductPage = () => {
                 </option>
               ))}
             </select>
-
             <select
               value={selectedCompany}
               onChange={(e) => setSelectedCompany(e.target.value)}
@@ -162,7 +161,6 @@ const ProductPage = () => {
                 </option>
               ))}
             </select>
-
             <select
               value={selectedStorageArea}
               onChange={(e) => setSelectedStorageArea(e.target.value)}
@@ -175,7 +173,6 @@ const ProductPage = () => {
                 </option>
               ))}
             </select>
-
             <button
               onClick={handleQuantitySort}
               className={`px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
@@ -189,12 +186,14 @@ const ProductPage = () => {
                 ? "↓"
                 : ""}
             </button>
-            <button
-              className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center hover:bg-indigo-600 transition-colors"
-              onClick={() => setShowForm(true)}
-            >
-              <FaPlus className="text-white" />
-            </button>
+            {user && user.role === Role.ADMIN_ROLE && (
+              <button
+                className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center hover:bg-indigo-600 transition-colors"
+                onClick={() => setShowForm(true)}
+              >
+                <FaPlus className="text-white" />
+              </button>
+            )}{" "}
           </div>
         </div>
         <AddProductForm
@@ -202,7 +201,7 @@ const ProductPage = () => {
           onClose={() => setShowForm(false)}
         />
 
-        {loading ? (
+        {loading || isRefetching ? (
           <Loading />
         ) : error ? (
           <div className="text-red-500 text-center py-4">{error}</div>
@@ -258,12 +257,12 @@ const ProductPage = () => {
                     </td>
                     <td
                       className={`px-6 py-4 whitespace-nowrap text-sm ${
-                        getQuantity(product.id) <= product.minQuantity
+                        product.quantity <= product.minQuantity
                           ? "text-red-500"
                           : "text-gray-900"
                       }`}
                     >
-                      {getQuantity(product.id)}
+                      {product.quantity}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {product.tags?.[0]?.area.name ?? "A1"}

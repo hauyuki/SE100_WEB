@@ -54,6 +54,8 @@ export const routes = [
     component: AdminDashboard,
     layout: AdminLayout,
   },
+  { path: "/admin/product/:id", component: ProductDetail, layout: AdminLayout },
+
   { path: "/admin/products", component: AdminProductPage, layout: AdminLayout },
   { path: "/admin/import", component: AdminImportPage, layout: AdminLayout },
   { path: "/admin/export", component: AdminExportPage, layout: AdminLayout },

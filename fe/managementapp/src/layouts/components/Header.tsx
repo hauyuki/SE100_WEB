@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { UserCircleIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import { useAuthContext } from "../../contexts/AuthContext";
+import { Role } from "../../models/Auth";
 
 interface HeaderProps {
   currentPath?: string;
@@ -34,6 +35,7 @@ const Header: React.FC<HeaderProps> = ({ currentPath = "dashboard" }) => {
       const adminPath = path.replace("admin/", "");
 
       if (adminPath === "dashboard") return "Dashboard";
+      if (adminPath.startsWith("product/")) return "Chi tiết sản phẩm";
       if (adminPath === "products") return "Quản lý sản phẩm";
       if (
         adminPath.startsWith("import") ||
@@ -81,20 +83,16 @@ const Header: React.FC<HeaderProps> = ({ currentPath = "dashboard" }) => {
       </h1>
 
       {/* Right side - User info */}
-      <div className="relative" ref={dropdownRef}>
-        <div
-          className="flex items-center gap-3 cursor-pointer"
-          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-        >
-          <div className="text-right">
-            <p className="font-medium text-gray-800">{user?.name}</p>
-            <p className="text-sm text-gray-500">
-              {user?.role === "EMPLOYEE_ROLE" ? "Nhân viên" : "Quản lý"}
-            </p>
-          </div>
-          <div className="h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center">
-            <UserCircleIcon className="h-8 w-8 text-gray-400" />
-          </div>
+
+      <div className="flex items-center gap-3">
+        <div className="text-right">
+          <p className="font-medium text-gray-800">{user?.name}</p>
+          <p className="text-sm text-gray-500">
+            {user?.role === Role.EMPLOYEE_ROLE ? "Nhân viên" : "Quản lý"}
+          </p>
+        </div>
+        <div className="h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center">
+          <UserCircleIcon className="h-8 w-8 text-gray-400" />
         </div>
 
         {/* Dropdown Menu */}

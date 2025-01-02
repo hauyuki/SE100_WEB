@@ -108,7 +108,7 @@ export const UpsertProductModelSchema = z.object({
   productionCost: z
     .number()
     .min(0, "Production cost must be a positive number"), // Production cost must be a non-negative number
-  image: z.string().url("Invalid image URL format"), // Image must be a valid URL
+  image: z.string().optional(), // Image must be a valid URL
   minQuantity: z.number().min(0, "Minimum quantity must be a positive number"), // Minimum quantity must be a non-negative number
   maxQuantity: z.number().min(0, "Maximum quantity must be a positive number"), // Maximum quantity must be a non-negative number
   categoryId: z.coerce.number().int().min(1, "Category ID is required"), // Category ID must be a positive number
@@ -148,4 +148,30 @@ export const UpdateShipmentSchema = z.object({
   employeeId: z.number().int(),
   fromPosition: z.string().optional(),
   toPosition: z.string().optional(),
+});
+
+export type EmployeeRequest = {
+  position: string;
+  address: string;
+  phone: string;
+  name: string;
+  department: string;
+  avatar: string;
+  dob: string; // ISO date format
+  username: string;
+  password: string;
+};
+
+export const EmployeeRequestSchema = z.object({
+  position: z.string(),
+  address: z.string(),
+  phone: z.string(),
+  name: z.string(),
+  department: z.string(),
+  avatar: z.string(),
+  dob: z.string().refine((date) => !isNaN(Date.parse(date)), {
+    message: "Invalid date format",
+  }),
+  username: z.string(),
+  password: z.string().optional(),
 });

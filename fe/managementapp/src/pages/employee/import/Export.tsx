@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { FaCalendarAlt, FaPlus } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import ExportForm from "./components/ExportForm";
 import ImportTabs from "./components/ImportTabs";
 import UpdateExportForm from "./components/UpdateExportForm";
 import OutboundReportForm from "../../../components/OutboundReportForm";
 import { useGetOutboundReports } from "../../../hooks/outboundReports";
+import { OutboundReport } from "../../../models/OutboundReport";
 import Loading from "../../../components/Loading";
 
 interface Product {
@@ -26,17 +26,15 @@ interface FormData {
 }
 
 const Export = () => {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedValue, setSelectedValue] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [showUpdateForm, setShowUpdateForm] = useState(false);
-  const [selectedExport, setSelectedExport] = useState<{
-    orderId: string;
-    status: string;
-    completionDate?: string;
-  } | null>(null);
+  const [selectedExport, setSelectedExport] = useState<OutboundReport | null>(
+    null
+  );
   const [formData, setFormData] = useState<FormData>({
     orderId: "",
     shipper: "",
@@ -117,7 +115,13 @@ const Export = () => {
     });
     setShowForm(false);
   };
-  const { data: outboundData, isPending: loading } = useGetOutboundReports();
+  const {
+    data: outboundData,
+    isPending: loading,
+    isError,
+    isRefetching,
+    isLoading,
+  } = useGetOutboundReports();
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -126,64 +130,43 @@ const Export = () => {
     }).format(value);
   };
 
-  const filteredData = data
-    .filter(
-      (item) =>
-        item.orderId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.shipper.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.notes.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    .sort((a, b) => {
+  const filteredData = outboundData?.data
+    ?.filter((item) => {
+      const carrierMatch = item?.shipment?.carrier
+        ?.toLowerCase()
+        .includes(searchQuery?.toLowerCase());
+      const fromPositionMatch = item?.shipment?.fromPosition
+        ?.toLowerCase()
+        .includes(searchQuery?.toLowerCase());
+      const toPositionMatch = item?.shipment?.toPosition
+        ?.toLowerCase()
+        .includes(searchQuery?.toLowerCase());
+
+      const shipmentDate = new Date(item?.shipment?.date);
+      const isWithinDateRange =
+        (!startDate || shipmentDate >= new Date(startDate)) &&
+        (!endDate || shipmentDate <= new Date(endDate));
+
+      return (
+        (carrierMatch || fromPositionMatch || toPositionMatch) &&
+        isWithinDateRange
+      );
+    })
+    ?.sort((a, b) => {
       if (selectedValue === "asc") {
-        return a.totalValue - b.totalValue;
+        return a.quantity - b.quantity;
       } else if (selectedValue === "desc") {
-        return b.totalValue - a.totalValue;
+        return b.quantity - a.quantity;
       }
       return 0;
     });
 
   const handleEdit = (id: number) => {
-    const itemToEdit = data.find((item) => item.id === id);
+    const itemToEdit = outboundData?.data.find((item) => item.id === id);
     if (itemToEdit) {
-      setSelectedExport({
-        orderId: itemToEdit.orderId,
-        status: itemToEdit.status,
-        completionDate: itemToEdit.completionDate,
-      });
+      setSelectedExport(itemToEdit);
       setShowUpdateForm(true);
     }
-  };
-
-  const handleUpdateSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!selectedExport) return;
-
-    setData((prev) =>
-      prev.map((item) =>
-        item.orderId === selectedExport.orderId
-          ? {
-              ...item,
-              status: selectedExport.status,
-              completionDate:
-                selectedExport.status === "Vận chuyển thành công"
-                  ? selectedExport.completionDate || ""
-                  : "",
-            }
-          : item
-      )
-    );
-    setShowUpdateForm(false);
-    setSelectedExport(null);
-  };
-
-  const handleUpdateChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    if (!selectedExport) return;
-    setSelectedExport((prev) => ({
-      ...prev!,
-      [e.target.name]: e.target.value,
-    }));
   };
 
   return (
@@ -198,7 +181,7 @@ const Export = () => {
               placeholder="Tìm kiếm theo mã phiếu xuất, đơn vị vận chuyển hoặc ghi chú"
               className="w-full border rounded-md pl-4 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-400 text-sm"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => setSearchQuery(e.target.value ?? "")}
             />
             <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
               <svg
@@ -255,8 +238,20 @@ const Export = () => {
           onClose={() => setShowForm(false)}
         />
 
-        {loading ? (
+        {selectedExport && (
+          <UpdateExportForm
+            showForm={showUpdateForm}
+            outboundData={selectedExport}
+            onClose={() => {
+              setShowUpdateForm(false);
+              setSelectedExport(null);
+            }}
+          />
+        )}
+        {loading || isRefetching ? (
           <Loading />
+        ) : isError ? (
+          <div className="text-red-500 text-center py-4">Đã có lỗi xảy ra</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
@@ -325,19 +320,6 @@ const Export = () => {
               </tbody>
             </table>
           </div>
-        )}
-
-        {selectedExport && (
-          <UpdateExportForm
-            showForm={showUpdateForm}
-            exportData={selectedExport}
-            onClose={() => {
-              setShowUpdateForm(false);
-              setSelectedExport(null);
-            }}
-            onSubmit={handleUpdateSubmit}
-            onChange={handleUpdateChange}
-          />
         )}
       </div>
     </div>

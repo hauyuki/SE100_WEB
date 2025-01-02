@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { FiX } from "react-icons/fi";
 import { useGetAreas } from "../../../../hooks/areas";
 import { useCreateTag } from "../../../../hooks/tags";
@@ -39,10 +39,14 @@ const AddTagForm: React.FC<AddTagFormProps> = ({ isOpen, onClose }) => {
   };
 
   const {
+    reset,
     register,
     handleSubmit,
     formState: { errors },
   } = form;
+  useEffect(() => {
+    reset();
+  }, [isOpen]);
   if (!isOpen) return null;
 
   return (

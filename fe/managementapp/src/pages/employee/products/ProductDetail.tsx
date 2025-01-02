@@ -5,6 +5,8 @@ import { Link } from "react-router-dom";
 import productImage1 from "../../../assets/images/itempic.png";
 import { useDeleteProduct, useGetProductDetail } from "../../../hooks/products";
 import EditProductForm from "../../admin/products/component/EditProductForm";
+import { Role } from "../../../models/Auth";
+import { useAuthContext } from "../../../contexts/AuthContext";
 import Loading from "../../../components/Loading";
 
 const ProductDetail = () => {
@@ -13,9 +15,13 @@ const ProductDetail = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
   const [isShowEditForm, setIsShowEditForm] = useState(false);
-  const { data: editedProduct, isPending: loading } = useGetProductDetail(
-    Number(id)
-  );
+  const { user } = useAuthContext();
+  const {
+    data: editedProduct,
+    isLoading,
+    isRefetching,
+    isError,
+  } = useGetProductDetail(Number(id));
   const handleEdit = () => {
     // setIsEditing(true);
     setIsShowEditForm(true);
@@ -56,35 +62,43 @@ const ProductDetail = () => {
   };
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <Link to="/product" className="inline-flex items-center text-primary">
-          <ChevronLeftIcon className="h-5 w-5 mr-1" />
-          Trở về
-        </Link>
-        <button
-          onClick={handleEdit}
-          className="inline-flex items-center text-indigo-600 hover:text-indigo-900"
-        >
-          <PencilIcon className="h-5 w-5 mr-1" />
-          Sửa
-        </button>
-      </div>
-
-      {loading ? (
+    <>
+      {isLoading || isRefetching ? (
         <Loading />
-      ) : !editedProduct ? (
-        <div className="text-center text-gray-500">
-          Không tìm thấy thông tin sản phẩm
-        </div>
+      ) : isError ? (
+        <div className="text-red-500 text-center py-4">Đã có lỗi xảy ra</div>
       ) : (
-        <>
-          <EditProductForm
-            showForm={isShowEditForm}
-            onClose={() => setIsShowEditForm(false)}
-            product={editedProduct}
-          />
-          {/* Rest of the existing code */}
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-6">
+            <Link
+              to={
+                user?.role == Role.EMPLOYEE_ROLE
+                  ? "/product"
+                  : "/admin/products"
+              }
+              className="inline-flex items-center text-primary"
+            >
+              <ChevronLeftIcon className="h-5 w-5 mr-1" />
+              Trở về
+            </Link>
+            {user?.role == Role.ADMIN_ROLE && editedProduct && (
+              <button
+                onClick={handleEdit}
+                className="inline-flex items-center text-indigo-600 hover:text-indigo-900"
+              >
+                <PencilIcon className="h-5 w-5 mr-1" />
+                Sửa
+              </button>
+            )}{" "}
+          </div>
+          {editedProduct && (
+            <EditProductForm
+              showForm={isShowEditForm}
+              onClose={() => setIsShowEditForm(false)}
+              product={editedProduct}
+            />
+          )}{" "}
+          {/* Rest of the existing code until the general information section */}
           {/* General information */}
           <div className="bg-white rounded-lg p-6 mb-6">
             <h2 className="text-lg font-medium mb-4">Thông tin chung</h2>
@@ -253,8 +267,8 @@ const ProductDetail = () => {
                 <thead>
                   <tr className="bg-gray-50">
                     {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      STT
-                    </th> */}
+                  STT
+                </th> */}
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                       Mã phiếu nhập
                     </th>
@@ -328,11 +342,11 @@ const ProductDetail = () => {
           {/* Action buttons */}
           <div className="bg-white rounded-lg p-6 flex justify-end gap-4">
             {/* <button
-              onClick={handleSave}
-              className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
-            >
-              Lưu
-            </button> */}
+          onClick={handleSave}
+          className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+        >
+          Lưu
+        </button> */}
             <button
               onClick={handleDelete}
               className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
@@ -340,9 +354,9 @@ const ProductDetail = () => {
               Xóa
             </button>
           </div>
-        </>
+        </div>
       )}
-    </div>
+    </>
   );
 };
 

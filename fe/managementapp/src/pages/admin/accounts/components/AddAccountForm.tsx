@@ -1,143 +1,176 @@
-import React from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import React, { useEffect } from "react";
+import { useForm } from "react-hook-form";
 import { FiX } from "react-icons/fi";
+import { EmployeeRequestSchema } from "../../../../schemas/auth";
+import { EmployeeRequest } from "../../../../models/Employee";
+import ButtonPrimary from "../../../../components/Button/ButtonPrimary";
+import { useCreateEmployee } from "../../../../hooks/employees";
 
 interface AddAccountFormProps {
   isOpen: boolean;
   onClose: () => void;
-  newAccount: {
-    fullName: string;
-    position: string;
-    department: string;
-    email: string;
-    phone: string;
-    password: string;
-  };
-  setNewAccount: (account: {
-    fullName: string;
-    position: string;
-    department: string;
-    email: string;
-    phone: string;
-    password: string;
-  }) => void;
-  onSubmit: (e: React.FormEvent) => void;
 }
 
-const AddAccountForm: React.FC<AddAccountFormProps> = ({
-  isOpen,
-  onClose,
-  newAccount,
-  setNewAccount,
-  onSubmit,
-}) => {
+const AddAccountForm: React.FC<AddAccountFormProps> = ({ isOpen, onClose }) => {
+  const { mutate: createEmployee, isPending } = useCreateEmployee();
+
+  const form = useForm<EmployeeRequest>({
+    resolver: zodResolver(EmployeeRequestSchema),
+    defaultValues: {
+      name: "",
+      position: "",
+      phone: "",
+      department: "",
+      avatar:
+        "https://cbpdizdmebasivufwuer.supabase.co/storage/v1/object/sign/default/avatar.png?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJkZWZhdWx0L2F2YXRhci5wbmciLCJpYXQiOjE3MzU3MzI3MDMsImV4cCI6MjA1MTA5MjcwM30.noj-wPlNid8enMv1c-BzIia8k7XNdCpDOq3JmW-spQk",
+      username: "",
+      password: "",
+    },
+  });
+
+  const {
+    reset,
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = form;
+  useEffect(() => {
+    reset();
+  }, []);
+  const onSubmit = (data: EmployeeRequest) => {
+    console.log(data);
+    createEmployee(data, {
+      onSuccess: () => onClose(),
+      onError: () => console.error("Error creating employee"),
+    });
+  };
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-gray-800">
-            Create New Account
+            Tạo Tài Khoản Mới
           </h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 transition duration-200"
+            aria-label="Close"
           >
             <FiX className="w-6 h-6" />
           </button>
         </div>
-        <form onSubmit={onSubmit}>
-          <div className="mb-4">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="grid grid-cols-2 gap-4"
+        >
+          <div className="col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Họ và tên
             </label>
             <input
               type="text"
-              value={newAccount.fullName}
-              onChange={(e) =>
-                setNewAccount({ ...newAccount, fullName: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              placeholder="Nhập họ và tên của bạn"
+              {...register("name")}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               required
             />
           </div>
-          <div className="mb-4">
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Phòng ban
             </label>
             <input
               type="text"
-              value={newAccount.department}
-              onChange={(e) =>
-                setNewAccount({ ...newAccount, department: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              placeholder="Nhập phòng ban"
+              {...register("department")}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               required
             />
           </div>
-          <div className="mb-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Địa chỉ
+            </label>
+            <input
+              type="text"
+              placeholder="Nhập địa chỉ"
+              {...register("address")}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Ngày sinh
+            </label>
+            <input
+              type="date"
+              {...register("dob")}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              required
+            />
+          </div>
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Chức vụ
             </label>
             <input
               type="text"
-              value={newAccount.position}
-              onChange={(e) =>
-                setNewAccount({ ...newAccount, position: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              placeholder="Nhập chức vụ"
+              {...register("position")}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               required
             />
           </div>
-          <div className="mb-4">
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Email liên hệ
             </label>
             <input
               type="email"
-              value={newAccount.email}
-              onChange={(e) =>
-                setNewAccount({ ...newAccount, email: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              placeholder="Nhập email liên hệ"
+              {...register("username")}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               required
             />
           </div>
-          <div className="mb-4">
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Số điện thoại liên hệ
             </label>
             <input
               type="tel"
-              value={newAccount.phone}
-              onChange={(e) =>
-                setNewAccount({ ...newAccount, phone: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              placeholder="Nhập số điện thoại"
+              {...register("phone")}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               required
             />
           </div>
-          <div className="mb-6">
+          <div className="col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Mật khẩu
             </label>
             <input
               type="password"
-              value={newAccount.password}
-              onChange={(e) =>
-                setNewAccount({ ...newAccount, password: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              placeholder="Nhập mật khẩu"
+              {...register("password")}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               required
             />
           </div>
-          <div className="flex justify-end gap-3">
-            <button
+          <div className="col-span-2 flex justify-end gap-3">
+            <ButtonPrimary
               type="submit"
-              className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+              disabled={isPending}
+              loading={isPending}
+              className="px-6 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none"
             >
-              Create
-            </button>
+              Lưu
+            </ButtonPrimary>
           </div>
         </form>
       </div>

@@ -8,7 +8,7 @@ import ButtonPrimary from "./Button/ButtonPrimary";
 import { usePostOutboundReports } from "../hooks/outboundReports";
 import { useAuthContext } from "../contexts/AuthContext";
 import { ItemRequest, OutboundReportRequest } from "../models/OutboundReport";
-import { useGetStatistics } from "../hooks/statistics";
+import { Product } from "../models/Product";
 
 const OutboundReportForm = ({
   onClose,
@@ -38,8 +38,12 @@ const OutboundReportForm = ({
   });
 
   const { mutate: addOutboundReport, isPending } = usePostOutboundReports();
-  const { data: stockDatas } = useGetStatistics();
   const { data: products } = useGetProducts();
+  const [stockDatas, setStockDatas] = useState<Product[]>([]);
+  useEffect(() => {
+    let ee = products?.productList.filter((item) => item.quantity > 0) ?? [];
+    setStockDatas(ee);
+  }, [products]);
   console.log(form.formState.errors);
   const {
     register,
@@ -50,18 +54,15 @@ const OutboundReportForm = ({
   } = form;
   const items = watch("items"); // Watching the items array to dynamically add products
   const availableProducts = useMemo(() => {
-    if (!stockDatas?.items) return [];
-    return stockDatas.items.filter(
+    if (!stockDatas) return [];
+    return stockDatas.filter(
       (item) =>
-        !items.some(
-          (selected) => Number(selected.productId) === item.product.id
-        )
+        !items.some((selected) => Number(selected.productId) === item.id)
     );
   }, [stockDatas, items]);
 
   const [currentItem, setCurrentItem] = useState<ItemRequest>({
-    productId:
-      availableProducts.length > 0 ? availableProducts[0].product.id : 0,
+    productId: availableProducts.length > 0 ? availableProducts[0].id : 0,
     quantity: 0,
     unitPrice: 0,
   });
@@ -71,8 +72,7 @@ const OutboundReportForm = ({
   useEffect(() => {
     setCurrentItem({
       ...currentItem,
-      productId:
-        availableProducts.length > 0 ? availableProducts[0].product.id : 0,
+      productId: availableProducts.length > 0 ? availableProducts[0].id : 0,
     });
   }, [availableProducts]);
 
@@ -93,7 +93,7 @@ const OutboundReportForm = ({
   const addItem = () => {
     console.log("call this");
     const product = availableProducts.find(
-      (p) => p.product.id === currentItem.productId
+      (p) => p.id === currentItem.productId
     );
 
     if (!product) return;
@@ -122,8 +122,7 @@ const OutboundReportForm = ({
     setValue("items", updatedItems); // Update the form state with new items
 
     setCurrentItem({
-      productId:
-        availableProducts.length > 0 ? availableProducts[0].product.id : 0,
+      productId: availableProducts.length > 0 ? availableProducts[0].id : 0,
       quantity: 0,
       unitPrice: 0,
     }); // Reset current item with first product as default
@@ -310,12 +309,9 @@ const OutboundReportForm = ({
                       className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     >
                       {availableProducts?.map((product) => (
-                        <option
-                          key={product.product.id}
-                          value={product.product.id}
-                        >
-                          {product.product.name} - {product.product.marketPrice}{" "}
-                          - {product.quantity}
+                        <option key={product.id} value={product.id}>
+                          {product.name} - {product.marketPrice} -{" "}
+                          {product.quantity}
                         </option>
                       ))}
                     </select>

@@ -10,6 +10,7 @@ import { useGetCompanies } from "../../../../hooks/companies";
 import { useGetTags } from "../../../../hooks/tags";
 import { XCircleIcon } from "@heroicons/react/24/outline";
 import { apiUploadImage } from "../../../../utils";
+import { v4 as uuidv4 } from "uuid";
 
 const AddProductForm = ({
   showForm,
@@ -27,22 +28,24 @@ const AddProductForm = ({
       marketPrice: 0,
       productionCost: 0,
       image: "",
-      minQuantity: 0,
-      maxQuantity: 0,
-      categoryId: 0,
-      companyId: 0,
+      minQuantity: 10,
+      maxQuantity: 1000,
       tagIds: [],
     },
   });
   const [image, setImage] = useState<any>("");
 
   const {
+    reset,
     register,
     handleSubmit,
     formState: { errors },
     setValue,
     watch,
   } = form;
+  useEffect(() => {
+    reset();
+  }, []);
   const { mutate: addProduct, isPending } = usePostProducts();
   const { data: categories } = useGetCategories();
   const { data: companies } = useGetCompanies();
@@ -79,6 +82,15 @@ const AddProductForm = ({
       }
     );
   };
+  const productName = watch("name");
+  useEffect(() => {
+    if (productName) {
+      const generatedSKU =
+        productName.replace(/\s+/g, "-").substring(0, 10) +
+        uuidv4().toString().substring(0, 3);
+      setValue("sku", generatedSKU);
+    }
+  }, [productName]);
 
   if (!showForm) return null;
 
@@ -96,6 +108,22 @@ const AddProductForm = ({
         </div>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Product Name
+              </label>
+              <input
+                type="text"
+                {...register("name")}
+                placeholder="Nhập tên sản phẩm"
+                className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                required
+              />
+              {errors.name && (
+                <p className="text-red-500 text-sm">{errors.name.message}</p>
+              )}
+            </div>
+
             {/* SKU Field */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -103,6 +131,8 @@ const AddProductForm = ({
               </label>
               <input
                 type="text"
+                readOnly
+                disabled
                 {...register("sku")}
                 className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
@@ -113,20 +143,6 @@ const AddProductForm = ({
             </div>
 
             {/* Product Name Field */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Product Name
-              </label>
-              <input
-                type="text"
-                {...register("name")}
-                className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                required
-              />
-              {errors.name && (
-                <p className="text-red-500 text-sm">{errors.name.message}</p>
-              )}
-            </div>
 
             {/* Description Field */}
 
@@ -181,18 +197,35 @@ const AddProductForm = ({
             {/* Market Price Field */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Market Price
+                Prouduction cost
               </label>
               <input
                 type="number"
-                {...register("marketPrice", { valueAsNumber: true })}
+                {...register("productionCost", { valueAsNumber: true })}
                 className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
                 min="0"
               />
-              {errors.marketPrice && (
+              {errors.productionCost && (
                 <p className="text-red-500 text-sm">
-                  {errors.marketPrice.message}
+                  {errors.productionCost.message}
+                </p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Market Price
+              </label>
+              <input
+                type="number"
+                {...register("productionCost", { valueAsNumber: true })}
+                className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                required
+                min="0"
+              />
+              {errors.productionCost && (
+                <p className="text-red-500 text-sm">
+                  {errors.productionCost.message}
                 </p>
               )}
             </div>
@@ -299,7 +332,7 @@ const AddProductForm = ({
             </div>
           </div>
           <div className="col-span-2">
-            <label>Food image</label>
+            <label>Product image</label>
             <div className="mt-1 relative flex justify-center px-6 pt-5 pb-6 border-2 border-neutral-300 dark:border-neutral-700 border-dashed rounded-md">
               {image && (
                 <>
@@ -384,6 +417,7 @@ const AddProductForm = ({
               Description
             </label>
             <textarea
+              placeholder="Product description"
               {...register("description")}
               className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               rows={4}
@@ -408,7 +442,7 @@ const AddProductForm = ({
               type="submit"
               className="px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600"
             >
-              {isPending ? "Adding..." : "Add Product"}
+              {isPending ? "Đang thêm..." : "Thêm sản phẩm"}
             </button>
           </div>
         </form>
