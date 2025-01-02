@@ -1,6 +1,8 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
+import { useAuthContext } from "../contexts/AuthContext";
+import Snackbar from "../components/Snackbar";
 
 interface UserProfile {
   role: string;
@@ -13,7 +15,18 @@ interface UserProfile {
 }
 
 const Profile = () => {
+  const navigate = useNavigate();
+  const { user } = useAuthContext();
   const [isEditing, setIsEditing] = useState(false);
+  const [snackbar, setSnackbar] = useState<{
+    show: boolean;
+    message: string;
+    type: "success" | "error";
+  }>({
+    show: false,
+    message: "",
+    type: "success",
+  });
   const [profile, setProfile] = useState<UserProfile>({
     role: "EMPLOYEE_ROLE",
     address: "123 Đường ABC, Quận XYZ, TP.HCM",
@@ -33,22 +46,46 @@ const Profile = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // TODO: Implement save profile logic
-    console.log("Saving profile:", profile);
-    setIsEditing(false);
+    try {
+      // TODO: Implement save profile logic
+      console.log("Saving profile:", profile);
+      setIsEditing(false);
+      setSnackbar({
+        show: true,
+        message: "Cập nhật thông tin thành công",
+        type: "success",
+      });
+    } catch (error) {
+      setSnackbar({
+        show: true,
+        message: "Có lỗi xảy ra khi cập nhật thông tin",
+        type: "error",
+      });
+    }
+  };
+
+  const handleBack = () => {
+    // Navigate to dashboard based on user role
+    const dashboardPath =
+      user?.role === "ADMIN_ROLE" ? "/admin/dashboard" : "/dashboard";
+    navigate(dashboardPath);
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar((prev) => ({ ...prev, show: false }));
   };
 
   return (
     <div className="container mx-auto p-6 max-w-3xl">
       {/* Back button */}
       <div className="mb-6">
-        <Link
-          to="/"
+        <button
+          onClick={handleBack}
           className="inline-flex items-center text-indigo-600 hover:text-indigo-700"
         >
           <ChevronLeftIcon className="h-5 w-5 mr-1" />
           Trở về
-        </Link>
+        </button>
       </div>
 
       <div className="bg-white rounded-lg shadow-md">
@@ -191,6 +228,13 @@ const Profile = () => {
           </div>
         </form>
       </div>
+
+      <Snackbar
+        show={snackbar.show}
+        message={snackbar.message}
+        type={snackbar.type}
+        onClose={handleCloseSnackbar}
+      />
     </div>
   );
 };

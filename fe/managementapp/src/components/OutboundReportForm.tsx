@@ -10,12 +10,18 @@ import { useAuthContext } from "../contexts/AuthContext";
 import { ItemRequest, OutboundReportRequest } from "../models/OutboundReport";
 import { Product } from "../models/Product";
 
-const OutboundReportForm = ({
-  onClose,
-  showForm,
-}: {
-  onClose: () => void;
+interface OutboundReportFormProps {
   showForm: boolean;
+  onClose: () => void;
+  onSuccess?: () => void;
+  onError?: () => void;
+}
+
+const OutboundReportForm: React.FC<OutboundReportFormProps> = ({
+  showForm,
+  onClose,
+  onSuccess,
+  onError,
 }) => {
   // Setup for the form
   const { user } = useAuthContext();
@@ -135,9 +141,11 @@ const OutboundReportForm = ({
         onSuccess: () => {
           console.log("success");
           onClose();
+          onSuccess?.();
         },
-        onError: () => {
-          console.log("err");
+        onError: (error) => {
+          console.error("Error creating outbound report:", error);
+          onError?.();
         },
       }
     );

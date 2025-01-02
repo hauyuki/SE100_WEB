@@ -12,12 +12,16 @@ interface UpdateExportFormProps {
   showForm: boolean;
   outboundData: OutboundReport;
   onClose: () => void;
+  onSuccess?: () => void;
+  onError?: () => void;
 }
 
 const UpdateExportForm: React.FC<UpdateExportFormProps> = ({
   showForm,
   outboundData,
   onClose,
+  onSuccess,
+  onError,
 }) => {
   const { mutate: updateShipment, isPending } = useUpdateShipment();
   const form = useForm<UpdateShipmentRequest>({
@@ -30,11 +34,12 @@ const UpdateExportForm: React.FC<UpdateExportFormProps> = ({
       carrier: outboundData.shipment.carrier,
       fromLocation: outboundData.shipment.fromPosition ?? "",
       toLocation: outboundData.shipment.toPosition ?? "",
-      employeeId: outboundData.shipment.pic.id, // Adjust if necessary
+      employeeId: outboundData.shipment.pic.id,
       status: outboundData.shipment.status,
       type: outboundData.shipment.type,
     },
   });
+
   const onSubmit = (data: UpdateShipmentRequest) => {
     console.log("Form Data:", data);
     updateShipment(
@@ -43,13 +48,16 @@ const UpdateExportForm: React.FC<UpdateExportFormProps> = ({
         onSuccess: () => {
           console.log("success");
           onClose();
+          onSuccess?.();
         },
         onError: () => {
           console.log("err");
+          onError?.();
         },
       }
     );
   };
+
   const {
     register,
     handleSubmit,

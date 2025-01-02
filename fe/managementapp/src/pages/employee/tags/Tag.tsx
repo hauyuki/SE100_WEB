@@ -8,6 +8,7 @@ import { useGetAreas } from "../../../hooks/areas";
 import { Area } from "../../../models/Area";
 import { useAuthContext } from "../../../contexts/AuthContext";
 import { Role } from "../../../models/Auth";
+import Snackbar from "../../../components/Snackbar";
 
 interface AreaProduct {
   name: string;
@@ -30,6 +31,11 @@ const Tag = () => {
     date: string;
   } | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    show: false,
+    message: "",
+    type: "success" as "success" | "error",
+  });
 
   // Warehouse areas data
   const warehouseAreas: WarehouseArea[] = [
@@ -110,15 +116,43 @@ const Tag = () => {
   };
 
   const handleEditSubmit = (tagData: { name: string; meaning: string }) => {
-    // Handle the edit submission here
-    console.log("Updated tag:", tagData);
-    // You would typically make an API call here to update the tag
+    try {
+      // Handle the edit submission here
+      console.log("Updated tag:", tagData);
+      // You would typically make an API call here to update the tag
+      setSnackbar({
+        show: true,
+        message: "Cập nhật tag thành công!",
+        type: "success",
+      });
+      setIsEditModalOpen(false);
+    } catch (error) {
+      setSnackbar({
+        show: true,
+        message: "Có lỗi xảy ra khi cập nhật tag!",
+        type: "error",
+      });
+    }
   };
 
   const handleAddSubmit = (tagData: { name: string; meaning: string }) => {
-    // Handle the add submission here
-    console.log("New tag:", tagData);
-    // You would typically make an API call here to create the tag
+    try {
+      // Handle the add submission here
+      console.log("New tag:", tagData);
+      // You would typically make an API call here to create the tag
+      setSnackbar({
+        show: true,
+        message: "Thêm tag mới thành công!",
+        type: "success",
+      });
+      setIsAddModalOpen(false);
+    } catch (error) {
+      setSnackbar({
+        show: true,
+        message: "Có lỗi xảy ra khi thêm tag mới!",
+        type: "error",
+      });
+    }
   };
 
   return (
@@ -288,6 +322,13 @@ const Tag = () => {
           )}
         </div>
       </div>
+
+      <Snackbar
+        show={snackbar.show}
+        message={snackbar.message}
+        type={snackbar.type}
+        onClose={() => setSnackbar({ ...snackbar, show: false })}
+      />
     </div>
   );
 };

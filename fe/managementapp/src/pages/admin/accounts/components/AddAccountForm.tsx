@@ -10,9 +10,16 @@ import { useCreateEmployee } from "../../../../hooks/employees";
 interface AddAccountFormProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
+  onError?: (error: string) => void;
 }
 
-const AddAccountForm: React.FC<AddAccountFormProps> = ({ isOpen, onClose }) => {
+const AddAccountForm: React.FC<AddAccountFormProps> = ({
+  isOpen,
+  onClose,
+  onSuccess,
+  onError,
+}) => {
   const { mutate: createEmployee, isPending } = useCreateEmployee();
 
   const form = useForm<EmployeeRequest>({
@@ -41,8 +48,14 @@ const AddAccountForm: React.FC<AddAccountFormProps> = ({ isOpen, onClose }) => {
   const onSubmit = (data: EmployeeRequest) => {
     console.log(data);
     createEmployee(data, {
-      onSuccess: () => onClose(),
-      onError: () => console.error("Error creating employee"),
+      onSuccess: () => {
+        onClose();
+        onSuccess?.();
+      },
+      onError: (error) => {
+        console.error("Error creating employee:", error);
+        onError?.(error.message || "Error creating employee");
+      },
     });
   };
 

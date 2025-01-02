@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { FiX } from "react-icons/fi";
 import { useGetAreas } from "../../../../hooks/areas";
 import { useCreateTag } from "../../../../hooks/tags";
@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CreateTagRequest } from "../../../../models/Tag";
 import { UpsertTagModelSchema } from "../../../../schemas/auth";
+import Snackbar from "../../../../components/Snackbar";
 
 interface AddTagFormProps {
   isOpen: boolean;
@@ -15,6 +16,16 @@ interface AddTagFormProps {
 const AddTagForm: React.FC<AddTagFormProps> = ({ isOpen, onClose }) => {
   const { data: areas } = useGetAreas();
   const { mutate: addTag, isPending } = useCreateTag();
+  const [snackbar, setSnackbar] = useState<{
+    show: boolean;
+    message: string;
+    type: "success" | "error";
+  }>({
+    show: false,
+    message: "",
+    type: "success",
+  });
+
   const form = useForm<CreateTagRequest>({
     resolver: zodResolver(UpsertTagModelSchema),
     defaultValues: {
@@ -23,16 +34,27 @@ const AddTagForm: React.FC<AddTagFormProps> = ({ isOpen, onClose }) => {
       areaId: 0,
     },
   });
+
   const onSubmit = (data: CreateTagRequest) => {
     addTag(
       { ...data },
       {
         onSuccess: () => {
           console.log("Tag add successfully");
+          setSnackbar({
+            show: true,
+            message: "Thêm tag thành công",
+            type: "success",
+          });
           onClose();
         },
-        onError: () => {
+        onError: (error) => {
           console.log("Error adding tag");
+          setSnackbar({
+            show: true,
+            message: error.message || "Có lỗi xảy ra khi thêm tag",
+            type: "error",
+          });
         },
       }
     );
@@ -117,6 +139,12 @@ const AddTagForm: React.FC<AddTagFormProps> = ({ isOpen, onClose }) => {
           </div>
         </form>
       </div>
+      <Snackbar
+        show={snackbar.show}
+        message={snackbar.message}
+        type={snackbar.type}
+        onClose={() => setSnackbar({ ...snackbar, show: false })}
+      />
     </div>
   );
 };

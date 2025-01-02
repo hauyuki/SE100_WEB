@@ -8,6 +8,7 @@ import { useGetInboundReports } from "../../../hooks/inboundReports";
 import AddProductForm from "../../admin/products/component/AddProductForm";
 import { InboundReport } from "../../../models";
 import Loading from "../../../components/Loading";
+import Snackbar from "../../../components/Snackbar";
 
 interface Product {
   id: string;
@@ -73,6 +74,15 @@ const Import = () => {
       notes: "Express Import",
     },
   ]);
+  const [snackbar, setSnackbar] = useState<{
+    show: boolean;
+    message: string;
+    type: "success" | "error";
+  }>({
+    show: false,
+    message: "",
+    type: "success",
+  });
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -185,6 +195,45 @@ const Import = () => {
     }));
   };
 
+  const handleCloseSnackbar = () => {
+    setSnackbar((prev) => ({ ...prev, show: false }));
+  };
+
+  const handleAddSuccess = () => {
+    setShowForm(false);
+    setSnackbar({
+      show: true,
+      message: "Thêm phiếu nhập thành công",
+      type: "success",
+    });
+  };
+
+  const handleAddError = () => {
+    setSnackbar({
+      show: true,
+      message: "Có lỗi xảy ra khi thêm phiếu nhập",
+      type: "error",
+    });
+  };
+
+  const handleUpdateSuccess = () => {
+    setShowUpdateForm(false);
+    setSelectedImport(null);
+    setSnackbar({
+      show: true,
+      message: "Cập nhật phiếu nhập thành công",
+      type: "success",
+    });
+  };
+
+  const handleUpdateError = () => {
+    setSnackbar({
+      show: true,
+      message: "Có lỗi xảy ra khi cập nhật phiếu nhập",
+      type: "error",
+    });
+  };
+
   return (
     <div className="container mx-auto p-6">
       <ImportTabs />
@@ -260,6 +309,8 @@ const Import = () => {
         <InboundReportForm
           showForm={showForm}
           onClose={() => setShowForm(false)}
+          onSuccess={handleAddSuccess}
+          onError={handleAddError}
         />
         {/* <AddProductForm
           showForm={showForm}
@@ -273,6 +324,8 @@ const Import = () => {
               setShowUpdateForm(false);
               setSelectedImport(null);
             }}
+            onSuccess={handleUpdateSuccess}
+            onError={handleUpdateError}
           />
         )}
         {loading || isRefetching ? (
@@ -351,6 +404,13 @@ const Import = () => {
           </div>
         )}
       </div>
+
+      <Snackbar
+        show={snackbar.show}
+        message={snackbar.message}
+        type={snackbar.type}
+        onClose={handleCloseSnackbar}
+      />
     </div>
   );
 };
