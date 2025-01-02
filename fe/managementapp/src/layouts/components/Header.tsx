@@ -1,14 +1,33 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { UserCircleIcon } from "@heroicons/react/24/outline";
+import { Link } from "react-router-dom";
 import { useAuthContext } from "../../contexts/AuthContext";
 import { Role } from "../../models/Auth";
 
 interface HeaderProps {
   currentPath?: string;
+  setCurrentPath?: (path: string) => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ currentPath = "dashboard" }) => {
   const { user } = useAuthContext();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   // Convert path to title (first letter uppercase)
   const getTitle = (path: string) => {
     // Admin routes
@@ -44,8 +63,16 @@ const Header: React.FC<HeaderProps> = ({ currentPath = "dashboard" }) => {
     if (path === "report/generate") return "Tạo báo cáo";
     if (path === "audit") return "Kiểm toán";
     if (path === "tag") return "Tag";
+    if (path === "profile") {
+      return "Thông tin cá nhân";
+    }
 
     return path;
+  };
+
+  const handleLogout = () => {
+    // TODO: Implement logout logic
+    console.log("Logging out...");
   };
 
   return (
@@ -56,6 +83,7 @@ const Header: React.FC<HeaderProps> = ({ currentPath = "dashboard" }) => {
       </h1>
 
       {/* Right side - User info */}
+
       <div className="flex items-center gap-3">
         <div className="text-right">
           <p className="font-medium text-gray-800">{user?.name}</p>
@@ -66,6 +94,25 @@ const Header: React.FC<HeaderProps> = ({ currentPath = "dashboard" }) => {
         <div className="h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center">
           <UserCircleIcon className="h-8 w-8 text-gray-400" />
         </div>
+
+        {/* Dropdown Menu */}
+        {isDropdownOpen && (
+          <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
+            <Link
+              to="/profile"
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              onClick={() => setIsDropdownOpen(false)}
+            >
+              Thông tin cá nhân
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            >
+              Đăng xuất
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );

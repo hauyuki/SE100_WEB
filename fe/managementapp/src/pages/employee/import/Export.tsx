@@ -5,7 +5,6 @@ import ImportTabs from "./components/ImportTabs";
 import UpdateExportForm from "./components/UpdateExportForm";
 import OutboundReportForm from "../../../components/OutboundReportForm";
 import { useGetOutboundReports } from "../../../hooks/outboundReports";
-import { OutboundReport } from "../../../models/OutboundReport";
 
 interface Product {
   id: string;
@@ -114,7 +113,7 @@ const Export = () => {
     });
     setShowForm(false);
   };
-  const { data: outboundData } = useGetOutboundReports();
+  const { data: outboundData, isPending: loading } = useGetOutboundReports();
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -234,13 +233,16 @@ const Export = () => {
         {selectedExport && (
           <UpdateExportForm
             showForm={showUpdateForm}
-            outboundData={selectedExport}
+            exportData={selectedExport}
             onClose={() => {
               setShowUpdateForm(false);
               setSelectedExport(null);
             }}
+            onSubmit={handleUpdateSubmit}
+            onChange={handleUpdateChange}
           />
         )}
+
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
@@ -252,11 +254,12 @@ const Export = () => {
                 <th className="px-6 py-3 text-center">Ngày vận chuyển</th>
                 <th className="px-6 py-3 text-center">Ngày hoàn thành</th>
                 <th className="px-6 py-3 text-center">Trạng thái</th>
+                <th className="px-6 py-3 text-center">Ghi chú</th>
                 <th className="px-6 py-3 text-center">Thao tác</th>
               </tr>
             </thead>
             <tbody>
-              {filteredData?.map((item) => (
+              {outboundData?.data.map((item) => (
                 <tr
                   key={item.id}
                   className="border-b border-gray-200 hover:bg-gray-100"
@@ -273,40 +276,34 @@ const Export = () => {
                   <td className="px-6 py-4 text-right">
                     {formatCurrency(item.totalPrice)}
                   </td>
-                  <td className="px-6 py-4">{item.shipment?.carrier}</td>
+                  <td className="px-6 py-4">{item.shipment.carrier}</td>
                   <td className="px-6 py-4 text-center">
-                    {new Date(item.shipment?.date).toDateString()}
+                    {new Date(item.shipment.date).toDateString()}
                   </td>
                   <td className="px-6 py-4 text-center">
-                    {item.shipment?.completedDate
-                      ? item.shipment?.completedDate.toDateString()
-                      : "Pending"}
+                    {/* {item.completionDate || "-"} */}
                   </td>
                   <td className="px-6 py-4 text-center">
                     <span
                       className={`inline-flex items-center justify-center px-3 py-1 text-sm font-medium rounded-full ${
-                        item.shipment?.status === "COMPLETED"
+                        item.shipment.status === "Vận chuyển thành công"
                           ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20"
-                          : item.shipment?.status === "IN_PROGRESS"
+                          : item.shipment.status === "Đang vận chuyển"
                           ? "bg-amber-50 text-amber-700 ring-1 ring-amber-600/20"
-                          : item.shipment?.status === "PENDING"
-                          ? "bg-blue-50 text-blue-700 ring-1 "
                           : "bg-rose-50 text-rose-700 ring-1 ring-rose-600/20"
                       }`}
                     >
-                      {item.shipment?.status}
+                      {item.shipment.status}
                     </span>
                   </td>
                   {/* <td className="px-6 py-4">{item.}</td> */}
                   <td className="px-6 py-4 text-center">
-                    {item.shipment?.status !== "COMPLETED" && (
-                      <button
-                        onClick={() => handleEdit(item.id)}
-                        className="text-indigo-600 hover:text-indigo-900"
-                      >
-                        Sửa
-                      </button>
-                    )}{" "}
+                    <button
+                      onClick={() => handleEdit(item.id)}
+                      className="text-indigo-600 hover:text-indigo-900"
+                    >
+                      Sửa
+                    </button>
                   </td>
                 </tr>
               ))}

@@ -5,8 +5,6 @@ import { Link } from "react-router-dom";
 import productImage1 from "../../../assets/images/itempic.png";
 import { useDeleteProduct, useGetProductDetail } from "../../../hooks/products";
 import EditProductForm from "../../admin/products/component/EditProductForm";
-import { useAuthContext } from "../../../contexts/AuthContext";
-import { Role } from "../../../models/Auth";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -14,9 +12,8 @@ const ProductDetail = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
   const [isShowEditForm, setIsShowEditForm] = useState(false);
+
   const { data: editedProduct } = useGetProductDetail(Number(id));
-  const { mutate: deleteProduct, isPending } = useDeleteProduct();
-  const { user } = useAuthContext();
   const handleEdit = () => {
     // setIsEditing(true);
     setIsShowEditForm(true);
@@ -243,68 +240,66 @@ const ProductDetail = () => {
         </div>
       </div>
       {/* Detailed information */}
-      {editedProduct && (
-        <div className="bg-white rounded-lg p-6 mb-6">
-          <h2 className="text-lg font-medium mb-4">Thông tin chi tiết</h2>
-          <div className="overflow-x-auto">
-            <table className="min-w-full">
-              <thead>
-                <tr className="bg-gray-50">
-                  {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+      <div className="bg-white rounded-lg p-6 mb-6">
+        <h2 className="text-lg font-medium mb-4">Thông tin chi tiết</h2>
+        <div className="overflow-x-auto">
+          <table className="min-w-full">
+            <thead>
+              <tr className="bg-gray-50">
+                {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   STT
                 </th> */}
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Mã phiếu nhập
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Số lượng nhập
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Số lượng tồn
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Giá nhập
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Tổng tiền
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Ngày sản xuất
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Ngày hết hạn
-                  </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Mã phiếu nhập
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Số lượng nhập
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Số lượng tồn
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Giá nhập
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Tổng tiền
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Ngày sản xuất
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Ngày hết hạn
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {editedProduct?.items?.map((detail, index) => (
+                <tr key={detail.id}>
+                  <td className="px-6 py-4 whitespace-nowrap">{detail.id}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-primary">
+                    {detail.quantity}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {detail.stockQuantity}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {detail.unitPrice}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {detail.totalPrice}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {new Date(detail.expirationDate).toDateString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {new Date(detail.expirationDate).toDateString()}
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {editedProduct?.items?.map((detail, index) => (
-                  <tr key={detail.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">{detail.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-primary">
-                      {detail.quantity}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {detail.stockQuantity}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {detail.unitPrice}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {detail.totalPrice}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {new Date(detail.expirationDate).toDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {new Date(detail.expirationDate).toDateString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
-      )}{" "}
+      </div>
       {/* Description */}
       <div className="bg-white rounded-lg p-6 mb-6">
         <h2 className="text-lg font-medium mb-4">Mô tả</h2>
@@ -321,25 +316,20 @@ const ProductDetail = () => {
         )}
       </div>
       {/* Action buttons */}
-      {user?.role === Role.ADMIN_ROLE && editedProduct && (
-        <div className="bg-white rounded-lg p-6 flex justify-end gap-4">
-          {/* <button
+      <div className="bg-white rounded-lg p-6 flex justify-end gap-4">
+        {/* <button
           onClick={handleSave}
           className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
         >
           Lưu
         </button> */}
-          <button
-            onClick={() => {
-              deleteProduct(editedProduct.id);
-            }}
-            disabled={isPending}
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-          >
-            {isPending ? "Đang xóa..." : "Xóa"}
-          </button>
-        </div>
-      )}{" "}
+        <button
+          onClick={handleDelete}
+          className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+        >
+          Xóa
+        </button>
+      </div>
     </div>
   );
 };

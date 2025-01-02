@@ -6,8 +6,7 @@ import { useGetProducts } from "../../../hooks/products";
 import AddProductForm from "../../admin/products/component/AddProductForm";
 import { FaPlus } from "react-icons/fa";
 import { useGetStatistics } from "../../../hooks/statistics";
-import { useAuthContext } from "../../../contexts/AuthContext";
-import { Role } from "../../../models/Auth";
+import Loading from "../../../components/Loading";
 
 const ProductPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -200,7 +199,7 @@ const ProductPage = () => {
         />
 
         {loading ? (
-          <div className="text-center py-4">Loading...</div>
+          <Loading />
         ) : error ? (
           <div className="text-red-500 text-center py-4">{error}</div>
         ) : (
