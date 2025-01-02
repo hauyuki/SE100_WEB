@@ -16,10 +16,14 @@ const EditProductForm = ({
   showForm,
   onClose,
   product,
+  onSuccess,
+  onError,
 }: {
   showForm: boolean;
   onClose: () => void;
   product: ProductDetail;
+  onSuccess?: () => void;
+  onError?: (error: string) => void;
 }) => {
   const form = useForm<UpsertProductModel>({
     resolver: zodResolver(UpsertProductModelSchema),
@@ -97,11 +101,13 @@ const EditProductForm = ({
       { id: product.id, ...data, tagIds: selectedTags },
       {
         onSuccess: () => {
-          console.log("Product added successfully");
+          console.log("Product updated successfully");
           onClose();
+          onSuccess?.();
         },
-        onError: () => {
-          console.log("Error adding product");
+        onError: (error) => {
+          console.log("Error updating product", error);
+          onError?.(error.message || "Error updating product");
         },
       }
     );

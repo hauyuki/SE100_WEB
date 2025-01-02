@@ -11,12 +11,16 @@ interface UpdateImportFormProps {
   showForm: boolean;
   importData: InboundReport;
   onClose: () => void;
+  onSuccess?: () => void;
+  onError?: () => void;
 }
 
 const UpdateImportForm: React.FC<UpdateImportFormProps> = ({
   showForm,
   importData,
   onClose,
+  onSuccess,
+  onError,
 }) => {
   const { mutate: updateShipment, isPending } = useUpdateShipment();
   const form = useForm<UpdateShipmentRequest>({
@@ -29,11 +33,12 @@ const UpdateImportForm: React.FC<UpdateImportFormProps> = ({
       carrier: importData.shipment.carrier,
       fromLocation: importData.shipment.fromPosition ?? "",
       toLocation: importData.shipment.toPosition ?? "",
-      employeeId: importData.shipment.pic.id, // Adjust if necessary
+      employeeId: importData.shipment.pic.id,
       status: importData.shipment.status,
       type: importData.shipment.type,
     },
   });
+
   const onSubmit = (data: UpdateShipmentRequest) => {
     console.log("Form Data:", data);
     updateShipment(
@@ -42,13 +47,16 @@ const UpdateImportForm: React.FC<UpdateImportFormProps> = ({
         onSuccess: () => {
           console.log("success");
           onClose();
+          onSuccess?.();
         },
         onError: () => {
           console.log("err");
+          onError?.();
         },
       }
     );
   };
+
   const {
     register,
     handleSubmit,

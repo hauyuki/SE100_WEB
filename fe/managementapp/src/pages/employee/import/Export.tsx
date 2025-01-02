@@ -7,6 +7,7 @@ import OutboundReportForm from "../../../components/OutboundReportForm";
 import { useGetOutboundReports } from "../../../hooks/outboundReports";
 import { OutboundReport } from "../../../models/OutboundReport";
 import Loading from "../../../components/Loading";
+import Snackbar from "../../../components/Snackbar";
 
 interface Product {
   id: string;
@@ -43,6 +44,15 @@ const Export = () => {
     status: "Đang vận chuyển",
     notes: "",
     products: [],
+  });
+  const [snackbar, setSnackbar] = useState<{
+    show: boolean;
+    message: string;
+    type: "success" | "error";
+  }>({
+    show: false,
+    message: "",
+    type: "success",
   });
 
   const [data, setData] = useState([
@@ -169,6 +179,45 @@ const Export = () => {
     }
   };
 
+  const handleCloseSnackbar = () => {
+    setSnackbar((prev) => ({ ...prev, show: false }));
+  };
+
+  const handleAddSuccess = () => {
+    setShowForm(false);
+    setSnackbar({
+      show: true,
+      message: "Thêm phiếu xuất thành công",
+      type: "success",
+    });
+  };
+
+  const handleAddError = () => {
+    setSnackbar({
+      show: true,
+      message: "Có lỗi xảy ra khi thêm phiếu xuất",
+      type: "error",
+    });
+  };
+
+  const handleUpdateSuccess = () => {
+    setShowUpdateForm(false);
+    setSelectedExport(null);
+    setSnackbar({
+      show: true,
+      message: "Cập nhật phiếu xuất thành công",
+      type: "success",
+    });
+  };
+
+  const handleUpdateError = () => {
+    setSnackbar({
+      show: true,
+      message: "Có lỗi xảy ra khi cập nhật phiếu xuất",
+      type: "error",
+    });
+  };
+
   return (
     <div className="container mx-auto p-6">
       <ImportTabs />
@@ -236,6 +285,8 @@ const Export = () => {
         <OutboundReportForm
           showForm={showForm}
           onClose={() => setShowForm(false)}
+          onSuccess={handleAddSuccess}
+          onError={handleAddError}
         />
 
         {selectedExport && (
@@ -246,6 +297,8 @@ const Export = () => {
               setShowUpdateForm(false);
               setSelectedExport(null);
             }}
+            onSuccess={handleUpdateSuccess}
+            onError={handleUpdateError}
           />
         )}
         {loading || isRefetching ? (
@@ -322,6 +375,13 @@ const Export = () => {
           </div>
         )}
       </div>
+
+      <Snackbar
+        show={snackbar.show}
+        message={snackbar.message}
+        type={snackbar.type}
+        onClose={handleCloseSnackbar}
+      />
     </div>
   );
 };

@@ -9,12 +9,18 @@ import ButtonPrimary from "./Button/ButtonPrimary";
 import { usePostInboundReports } from "../hooks/inboundReports";
 import { useAuthContext } from "../contexts/AuthContext";
 
-const InboundReportForm = ({
-  onClose,
-  showForm,
-}: {
-  onClose: () => void;
+interface InboundReportFormProps {
   showForm: boolean;
+  onClose: () => void;
+  onSuccess?: () => void;
+  onError?: () => void;
+}
+
+const InboundReportForm: React.FC<InboundReportFormProps> = ({
+  showForm,
+  onClose,
+  onSuccess,
+  onError,
 }) => {
   // Setup for the form
   const { user } = useAuthContext();
@@ -72,9 +78,11 @@ const InboundReportForm = ({
         onSuccess: () => {
           console.log("success");
           onClose();
+          onSuccess?.();
         },
-        onError: () => {
-          console.log("err");
+        onError: (error) => {
+          console.error("Error creating inbound report:", error);
+          onError?.();
         },
       }
     );

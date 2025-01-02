@@ -15,12 +15,16 @@ interface EditAccountFormProps {
   isOpen: boolean;
   onClose: () => void;
   employee: Employee;
+  onSuccess?: () => void;
+  onError?: (error: string) => void;
 }
 
 const EditAccountForm: React.FC<EditAccountFormProps> = ({
   isOpen,
   onClose,
   employee,
+  onSuccess,
+  onError,
 }) => {
   const { mutate: updateEmployee, isPending } = useUpdateEmployee();
   const { mutate: updateEmployeeWithPassword, isPending: isLoading } =
@@ -71,16 +75,28 @@ const EditAccountForm: React.FC<EditAccountFormProps> = ({
       updateEmployeeWithPassword(
         { ...data, id: employee.id },
         {
-          onSuccess: () => onClose(),
-          onError: () => console.error("Error creating employee"),
+          onSuccess: () => {
+            onClose();
+            onSuccess?.();
+          },
+          onError: (error) => {
+            console.error("Error updating employee:", error);
+            onError?.(error.message || "Error updating employee");
+          },
         }
       );
     } else {
       updateEmployee(
         { ...data, id: employee.id },
         {
-          onSuccess: () => onClose(),
-          onError: () => console.error("Error creating employee"),
+          onSuccess: () => {
+            onClose();
+            onSuccess?.();
+          },
+          onError: (error) => {
+            console.error("Error updating employee:", error);
+            onError?.(error.message || "Error updating employee");
+          },
         }
       );
     }

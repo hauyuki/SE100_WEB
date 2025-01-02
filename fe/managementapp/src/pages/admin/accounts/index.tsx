@@ -4,6 +4,7 @@ import AddAccountForm from "./components/AddAccountForm";
 import EditAccountForm from "./components/EditAccountForm";
 import { useGetEmployees } from "../../../hooks/employees";
 import { Employee } from "../../../models/Employee";
+import Snackbar from "../../../components/Snackbar";
 
 interface Account {
   id: number;
@@ -38,6 +39,15 @@ const AccountManagementPage = () => {
     password: "",
   });
   const [editingAccount, setEditingAccount] = useState<Employee | null>(null);
+  const [snackbar, setSnackbar] = useState<{
+    show: boolean;
+    message: string;
+    type: "success" | "error";
+  }>({
+    show: false,
+    message: "",
+    type: "success",
+  });
 
   const handleCreateAccount = () => {
     setIsAddPopupOpen(true);
@@ -72,6 +82,45 @@ const AccountManagementPage = () => {
   };
   const { data: employees } = useGetEmployees();
 
+  const handleCloseSnackbar = () => {
+    setSnackbar((prev) => ({ ...prev, show: false }));
+  };
+
+  const handleCreateSuccess = () => {
+    setIsAddPopupOpen(false);
+    setSnackbar({
+      show: true,
+      message: "Tạo tài khoản thành công",
+      type: "success",
+    });
+  };
+
+  const handleCreateError = (error: string) => {
+    setSnackbar({
+      show: true,
+      message: error || "Tạo tài khoản thất bại",
+      type: "error",
+    });
+  };
+
+  const handleUpdateSuccess = () => {
+    setIsEditPopupOpen(false);
+    setEditingAccount(null);
+    setSnackbar({
+      show: true,
+      message: "Cập nhật tài khoản thành công",
+      type: "success",
+    });
+  };
+
+  const handleUpdateError = (error: string) => {
+    setSnackbar({
+      show: true,
+      message: error || "Cập nhật tài khoản thất bại",
+      type: "error",
+    });
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
@@ -88,12 +137,16 @@ const AccountManagementPage = () => {
       <AddAccountForm
         isOpen={isAddPopupOpen}
         onClose={() => setIsAddPopupOpen(false)}
+        onSuccess={handleCreateSuccess}
+        onError={handleCreateError}
       />
       {editingAccount && (
         <EditAccountForm
           isOpen={isEditPopupOpen}
           onClose={() => setIsEditPopupOpen(false)}
           employee={editingAccount}
+          onSuccess={handleUpdateSuccess}
+          onError={handleUpdateError}
         />
       )}
       <div className="bg-white shadow-lg rounded-lg overflow-hidden">
@@ -166,6 +219,13 @@ const AccountManagementPage = () => {
           </table>
         </div>
       </div>
+
+      <Snackbar
+        show={snackbar.show}
+        message={snackbar.message}
+        type={snackbar.type}
+        onClose={handleCloseSnackbar}
+      />
     </div>
   );
 };

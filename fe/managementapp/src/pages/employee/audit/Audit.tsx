@@ -3,6 +3,7 @@ import { FaPlus } from "react-icons/fa";
 import CreateAuditForm from "./components/CreateAuditForm";
 import { useNavigate } from "react-router-dom";
 import Loading from "../../../components/Loading";
+import Snackbar from "../../../components/Snackbar";
 
 interface AuditProduct {
   sku: string;
@@ -28,6 +29,36 @@ const Audit = () => {
   const [sortValue, setSortValue] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [auditRecords, setAuditRecords] = useState<AuditRecord[]>([]);
+  const [snackbar, setSnackbar] = useState<{
+    show: boolean;
+    message: string;
+    type: "success" | "error";
+  }>({
+    show: false,
+    message: "",
+    type: "success",
+  });
+
+  const handleCloseSnackbar = () => {
+    setSnackbar((prev) => ({ ...prev, show: false }));
+  };
+
+  const handleCreateSuccess = () => {
+    setShowCreateForm(false);
+    setSnackbar({
+      show: true,
+      message: "Tạo phiếu kiểm toán thành công",
+      type: "success",
+    });
+  };
+
+  const handleCreateError = (error: string) => {
+    setSnackbar({
+      show: true,
+      message: error || "Tạo phiếu kiểm toán thất bại",
+      type: "error",
+    });
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -218,6 +249,15 @@ const Audit = () => {
       <CreateAuditForm
         showForm={showCreateForm}
         onClose={() => setShowCreateForm(false)}
+        onSuccess={handleCreateSuccess}
+        onError={handleCreateError}
+      />
+
+      <Snackbar
+        show={snackbar.show}
+        message={snackbar.message}
+        type={snackbar.type}
+        onClose={handleCloseSnackbar}
       />
     </div>
   );

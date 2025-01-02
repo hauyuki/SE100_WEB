@@ -12,11 +12,15 @@ interface AuditProduct {
 interface CreateAuditFormProps {
   showForm: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
+  onError?: (error: string) => void;
 }
 
 const CreateAuditForm: React.FC<CreateAuditFormProps> = ({
   showForm,
   onClose,
+  onSuccess,
+  onError,
 }) => {
   const [products, setProducts] = useState<AuditProduct[]>([
     {
@@ -83,6 +87,22 @@ const CreateAuditForm: React.FC<CreateAuditFormProps> = ({
     return products.reduce((sum, product) => sum + product.deficit, 0);
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      // TODO: Implement API call
+      console.log("Form submitted:", {
+        products,
+        totalDeficit: calculateTotalDeficit(),
+      });
+      onClose();
+      onSuccess?.();
+    } catch (error: any) {
+      console.error("Error creating audit:", error);
+      onError?.(error.message || "Error creating audit");
+    }
+  };
+
   if (!showForm) return null;
 
   return (
@@ -98,7 +118,7 @@ const CreateAuditForm: React.FC<CreateAuditFormProps> = ({
           </button>
         </div>
 
-        <form className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">

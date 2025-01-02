@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import Loading from "../../../components/Loading";
+import Snackbar from "../../../components/Snackbar";
 
 interface AuditProduct {
   sku: string;
@@ -25,6 +26,35 @@ const AuditDetail = () => {
   const { id } = useParams();
   const [loading, setLoading] = useState(true);
   const [auditData, setAuditData] = useState<AuditDetail | null>(null);
+  const [snackbar, setSnackbar] = useState<{
+    show: boolean;
+    message: string;
+    type: "success" | "error";
+  }>({
+    show: false,
+    message: "",
+    type: "success",
+  });
+
+  const handleCloseSnackbar = () => {
+    setSnackbar((prev) => ({ ...prev, show: false }));
+  };
+
+  const handleUpdateSuccess = () => {
+    setSnackbar({
+      show: true,
+      message: "Cập nhật phiếu kiểm toán thành công",
+      type: "success",
+    });
+  };
+
+  const handleUpdateError = (error: string) => {
+    setSnackbar({
+      show: true,
+      message: error || "Cập nhật phiếu kiểm toán thất bại",
+      type: "error",
+    });
+  };
 
   useEffect(() => {
     // Simulate API call
@@ -217,6 +247,13 @@ const AuditDetail = () => {
           </table>
         </div>
       </div>
+
+      <Snackbar
+        show={snackbar.show}
+        message={snackbar.message}
+        type={snackbar.type}
+        onClose={handleCloseSnackbar}
+      />
     </div>
   );
 };
