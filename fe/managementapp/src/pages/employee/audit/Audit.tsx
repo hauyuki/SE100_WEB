@@ -14,7 +14,6 @@ const Audit = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortValue, setSortValue] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
-
   const {
     data: inventoryChecks,
     isLoading: loading,
