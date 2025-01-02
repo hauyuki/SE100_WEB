@@ -5,6 +5,8 @@ import ImportTabs from "./components/ImportTabs";
 import UpdateExportForm from "./components/UpdateExportForm";
 import OutboundReportForm from "../../../components/OutboundReportForm";
 import { useGetOutboundReports } from "../../../hooks/outboundReports";
+import { OutboundReport } from "../../../models/OutboundReport";
+import Loading from "../../../components/Loading";
 
 interface Product {
   id: string;
@@ -113,7 +115,13 @@ const Export = () => {
     });
     setShowForm(false);
   };
-  const { data: outboundData, isPending: loading } = useGetOutboundReports();
+  const {
+    data: outboundData,
+    isPending: loading,
+    isError,
+    isRefetching,
+    isLoading,
+  } = useGetOutboundReports();
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -233,83 +241,86 @@ const Export = () => {
         {selectedExport && (
           <UpdateExportForm
             showForm={showUpdateForm}
-            exportData={selectedExport}
+            outboundData={selectedExport}
             onClose={() => {
               setShowUpdateForm(false);
               setSelectedExport(null);
             }}
-            onSubmit={handleUpdateSubmit}
-            onChange={handleUpdateChange}
           />
         )}
-
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-gray-50 text-gray-500 uppercase text-sm">
-                <th className="px-6 py-3 text-center">STT</th>
-                <th className="px-6 py-3 text-center">Mã phiếu xuất</th>
-                <th className="px-6 py-3 text-center">Tổng giá trị</th>
-                <th className="px-6 py-3 text-center">Đơn vị vận chuyển</th>
-                <th className="px-6 py-3 text-center">Ngày vận chuyển</th>
-                <th className="px-6 py-3 text-center">Ngày hoàn thành</th>
-                <th className="px-6 py-3 text-center">Trạng thái</th>
-                <th className="px-6 py-3 text-center">Ghi chú</th>
-                <th className="px-6 py-3 text-center">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              {outboundData?.data.map((item) => (
-                <tr
-                  key={item.id}
-                  className="border-b border-gray-200 hover:bg-gray-100"
-                >
-                  <td className="px-6 py-4 text-center">{item.id}</td>
-                  <td className="px-6 py-4">
-                    <Link
-                      to={`/export/${item.id}`}
-                      className="text-indigo-500 hover:text-indigo-600"
-                    >
-                      {item.id}
-                    </Link>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    {formatCurrency(item.totalPrice)}
-                  </td>
-                  <td className="px-6 py-4">{item.shipment.carrier}</td>
-                  <td className="px-6 py-4 text-center">
-                    {new Date(item.shipment.date).toDateString()}
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    {/* {item.completionDate || "-"} */}
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <span
-                      className={`inline-flex items-center justify-center px-3 py-1 text-sm font-medium rounded-full ${
-                        item.shipment.status === "Vận chuyển thành công"
-                          ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20"
-                          : item.shipment.status === "Đang vận chuyển"
-                          ? "bg-amber-50 text-amber-700 ring-1 ring-amber-600/20"
-                          : "bg-rose-50 text-rose-700 ring-1 ring-rose-600/20"
-                      }`}
-                    >
-                      {item.shipment.status}
-                    </span>
-                  </td>
-                  {/* <td className="px-6 py-4">{item.}</td> */}
-                  <td className="px-6 py-4 text-center">
-                    <button
-                      onClick={() => handleEdit(item.id)}
-                      className="text-indigo-600 hover:text-indigo-900"
-                    >
-                      Sửa
-                    </button>
-                  </td>
+        {loading || isRefetching ? (
+          <Loading />
+        ) : isError ? (
+          <div className="text-red-500 text-center py-4">Đã có lỗi xảy ra</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-gray-50 text-gray-500 uppercase text-sm">
+                  <th className="px-6 py-3 text-center">STT</th>
+                  <th className="px-6 py-3 text-center">Mã phiếu xuất</th>
+                  <th className="px-6 py-3 text-center">Tổng giá trị</th>
+                  <th className="px-6 py-3 text-center">Đơn vị vận chuyển</th>
+                  <th className="px-6 py-3 text-center">Ngày vận chuyển</th>
+                  <th className="px-6 py-3 text-center">Ngày hoàn thành</th>
+                  <th className="px-6 py-3 text-center">Trạng thái</th>
+                  <th className="px-6 py-3 text-center">Ghi chú</th>
+                  <th className="px-6 py-3 text-center">Thao tác</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {outboundData?.data.map((item) => (
+                  <tr
+                    key={item.id}
+                    className="border-b border-gray-200 hover:bg-gray-100"
+                  >
+                    <td className="px-6 py-4 text-center">{item.id}</td>
+                    <td className="px-6 py-4">
+                      <Link
+                        to={`/export/${item.id}`}
+                        className="text-indigo-500 hover:text-indigo-600"
+                      >
+                        {item.id}
+                      </Link>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      {formatCurrency(item.totalPrice)}
+                    </td>
+                    <td className="px-6 py-4">{item.shipment.carrier}</td>
+                    <td className="px-6 py-4 text-center">
+                      {new Date(item.shipment.date).toDateString()}
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      {/* {item.completionDate || "-"} */}
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span
+                        className={`inline-flex items-center justify-center px-3 py-1 text-sm font-medium rounded-full ${
+                          item.shipment.status === "Vận chuyển thành công"
+                            ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20"
+                            : item.shipment.status === "Đang vận chuyển"
+                            ? "bg-amber-50 text-amber-700 ring-1 ring-amber-600/20"
+                            : "bg-rose-50 text-rose-700 ring-1 ring-rose-600/20"
+                        }`}
+                      >
+                        {item.shipment.status}
+                      </span>
+                    </td>
+                    {/* <td className="px-6 py-4">{item.}</td> */}
+                    <td className="px-6 py-4 text-center">
+                      <button
+                        onClick={() => handleEdit(item.id)}
+                        className="text-indigo-600 hover:text-indigo-900"
+                      >
+                        Sửa
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -7,6 +7,8 @@ import AddProductForm from "../../admin/products/component/AddProductForm";
 import { FaPlus } from "react-icons/fa";
 import { useGetStatistics } from "../../../hooks/statistics";
 import Loading from "../../../components/Loading";
+import { Role } from "../../../models/Auth";
+import { useAuthContext } from "../../../contexts/AuthContext";
 
 const ProductPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -21,6 +23,7 @@ const ProductPage = () => {
   const {
     data: products,
     isPending: loading,
+    isRefetching,
     isError: error,
   } = useGetProducts();
   const [showForm, setShowForm] = useState(false);
@@ -198,7 +201,7 @@ const ProductPage = () => {
           onClose={() => setShowForm(false)}
         />
 
-        {loading ? (
+        {loading || isRefetching ? (
           <Loading />
         ) : error ? (
           <div className="text-red-500 text-center py-4">{error}</div>

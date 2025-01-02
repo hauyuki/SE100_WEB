@@ -45,7 +45,12 @@ const Import = () => {
     notes: "",
     products: [],
   });
-  const { data: inboundData, isPending: loading } = useGetInboundReports();
+  const {
+    data: inboundData,
+    isPending: loading,
+    isError,
+    isRefetching,
+  } = useGetInboundReports();
   const [data, setData] = useState([
     {
       id: 1,
@@ -183,6 +188,7 @@ const Import = () => {
   return (
     <div className="container mx-auto p-6">
       <ImportTabs />
+
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4">Danh sách phiếu nhập</h2>
         <div className="flex items-center space-x-4 mb-6">
@@ -269,81 +275,30 @@ const Import = () => {
             }}
           />
         )}
-
-
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-gray-50 text-gray-500 uppercase text-sm">
-                <th className="px-6 py-3 text-center">Mã phiếu nhập</th>
-                <th className="px-6 py-3 text-center">Tổng giá trị</th>
-                <th className="px-6 py-3 text-center">Đơn vị vận chuyển</th>
-                <th className="px-6 py-3 text-center">Ngày vận chuyển</th>
-                <th className="px-6 py-3 text-center">Ngày hoàn thành</th>
-                <th className="px-6 py-3 text-center">Trạng thái</th>
-                <th className="px-6 py-3 text-center">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredData?.map((item) => (
-                <tr
-                  key={item.id}
-                  className="border-b border-gray-200 hover:bg-gray-100"
-                >
-                  <td className="px-6 py-4">
-                    <Link
-                      to={`/import/${item.id}`}
-                      className="text-indigo-500 hover:text-indigo-600"
-                    >
-                      {item.id}
-                    </Link>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    {formatCurrency(item.price)}
-                  </td>
-                  <td className="px-6 py-4">{item.shipment.carrier}</td>
-                  <td className="px-6 py-4 text-center">
-                    {item.shipment.date.toDateString()}
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    {item.shipment.completedDate
-                      ? item.shipment.completedDate.toDateString()
-                      : "Pending"}
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <span
-                      className={`inline-flex items-center justify-center px-3 py-1 text-sm font-medium rounded-full ${
-                        item.shipment.status === "COMPLETED"
-                          ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20"
-                          : item.shipment.status === "IN_PROGRESS"
-                          ? "bg-amber-50 text-amber-700 ring-1 ring-amber-600/20"
-                          : item.shipment.status === "PENDING"
-                          ? "bg-blue-50 text-blue-700 ring-1 "
-                          : "bg-rose-50 text-rose-700 ring-1 ring-rose-600/20"
-                      }`}
-                    >
-                      {item.shipment.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    {item.shipment?.status !== "COMPLETED" && (
-                      <button
-                        onClick={() => handleEdit(item.id)}
-                        className="text-indigo-600 hover:text-indigo-900"
-                      >
-                        Sửa
-                      </button>
-                    )}{" "}
-                  </td>
+        {loading || isRefetching ? (
+          <Loading />
+        ) : isError ? (
+          <div className="text-red-500 text-center py-4">Đã có lỗi xảy ra</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-gray-50 text-gray-500 uppercase text-sm">
+                  <th className="px-6 py-3 text-center">Mã phiếu nhập</th>
+                  <th className="px-6 py-3 text-center">Tổng giá trị</th>
+                  <th className="px-6 py-3 text-center">Đơn vị vận chuyển</th>
+                  <th className="px-6 py-3 text-center">Ngày vận chuyển</th>
+                  <th className="px-6 py-3 text-center">Ngày hoàn thành</th>
+                  <th className="px-6 py-3 text-center">Trạng thái</th>
+                  <th className="px-6 py-3 text-center">Thao tác</th>
                 </tr>
               </thead>
               <tbody>
-                {inboundData?.data?.map((item) => (
+                {filteredData?.map((item) => (
                   <tr
                     key={item.id}
                     className="border-b border-gray-200 hover:bg-gray-100"
                   >
-                    <td className="px-6 py-4 text-center">{item.id}</td>
                     <td className="px-6 py-4">
                       <Link
                         to={`/import/${item.id}`}
@@ -379,14 +334,15 @@ const Import = () => {
                         {item.shipment.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4">Không có</td>
                     <td className="px-6 py-4 text-center">
-                      <button
-                        onClick={() => handleEdit(item.id)}
-                        className="text-indigo-600 hover:text-indigo-900"
-                      >
-                        Sửa
-                      </button>
+                      {item.shipment?.status !== "COMPLETED" && (
+                        <button
+                          onClick={() => handleEdit(item.id)}
+                          className="text-indigo-600 hover:text-indigo-900"
+                        >
+                          Sửa
+                        </button>
+                      )}{" "}
                     </td>
                   </tr>
                 ))}
