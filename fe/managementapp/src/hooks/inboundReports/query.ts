@@ -8,3 +8,9 @@ export const useGetInboundReports = () => {
     queryFn: () => InboundReportApis.getInboundReports(),
   });
 };
+export const useGetInboundReportDetail = (id: number) => {
+  return useQuery({
+    queryKey: [LIST_INBOUND_REPORT_KEY, id],
+    queryFn: () => InboundReportApis.getInboundReportById(id),
+  });
+};

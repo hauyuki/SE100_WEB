@@ -9,6 +9,12 @@ export const useGetStockReports = () => {
     queryFn: () => StockReportApis.getAllStockReports(),
   });
 };
+export const useGetStockReportDetail = (id: number) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.STOCK_REPORT_LIST, id],
+    queryFn: () => StockReportApis.getStockReport(id),
+  });
+};
 export const useGetStockReportDateRanges = (request: {
   startDate: string;
   endDate: string;

@@ -6,6 +6,7 @@ import {
 } from "@heroicons/react/24/outline";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
+import { useGetStockReportDetail } from "../../../hooks/stocks";
 
 interface ReportData {
   id: string;
@@ -52,7 +53,7 @@ interface ReportData {
 
 const ReportDetail = () => {
   const { id } = useParams();
-
+  const { data: report } = useGetStockReportDetail(Number(id));
   // Mock data - replace with actual API call
   const reportData: ReportData = {
     id: "BC001",
@@ -152,34 +153,39 @@ const ReportDetail = () => {
         {/* Report Header */}
         <div className="bg-white rounded-lg p-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            {reportData.title}
+            {report?.name}
           </h1>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-gray-500">Mã báo cáo</p>
-              <p className="font-medium">{reportData.id}</p>
+              <p className="font-medium">{report?.id}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Loại báo cáo</p>
-              <p className="font-medium">{reportData.type}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Ngày tạo</p>
+              <p className="text-sm text-gray-500">Ngày bắt đầu</p>
               <p className="font-medium">
-                {new Date(reportData.createdDate).toLocaleDateString("vi-VN")}
+                {" "}
+                {/* {report?.startDate ??
+                  new Date(report?.startDate!).toLocaleDateString("vi-VN")} */}
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Người tạo</p>
-              <p className="font-medium">{reportData.createdBy}</p>
+              <p className="text-sm text-gray-500">Ngày kết thúc</p>
+              <p className="font-medium">
+                {/* {report?.endDate ??
+                  new Date(report?.endDate!).toLocaleDateString("vi-VN")} */}
+              </p>
             </div>
+            {/* <div>
+              <p className="text-sm text-gray-500">Người tạo</p>
+              <p className="font-medium">{report.}</p>
+            </div> */}
           </div>
         </div>
 
         {/* Imports Section */}
-        {reportData.content.imports && (
+        {report?.items && (
           <div className="bg-white rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Nhập hàng</h2>
+            <h2 className="text-xl font-semibold mb-4">Nội dung báo cáo </h2>
             <div className="overflow-x-auto">
               <table className="min-w-full">
                 <thead>
@@ -188,22 +194,31 @@ const ReportDetail = () => {
                       Mã phiếu nhập
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Ngày nhập
+                      Tên sản phẩm
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                      Giá trị
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      Số lượng nhập
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      Số lượng xuất
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {reportData.content.imports.items.map((item) => (
+                  {report?.items.map((item) => (
                     <tr key={item.id}>
                       <td className="px-6 py-4 whitespace-nowrap">{item.id}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {new Date(item.date).toLocaleDateString("vi-VN")}
+                        {new Date(item.createdDate).toLocaleDateString("vi-VN")}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
-                        {formatCurrency(item.value)}
+                        {item.product.name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        {item.quantity}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        {item.outboundQuantity}
                       </td>
                     </tr>
                   ))}
@@ -212,7 +227,7 @@ const ReportDetail = () => {
                       Tổng cộng
                     </td>
                     <td className="px-6 py-4 text-right">
-                      {formatCurrency(reportData.content.imports.total)}
+                      {formatCurrency(report?.totalPrice)}
                     </td>
                   </tr>
                 </tbody>
@@ -222,7 +237,7 @@ const ReportDetail = () => {
         )}
 
         {/* Exports Section */}
-        {reportData.content.exports && (
+        {/* {reportData.content.exports && (
           <div className="bg-white rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4">Xuất hàng</h2>
             <div className="overflow-x-auto">
@@ -264,10 +279,10 @@ const ReportDetail = () => {
               </table>
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Products Section */}
-        {reportData.content.products && (
+        {/* {reportData.content.products && (
           <div className="bg-white rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4">Sản phẩm</h2>
             <div className="overflow-x-auto">
@@ -325,10 +340,10 @@ const ReportDetail = () => {
               </table>
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Revenue Section */}
-        {reportData.content.revenue && (
+        {/* {reportData.content.revenue && (
           <div className="bg-white rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4">Doanh thu</h2>
             <div className="overflow-x-auto">
@@ -392,7 +407,7 @@ const ReportDetail = () => {
               </table>
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

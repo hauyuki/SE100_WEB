@@ -4,6 +4,10 @@ import { ChevronLeftIcon, PencilIcon } from "@heroicons/react/24/outline";
 import UpdateImportForm from "./components/UpdateShipmentForm";
 import { Role } from "../../../models/Auth";
 import { useAuthContext } from "../../../contexts/AuthContext";
+import {
+  useGetInboundReportDetail,
+  useGetInboundReports,
+} from "../../../hooks/inboundReports";
 
 interface Product {
   id: string;
@@ -42,7 +46,7 @@ const ImportDetail = () => {
     status: string;
     completionDate?: string;
   } | null>(null);
-
+  const { data: inboundReport } = useGetInboundReportDetail(Number(id));
   // Mock data (replace with actual API call in production)
   const mockData: ImportDetail = {
     id: 1,
@@ -124,13 +128,13 @@ const ImportDetail = () => {
           <ChevronLeftIcon className="h-5 w-5 mr-1" />
           Trở về danh sách
         </Link>
-        <button
+        {/* <button
           onClick={() => setShowUpdateForm(true)}
           className="inline-flex items-center px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600"
         >
           <PencilIcon className="h-5 w-5 mr-2" />
           Sửa phiếu nhập
-        </button>
+        </button> */}
       </div>
 
       <div className="bg-white rounded-lg shadow-md">
@@ -138,16 +142,16 @@ const ImportDetail = () => {
         <div className="p-6 border-b border-gray-200">
           <div className="flex justify-between items-center">
             <h1 className="text-2xl font-bold text-gray-900">
-              Chi tiết phiếu nhập #{currentData.orderId}
+              Chi tiết phiếu nhập #{inboundReport?.id}
             </h1>
             <span
               className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                currentData.status === "Completed"
+                inboundReport?.shipment.status === "COMPLETED"
                   ? "bg-green-100 text-green-800"
                   : "bg-yellow-100 text-yellow-800"
               }`}
             >
-              {currentData.status}
+              {inboundReport?.shipment.status}
             </span>
           </div>
         </div>
@@ -158,25 +162,30 @@ const ImportDetail = () => {
           <div className="grid grid-cols-2 gap-6">
             <div>
               <p className="text-sm text-gray-600 mb-1">Đơn vị vận chuyển</p>
-              <p className="font-medium">{currentData.shipper}</p>
+              <p className="font-medium">{inboundReport?.shipment.carrier}</p>
             </div>
             <div>
               <p className="text-sm text-gray-600 mb-1">Tổng giá trị</p>
               <p className="font-medium text-indigo-600">
-                {formatCurrency(currentData.totalValue)}
+                {formatCurrency(inboundReport?.price ?? 0)}
               </p>
             </div>
             <div>
               <p className="text-sm text-gray-600 mb-1">Ngày vận chuyển</p>
-              <p className="font-medium">{currentData.shippingDate}</p>
+              <p className="font-medium">
+                {inboundReport?.shipment.date?.toDateString()}
+              </p>
             </div>
             <div>
               <p className="text-sm text-gray-600 mb-1">Ngày hoàn thành</p>
-              <p className="font-medium">{currentData.completionDate}</p>
+              <p className="font-medium">
+                {inboundReport?.shipment.completedDate?.toDateString() ??
+                  "Chưa hoàn thành"}
+              </p>
             </div>
             <div className="col-span-2">
               <p className="text-sm text-gray-600 mb-1">Ghi chú</p>
-              <p className="font-medium">{currentData.notes}</p>
+              <p className="font-medium">{inboundReport?.shipment.status}</p>
             </div>
           </div>
         </div>
@@ -209,7 +218,7 @@ const ImportDetail = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {currentData.products.map((product, index) => (
+                {inboundReport?.items.map((product, index) => (
                   <tr key={product.id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {index + 1}
@@ -218,16 +227,16 @@ const ImportDetail = () => {
                       {product.id}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {product.name}
+                      {product.product.name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {formatCurrency(product.price)}
+                      {formatCurrency(product.unitPrice)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {product.quantity}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-indigo-600 font-medium">
-                      {formatCurrency(product.price * product.quantity)}
+                      {formatCurrency(product.totalPrice)}
                     </td>
                   </tr>
                 ))}
@@ -239,7 +248,7 @@ const ImportDetail = () => {
                     Tổng cộng
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-indigo-600 font-medium">
-                    {formatCurrency(currentData.totalValue)}
+                    {formatCurrency(inboundReport?.price ?? 0)}
                   </td>
                 </tr>
               </tbody>
