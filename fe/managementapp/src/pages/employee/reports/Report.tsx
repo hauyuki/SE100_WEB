@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   LineChart,
   Line,
@@ -17,6 +17,8 @@ import {
   useGetStockReportDateRanges,
   useGetStockReports,
 } from "../../../hooks/stocks";
+import { useAuthContext } from "../../../contexts/AuthContext";
+import { Role } from "../../../models/Auth";
 
 const Report = () => {
   const navigate = useNavigate();
@@ -71,7 +73,7 @@ const Report = () => {
       setShowCustomDateRange(false);
     }
   };
-
+  const { user } = useAuthContext();
   const { data: reports } = useGetStockReports();
   return (
     <div className="p-6">
@@ -239,7 +241,16 @@ const Report = () => {
                 {reports?.map((report) => (
                   <tr key={report.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {report.id}
+                      <Link
+                        to={
+                          user?.role === Role.ADMIN_ROLE
+                            ? `/admin/report/${report.id}`
+                            : `/report/${report.id}`
+                        }
+                        className="text-indigo-500 hover:text-indigo-600"
+                      >
+                        {report.id}
+                      </Link>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-indigo-600">
                       {report.name}
@@ -264,14 +275,6 @@ const Report = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {report.outboundPrice}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
-                      <button
-                        className="text-gray-600 hover:text-indigo-600 transition-colors"
-                        title="Tải xuống"
-                      >
-                        <ArrowDownTrayIcon className="h-5 w-5" />
-                      </button>
                     </td>
                   </tr>
                 ))}

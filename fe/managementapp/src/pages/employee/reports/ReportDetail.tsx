@@ -7,6 +7,9 @@ import {
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 import { useGetStockReportDetail } from "../../../hooks/stocks";
+import { useAuthContext } from "../../../contexts/AuthContext";
+import { Role } from "../../../models/Auth";
+import { handleGenerateReport } from "../../../utils/generate_report";
 
 interface ReportData {
   id: string;
@@ -117,25 +120,29 @@ const ReportDetail = () => {
   };
 
   const handleDownloadPDF = async () => {
-    const element = document.getElementById("report-content");
-    if (!element) return;
+    if (report) handleGenerateReport(report);
+    // const element = document.getElementById("report-content");
+    // if (!element) return;
 
-    const canvas = await html2canvas(element);
-    const imgData = canvas.toDataURL("image/png");
-    const pdf = new jsPDF("p", "mm", "a4");
-    const imgProps = pdf.getImageProperties(imgData);
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+    // const canvas = await html2canvas(element);
+    // const imgData = canvas.toDataURL("image/png");
+    // const pdf = new jsPDF("p", "mm", "a4");
+    // const imgProps = pdf.getImageProperties(imgData);
+    // const pdfWidth = pdf.internal.pageSize.getWidth();
+    // const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
-    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-    pdf.save(`report-${reportData.id}.pdf`);
+    // pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+    // pdf.save(`report-${reportData.id}.pdf`);
   };
-
+  const { user } = useAuthContext();
   return (
     <div className="p-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <Link to="/report" className="inline-flex items-center text-indigo-600">
+        <Link
+          to={user?.role === Role.ADMIN_ROLE ? "/admin/reports" : "/report"}
+          className="inline-flex items-center text-indigo-600"
+        >
           <ChevronLeftIcon className="h-5 w-5 mr-1" />
           Trở về
         </Link>
@@ -161,20 +168,44 @@ const ReportDetail = () => {
               <p className="font-medium">{report?.id}</p>
             </div>
             <div>
+              <p className="text-sm text-gray-500">Tên báo cáo</p>
+              <p className="font-medium">{report?.name}</p>
+            </div>
+            <div>
               <p className="text-sm text-gray-500">Ngày bắt đầu</p>
               <p className="font-medium">
                 {" "}
-                {/* {report?.startDate ??
-                  new Date(report?.startDate!).toLocaleDateString("vi-VN")} */}
+                {report?.startDate
+                  ? new Date(report?.startDate).toLocaleDateString("vi-VN")
+                  : ""}
               </p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Ngày kết thúc</p>
               <p className="font-medium">
-                {/* {report?.endDate ??
-                  new Date(report?.endDate!).toLocaleDateString("vi-VN")} */}
+                {report?.endDate
+                  ? new Date(report?.endDate).toLocaleDateString("vi-VN")
+                  : ""}
               </p>
             </div>
+            <div>
+              <p className="text-sm text-gray-500">Tổng tiền nhập </p>
+              <p className="font-medium">
+                {report && formatCurrency(report?.inboundPrice)}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Tổng tiền xuất </p>
+              <p className="font-medium">
+                {report && formatCurrency(report?.outboundPrice)}
+              </p>
+            </div>
+            {/* <div>
+              <p className="text-sm text-gray-500">Tổng doanh thu </p>
+              <p className="font-medium">
+                {report && formatCurrency(report?.totalPrice)}
+              </p>
+            </div> */}
             {/* <div>
               <p className="text-sm text-gray-500">Người tạo</p>
               <p className="font-medium">{report.}</p>
@@ -189,7 +220,7 @@ const ReportDetail = () => {
             <div className="overflow-x-auto">
               <table className="min-w-full">
                 <thead>
-                  <tr className="bg-gray-50">
+                  <tr className="bg-gray-50 ">
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                       Mã phiếu nhập
                     </th>
@@ -202,28 +233,56 @@ const ReportDetail = () => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                       Số lượng xuất
                     </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      Tổng tiền nhập
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      Tổng tiền xuất
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {report?.items.map((item) => (
                     <tr key={item.id}>
                       <td className="px-6 py-4 whitespace-nowrap">{item.id}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      {/* <td className="px-6 py-4 whitespace-nowrap">
                         {new Date(item.createdDate).toLocaleDateString("vi-VN")}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                      </td> */}
+                      <td className="px-6 py-4 whitespace-nowrap text-left">
                         {item.product.name}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <td className="px-6 py-4 whitespace-nowrap text-left">
                         {item.quantity}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <td className="px-6 py-4 whitespace-nowrap text-left">
                         {item.outboundQuantity}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-left">
+                        {formatCurrency(item.inboundPrice)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-left">
+                        {formatCurrency(item.outboundPrice)}
                       </td>
                     </tr>
                   ))}
+                  {/* <tr className="bg-gray-50 font-medium">
+                    <td colSpan={5} className="px-6 py-4 text-right">
+                      Tổng nhập
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      {formatCurrency(report?.inboundPrice)}
+                    </td>
+                  </tr>
                   <tr className="bg-gray-50 font-medium">
-                    <td colSpan={2} className="px-6 py-4 text-right">
+                    <td colSpan={5} className="px-6 py-4 text-right">
+                      Tổng xuất
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      {formatCurrency(report?.outboundPrice)}
+                    </td>
+                  </tr> */}
+                  <tr className="bg-gray-50 font-medium">
+                    <td colSpan={5} className="px-6 py-4 text-right">
                       Tổng cộng
                     </td>
                     <td className="px-6 py-4 text-right">
