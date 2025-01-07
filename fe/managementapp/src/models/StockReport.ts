@@ -8,6 +8,11 @@ export type StockReportItem = {
   outboundQuantity: number; // Quantity already shipped out
   expiredQuantity: number; // Quantity that is expired (if any)
   createdDate: string; // Date when the product was created or added
+  inboundQuantity: number;
+  stockQuantity: number;
+  inboundPrice: number;
+  outboundPrice: number;
+  needInboundQuantity: number;
 };
 
 // StockReport: Defines the overall report, including a date and a list of StockReportItems
