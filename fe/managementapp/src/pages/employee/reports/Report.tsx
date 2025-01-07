@@ -232,9 +232,9 @@ const Report = () => {
                   <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase">
                     Giá xuất
                   </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                  {/* <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
                     Thao tác
-                  </th>
+                  </th> */}
                 </tr>
               </thead>{" "}
               <tbody className="divide-y divide-gray-200">
