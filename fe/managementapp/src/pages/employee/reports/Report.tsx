@@ -241,6 +241,9 @@ const Report = () => {
                 {reports?.map((report) => (
                   <tr key={report.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {report.id}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-indigo-600">
                       <Link
                         to={
                           user?.role === Role.ADMIN_ROLE
@@ -249,11 +252,8 @@ const Report = () => {
                         }
                         className="text-indigo-500 hover:text-indigo-600"
                       >
-                        {report.id}
+                        {report.name}
                       </Link>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-indigo-600">
-                      {report.name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {new Date(report.startDate).toDateString()}

@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { CalendarIcon, ChevronLeftIcon } from "@heroicons/react/24/outline";
 import { useCreateStockReport } from "../../../hooks/stocks";
 import ButtonPrimary from "../../../components/Button/ButtonPrimary";
+import { useAuthContext } from "../../../contexts/AuthContext";
+import { Role } from "../../../models/Auth";
 
 const ReportGenerator = () => {
   const [reportType, setReportType] = useState("week");
@@ -21,6 +23,7 @@ const ReportGenerator = () => {
       [content]: !prev[content],
     }));
   };
+  const { user } = useAuthContext();
   const { mutate: createStockReport, isPending } = useCreateStockReport();
   const navigate = useNavigate();
   return (
@@ -28,7 +31,7 @@ const ReportGenerator = () => {
       {/* Back button */}
       <div className="mb-6">
         <Link
-          to="/report"
+          to={user?.role === Role.ADMIN_ROLE ? "/admin/reports" : "/report"}
           className="inline-flex items-center text-indigo-600 hover:text-indigo-700"
         >
           <ChevronLeftIcon className="h-5 w-5 mr-1" />
@@ -144,8 +147,12 @@ const ReportGenerator = () => {
                       name: name,
                     },
                     {
-                      onSuccess: () => {
-                        navigate("/admin/reports");
+                      onSuccess: (res) => {
+                        if (user?.role === Role.ADMIN_ROLE) {
+                          navigate(`/admin/report/${res.id}`);
+                        } else {
+                          navigate(`/report/${res.id}`);
+                        }
                       },
                     }
                   );
