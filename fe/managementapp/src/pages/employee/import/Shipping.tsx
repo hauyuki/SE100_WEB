@@ -171,7 +171,7 @@ const Shipping = () => {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-gray-50 text-gray-500 uppercase text-sm">
-                  <th className="px-6 py-3 text-center">STT</th>
+                  {/* <th className="px-6 py-3 text-center">STT</th> */}
                   <th className="px-6 py-3 text-left">Mã vận đơn</th>
                   <th className="px-6 py-3 text-center">Loại</th>
                   <th className="px-6 py-3 text-right">Trạng thái </th>
@@ -187,14 +187,14 @@ const Shipping = () => {
                     key={item.id}
                     className="border-b border-gray-200 hover:bg-gray-100 cursor-pointer"
                   >
-                    <td className="px-6 py-4 text-center">{index + 1}</td>
+                    {/* <td className="px-6 py-4 text-center">{index + 1}</td> */}
                     <td className="px-6 py-4">
-                      <Link
+                      {/* <Link
                         to={`/${item.type}/${item.id}`}
                         className="text-indigo-500 hover:text-indigo-600"
-                      >
-                        {item.id}
-                      </Link>
+                      > */}
+                      {item.id}
+                      {/* </Link> */}
                     </td>
                     <td className="px-6 py-4 text-center">
                       <span

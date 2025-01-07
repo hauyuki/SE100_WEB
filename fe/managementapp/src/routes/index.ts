@@ -95,6 +95,7 @@ export const routes = [
   },
   { path: "/admin/audit", component: AdminAuditPage, layout: AdminLayout },
   { path: "/report/:id", component: ReportDetail, layout: DefaultLayout },
+  { path: "admin/report/:id", component: ReportDetail, layout: AdminLayout },
   { path: "/audit/:id", component: AuditDetail, layout: DefaultLayout },
   { path: "admin/audit/:id", component: AuditDetail, layout: AdminLayout },
 ];
