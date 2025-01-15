@@ -9,6 +9,8 @@ import AddProductForm from "../../admin/products/component/AddProductForm";
 import { InboundReport } from "../../../models";
 import Loading from "../../../components/Loading";
 import Snackbar from "../../../components/Snackbar";
+import { useAuthContext } from "../../../contexts/AuthContext";
+import { Role } from "../../../models/Auth";
 
 interface Product {
   id: string;
@@ -233,7 +235,7 @@ const Import = () => {
       type: "error",
     });
   };
-
+  const { user } = useAuthContext();
   return (
     <div className="container mx-auto p-6">
       <ImportTabs />
@@ -354,7 +356,11 @@ const Import = () => {
                   >
                     <td className="px-6 py-4">
                       <Link
-                        to={`/import/${item.id}`}
+                        to={
+                          user?.role === Role.ADMIN_ROLE
+                            ? `/admin/import/${item.id}`
+                            : `/import/${item.id}`
+                        }
                         className="text-indigo-500 hover:text-indigo-600"
                       >
                         {item.id}

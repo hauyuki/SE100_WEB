@@ -9,6 +9,7 @@ import { Role } from "../../../models/Auth";
 import { useAuthContext } from "../../../contexts/AuthContext";
 import Loading from "../../../components/Loading";
 import Snackbar from "../../../components/Snackbar";
+import { ProductApis } from "../../../api/ProductApis";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -65,10 +66,9 @@ const ProductDetail = () => {
     setIsEditing(false);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async(id:number) => {
     if (window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
-      // TODO: Implement delete functionality
-      // console.log("Deleting product:", sku);
+      await ProductApis.deleteProduct(id)
       navigate("/product");
     }
   };
@@ -381,12 +381,14 @@ const ProductDetail = () => {
         >
           Lưu
         </button> */}
-            <button
-              onClick={handleDelete}
-              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-            >
-              Xóa
-            </button>
+            {user?.role === Role.ADMIN_ROLE && (
+              <button
+                onClick={()=>handleDelete(Number(editedProduct?.id))}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              >
+                Xóa
+              </button>
+            )}{" "}
           </div>
           <Snackbar
             show={snackbar.show}

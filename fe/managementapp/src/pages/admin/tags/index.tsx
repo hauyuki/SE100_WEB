@@ -3,12 +3,7 @@ import { FiEdit2, FiPlus } from "react-icons/fi";
 import AddTagForm from "./components/AddTagForm";
 import EditTagForm from "./components/EditTagForm";
 import Tag from "../../employee/tags/Tag";
-interface Tag {
-  id: number;
-  tagName: string;
-  meaning: string;
-  createdDate: string;
-}
+
 const TagManagementPage = () => {
   return <Tag />;
 };

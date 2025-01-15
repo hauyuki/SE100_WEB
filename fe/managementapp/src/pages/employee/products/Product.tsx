@@ -26,6 +26,8 @@ const ProductPage = () => {
     isRefetching,
     isError: error,
   } = useGetProducts();
+
+  const SttProduct = Math.max(...(products?.productList ?? []).map(product => product.id));
   const [showForm, setShowForm] = useState(false);
   const { user } = useAuthContext();
   // Get unique categories, companies, and storage areas for filters
@@ -199,6 +201,7 @@ const ProductPage = () => {
         <AddProductForm
           showForm={showForm}
           onClose={() => setShowForm(false)}
+          SttProduct={SttProduct}
         />
 
         {loading || isRefetching ? (

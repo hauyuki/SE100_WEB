@@ -11,6 +11,7 @@ const AdminProductPage = () => {
       <AddProductForm
         showForm={showAddForm}
         onClose={() => setShowAddForm(false)}
+        SttProduct={0}
       />
     </div>
   );

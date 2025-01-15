@@ -8,10 +8,20 @@ export const StockReportApis = {
   getAllStockReports(): Promise<StockReport[]> {
     return apiGet("/stocks");
   },
+  getStockReport(id: number): Promise<StockReport> {
+    return apiGet(`/stocks/${id}`);
+  },
   getDateRangeStockReport(request: {
     startDate: string;
     endDate: string;
   }): Promise<WeeklyData[]> {
     return apiPost("/stocks/dateRange", request);
+  },
+  creeateStockReport(request: {
+    startDate: string;
+    endDate: string;
+    name: string;
+  }): Promise<StockReport> {
+    return apiPost("/stocks", request);
   },
 };

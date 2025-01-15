@@ -12,11 +12,13 @@ const AdminLayout: React.FC<Props> = ({ children }) => {
   const currentPath = location.pathname.split("/").slice(1).join("/");
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen ">
       <AdminSidebar currentPath={currentPath} />
       <div className="flex-1 flex flex-col">
         <Header currentPath={currentPath} />
-        <main className="flex-1 overflow-y-auto p-5">{children}</main>
+        <main className="flex-1 overflow-y-auto p-5 bg-gray-50">
+          {children}
+        </main>
       </div>
     </div>
   );

@@ -56,6 +56,8 @@ const LoginForm = () => {
       className="grid grid-cols-1 gap-6 max-w-80 w-full"
       onSubmit={handleSubmit(onSubmit)}
     >
+      <h2 className="font-bold text-2xl mx-auto">Storix</h2>
+
       <label className="block">
         <span className="text-neutral-800 dark:text-neutral-200">Email</span>
         <Input

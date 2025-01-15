@@ -13,6 +13,7 @@ export interface CreateTagRequest {
 }
 
 export interface UpdateTagRequest {
+  areaId:number
   name?: string;
   description?: string;
 }

@@ -5,10 +5,6 @@ type LayoutProps = {
 };
 
 const DefaultLayout: React.FC<LayoutProps> = ({ children }) => {
-  return (
-    <div className="relative flex h-full w-full mx-auto overflow-auto">
-      {children}
-    </div>
-  );
+  return <div className="relative flex h-screen w-screen ">{children}</div>;
 };
 export default DefaultLayout;

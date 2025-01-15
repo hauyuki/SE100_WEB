@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { PencilIcon } from "@heroicons/react/24/outline";
+import React, { useEffect, useState } from "react";
+import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import EditTagModal from "../../../components/modals/EditTagModal";
 import AddTagForm from "../../admin/tags/components/AddTagForm";
 import { useGetTags } from "../../../hooks/tags";
@@ -9,6 +9,7 @@ import { Area } from "../../../models/Area";
 import { useAuthContext } from "../../../contexts/AuthContext";
 import { Role } from "../../../models/Auth";
 import Snackbar from "../../../components/Snackbar";
+import { TagApis } from "../../../api/TagApis";
 
 interface AreaProduct {
   name: string;
@@ -23,10 +24,18 @@ interface WarehouseArea {
 }
 
 const Tag = () => {
+  const [searchTag, setSearchTag] = useState("");
+  const [searchArea, setSearchArea] = useState('');
   const [selectedArea, setSelectedArea] = useState<Area | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const {
+    data: productss,
+  } = useGetProducts();
+   
   const [selectedTag, setSelectedTag] = useState<{
+    id: number
     name: string;
+    areaId:number;
     meaning: string;
     date: string;
   } | null>(null);
@@ -77,9 +86,14 @@ const Tag = () => {
     },
   ];
 
-  // Tag list data
-  const { data: tags } = useGetTags();
+
+  const { data: tags , refetch} = useGetTags();
   const { data: areas } = useGetAreas();
+  
+  const filteredTags = tags?.filter((tag) =>
+    tag.name.toLowerCase().includes(searchTag.toLowerCase()) &&
+    tag.area?.name.toLowerCase().includes(searchArea.toLowerCase())
+  );
   const {
     data: products,
     isPending: loading,
@@ -103,55 +117,70 @@ const Tag = () => {
   };
 
   const handleEditClick = (tag: {
+    id: string;
     name: string;
+    areaId:number
     meaning: string;
     dateCreated: string;
   }) => {
     setSelectedTag({
+      id: Number(tag.id),
       name: tag.name,
+      areaId:Number(tag.areaId),
       meaning: tag.meaning,
       date: tag.dateCreated,
     });
     setIsEditModalOpen(true);
   };
 
-  const handleEditSubmit = (tagData: { name: string; meaning: string }) => {
-    try {
-      // Handle the edit submission here
-      console.log("Updated tag:", tagData);
-      // You would typically make an API call here to update the tag
-      setSnackbar({
-        show: true,
-        message: "Cập nhật tag thành công!",
-        type: "success",
-      });
-      setIsEditModalOpen(false);
-    } catch (error) {
-      setSnackbar({
-        show: true,
-        message: "Có lỗi xảy ra khi cập nhật tag!",
-        type: "error",
-      });
-    }
-  };
+    const handleEditSubmit = (tagData: { name: string; meaning: string }) => {
+      try {
+        setSnackbar({
+          show: true,
+          message: "Cập nhật tag thành công!",
+          type: "success",
+        });
+        setIsEditModalOpen(false);
+        refetch();
+
+      } catch (error) {
+        setSnackbar({
+          show: true,
+          message: "Có lỗi xảy ra khi cập nhật tag!",
+          type: "error",
+        });
+      }
+    };
 
   const handleAddSubmit = (tagData: { name: string; meaning: string }) => {
     try {
-      // Handle the add submission here
-      console.log("New tag:", tagData);
-      // You would typically make an API call here to create the tag
       setSnackbar({
         show: true,
         message: "Thêm tag mới thành công!",
         type: "success",
       });
       setIsAddModalOpen(false);
+
     } catch (error) {
       setSnackbar({
         show: true,
         message: "Có lỗi xảy ra khi thêm tag mới!",
         type: "error",
       });
+    }
+  };
+ const deleteTag = async(e: React.FormEvent,id:any) => {
+    e.preventDefault()
+    try {
+      await TagApis.deleteTag(id);
+      setSnackbar({
+        show: true,
+        message: "Xóa thàng công!",
+        type: "success",
+      });
+      refetch();
+    } catch (error) {
+      console.error("Failed to update tag:", error);
     }
   };
 
@@ -232,7 +261,6 @@ const Tag = () => {
             </div>
           )}
         </div>
-
         {/* Tags Table */}
         <div className="bg-white rounded-lg p-6">
           <div className="flex justify-between items-center mb-6">
@@ -246,7 +274,31 @@ const Tag = () => {
               </button>
             )}{" "}
           </div>
-
+          <div className="flex gap-4">
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder="Tìm kiếm theo tên tag..."
+                value={searchTag}
+                onChange={(e) => setSearchTag(e.target.value)}
+                className="border border-gray-300 rounded px-4 py-2 w-full"
+              />
+            </div>
+            <div className="mb-4">
+              <select
+                value={searchArea}
+                onChange={(e) => setSearchArea(e.target.value)}
+                className="border border-gray-300 rounded px-4 py-2 w-full"
+              >
+                <option value="">Tất cả khu vực</option>
+                {areas?.map((area) => (
+                  <option key={area.id} value={area.id}>
+                    {area.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
           <table className="min-w-full">
             <thead>
               <tr className="bg-gray-50">
@@ -260,44 +312,67 @@ const Tag = () => {
                   Ý nghĩa
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Số lượng sản phẩm
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Khu vực
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Ngày tạo
                 </th>
-                {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Ghi chú
-                </th> */}
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Hành động
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {tags?.map((tag) => (
-                <tr key={tag.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {tag.id}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-primary">
-                    {tag.name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {tag.description}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {tag?.area?.name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {new Date(tag.createdDate).toDateString()}
-                  </td>
-                  {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"> */}
-                  {/* <button
-                      className="text-gray-600 hover:text-primary"
-                      // onClick={() => handleEditClick(tag)}
-                    >
-                      <PencilIcon className="h-5 w-5" />
-                    </button> */}
-                  {/* </td> */}
-                </tr>
-              ))}
+              {filteredTags?.map((tag) => {
+                const matchingProductsCount = productss?.productList.filter(
+                  (product) => product.tags?.some((productTag) => productTag.name === tag.name)
+                ).length;
+                return(
+                  <tr key={tag.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {tag.id}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-primary">
+                      {tag.name}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {tag.description}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {matchingProductsCount}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {tag?.area?.name}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {new Date(tag.createdDate).toDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"> 
+                    <button
+                        className="text-gray-600 hover:text-primary"
+                        onClick={() => handleEditClick({
+                          id:String(tag.id),
+                          name: tag.name,
+                          areaId:tag.area.id,
+                          meaning: tag.description,
+                          dateCreated: new Date(tag.createdDate).toDateString(),
+                        })}
+                      >
+                        <PencilIcon className="h-5 w-5" />
+                      </button> 
+                     <button
+                        className="text-gray-600 hover:text-primary"
+                        onClick={(e) => deleteTag(e,tag.id)}
+                      >
+                        <TrashIcon className="h-5 w-5" />
+                      </button> 
+                    </td>
+                  </tr>
+                )
+            })}
             </tbody>
           </table>
 
@@ -309,6 +384,7 @@ const Tag = () => {
             />
           )}
           {/* Edit Modal */}
+          
           {selectedTag && (
             <EditTagModal
               isOpen={isEditModalOpen}

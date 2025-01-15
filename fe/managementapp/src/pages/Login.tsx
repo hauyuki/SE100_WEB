@@ -3,18 +3,18 @@ import LoginForm from "../components/LoginForm";
 
 const Login = () => {
   return (
-    <div className="h-full w-full grid grid-cols-2">
-      <div className="flex items-center justify-center">
+    <div className="h-screen w-screen overflow-hidden grid grid-cols-3">
+      <div className="flex items-center mx-4  justify-center">
         <LoginForm />
       </div>
-      <div className="p-5">
-        <div className="rounded-2xl bg-blue-400 h-[540px] overflow-hidden">
-          <img
-            alt="banner"
-            src={Images.landingImg}
-            className={`object-cover bg-center`}
-          ></img>
-        </div>
+      <div className="py-10 px-5 col-span-2 rounded-2xl  w-full h-screen overflow-hidden">
+        {/* <div className=" h-full overflow-hidden"> */}
+        <img
+          alt="banner"
+          src={Images.landingImg}
+          className={`object-cover bg-center rounded-2xl overflow-hidden w-full h-full`}
+        ></img>
+        {/* </div> */}
       </div>
     </div>
   );

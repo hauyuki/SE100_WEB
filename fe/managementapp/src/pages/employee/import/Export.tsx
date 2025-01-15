@@ -8,6 +8,8 @@ import { useGetOutboundReports } from "../../../hooks/outboundReports";
 import { OutboundReport } from "../../../models/OutboundReport";
 import Loading from "../../../components/Loading";
 import Snackbar from "../../../components/Snackbar";
+import { Role } from "../../../models/Auth";
+import { useAuthContext } from "../../../contexts/AuthContext";
 
 interface Product {
   id: string;
@@ -217,6 +219,7 @@ const Export = () => {
       type: "error",
     });
   };
+  const { user } = useAuthContext();
 
   return (
     <div className="container mx-auto p-6">
@@ -310,14 +313,12 @@ const Export = () => {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-gray-50 text-gray-500 uppercase text-sm">
-                  <th className="px-6 py-3 text-center">STT</th>
                   <th className="px-6 py-3 text-center">Mã phiếu xuất</th>
                   <th className="px-6 py-3 text-center">Tổng giá trị</th>
                   <th className="px-6 py-3 text-center">Đơn vị vận chuyển</th>
                   <th className="px-6 py-3 text-center">Ngày vận chuyển</th>
                   <th className="px-6 py-3 text-center">Ngày hoàn thành</th>
                   <th className="px-6 py-3 text-center">Trạng thái</th>
-                  <th className="px-6 py-3 text-center">Ghi chú</th>
                   <th className="px-6 py-3 text-center">Thao tác</th>
                 </tr>
               </thead>
@@ -327,10 +328,13 @@ const Export = () => {
                     key={item.id}
                     className="border-b border-gray-200 hover:bg-gray-100"
                   >
-                    <td className="px-6 py-4 text-center">{item.id}</td>
                     <td className="px-6 py-4">
                       <Link
-                        to={`/export/${item.id}`}
+                        to={
+                          user?.role === Role.ADMIN_ROLE
+                            ? `/admin/import/${item.id}`
+                            : `/import/${item.id}`
+                        }
                         className="text-indigo-500 hover:text-indigo-600"
                       >
                         {item.id}
@@ -344,15 +348,19 @@ const Export = () => {
                       {new Date(item.shipment.date).toDateString()}
                     </td>
                     <td className="px-6 py-4 text-center">
-                      {/* {item.completionDate || "-"} */}
+                      {item.shipment.completedDate
+                        ? new Date(item.shipment.date).toDateString()
+                        : "Pending"}
                     </td>
                     <td className="px-6 py-4 text-center">
                       <span
                         className={`inline-flex items-center justify-center px-3 py-1 text-sm font-medium rounded-full ${
-                          item.shipment.status === "Vận chuyển thành công"
+                          item.shipment.status === "COMPLETED"
                             ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20"
-                            : item.shipment.status === "Đang vận chuyển"
+                            : item.shipment.status === "IN_PROGRESS"
                             ? "bg-amber-50 text-amber-700 ring-1 ring-amber-600/20"
+                            : item.shipment.status === "PENDING"
+                            ? "bg-blue-50 text-blue-700 ring-1 "
                             : "bg-rose-50 text-rose-700 ring-1 ring-rose-600/20"
                         }`}
                       >
@@ -361,12 +369,14 @@ const Export = () => {
                     </td>
                     {/* <td className="px-6 py-4">{item.}</td> */}
                     <td className="px-6 py-4 text-center">
-                      <button
-                        onClick={() => handleEdit(item.id)}
-                        className="text-indigo-600 hover:text-indigo-900"
-                      >
-                        Sửa
-                      </button>
+                      {item.shipment?.status !== "CANCELLED" && (
+                        <button
+                          onClick={() => handleEdit(item.id)}
+                          className="text-indigo-600 hover:text-indigo-900"
+                        >
+                          Sửa
+                        </button>
+                      )}{" "}
                     </td>
                   </tr>
                 ))}

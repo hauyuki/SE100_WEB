@@ -14,6 +14,9 @@ export type Product = {
   maxQuantity: number;
   category: Category;
   company: Company;
+  capacity:string;
+  productType:string;
+  weight:string;
   tags: Tag[];
   quantity: number;
   storageArea: string;
@@ -31,8 +34,11 @@ export interface UpsertProductModel {
   marketPrice: number; // Assumes BigDecimal maps to number
   productionCost: number; // Assumes BigDecimal maps to number
   image: string;
+  capacity:string;
+  productType:string;
   minQuantity: number;
   maxQuantity: number;
+  weight:string;
   categoryId: number; // Foreign key for the category
   companyId: number; // Foreign key for the company
   tagIds: number[]; // Array of tag IDs

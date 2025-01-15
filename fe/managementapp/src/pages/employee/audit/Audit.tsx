@@ -3,32 +3,23 @@ import { FaPlus } from "react-icons/fa";
 import CreateAuditForm from "./components/CreateAuditForm";
 import { useNavigate } from "react-router-dom";
 import Loading from "../../../components/Loading";
+import { useGetInventoryChecks } from "../../../hooks/inventoryChecks";
+import { useAuthContext } from "../../../contexts/AuthContext";
+import { Role } from "../../../models/Auth";
+import InventoryCheckForm from "./components/CreateAuditForm";
 import Snackbar from "../../../components/Snackbar";
-
-interface AuditProduct {
-  sku: string;
-  name: string;
-  stockQuantity: number;
-  actualQuantity: number;
-  deficit: number;
-}
-
-interface AuditRecord {
-  id: number;
-  auditId: string;
-  createdDate: string;
-  createdBy: string;
-  totalDeficit: number;
-  notes: string;
-}
 
 const Audit = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortValue, setSortValue] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [auditRecords, setAuditRecords] = useState<AuditRecord[]>([]);
+  const {
+    data: inventoryChecks,
+    isLoading: loading,
+    isError,
+  } = useGetInventoryChecks();
+  const { user } = useAuthContext();
   const [snackbar, setSnackbar] = useState<{
     show: boolean;
     message: string;
@@ -45,11 +36,6 @@ const Audit = () => {
 
   const handleCreateSuccess = () => {
     setShowCreateForm(false);
-    setSnackbar({
-      show: true,
-      message: "Tạo phiếu kiểm toán thành công",
-      type: "success",
-    });
   };
 
   const handleCreateError = (error: string) => {
@@ -60,85 +46,29 @@ const Audit = () => {
     });
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        // Mock data
-        const data: AuditRecord[] = [
-          {
-            id: 1,
-            auditId: "KT001",
-            createdDate: "2024-03-15",
-            createdBy: "Bích Huyền",
-            totalDeficit: 1200000,
-            notes: "Kiểm kê định kỳ tháng 3/2024",
-          },
-          {
-            id: 2,
-            auditId: "KT002",
-            createdDate: "2024-03-10",
-            createdBy: "Bích Huyền",
-            totalDeficit: 850000,
-            notes: "Kiểm kê đột xuất",
-          },
-          {
-            id: 3,
-            auditId: "KT003",
-            createdDate: "2024-03-05",
-            createdBy: "Bích Huyền",
-            totalDeficit: 950000,
-            notes: "Kiểm kê cuối tháng 2/2024",
-          },
-          {
-            id: 4,
-            auditId: "KT004",
-            createdDate: "2024-02-28",
-            createdBy: "Bích Huyền",
-            totalDeficit: 750000,
-            notes: "Kiểm kê theo yêu cầu",
-          },
-          {
-            id: 5,
-            auditId: "KT005",
-            createdDate: "2024-02-25",
-            createdBy: "Bích Huyền",
-            totalDeficit: 1100000,
-            notes: "Kiểm kê định kỳ tháng 2/2024",
-          },
-        ];
-        setAuditRecords(data);
-      } catch (error) {
-        console.error("Error fetching audit records:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const filteredRecords = auditRecords
+  const filteredRecords = inventoryChecks?.data
     .filter(
       (record) =>
-        record.auditId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        record.createdBy.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        record.notes.toLowerCase().includes(searchQuery.toLowerCase())
+        record.employee.name
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        record.name.toLowerCase().includes(searchQuery.toLowerCase())
     )
     .sort((a, b) => {
       if (sortValue === "asc") {
-        return a.totalDeficit - b.totalDeficit;
+        return a.totalPrice - b.totalPrice;
       } else if (sortValue === "desc") {
-        return b.totalDeficit - a.totalDeficit;
+        return b.totalPrice - a.totalPrice;
       }
       return 0;
     });
 
-  const handleRowClick = (id: string) => {
-    navigate(`/audit/${id}`);
+  const handleRowClick = (id: number) => {
+    if (user?.role === Role.ADMIN_ROLE) {
+      navigate(`/admin/audit/${id}`);
+    } else {
+      navigate(`/audit/${id}`);
+    }
   };
 
   const formatCurrency = (value: number) => {
@@ -207,7 +137,6 @@ const Audit = () => {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-gray-50 text-gray-500 uppercase text-sm">
-                  <th className="px-6 py-3 text-left">STT</th>
                   <th className="px-6 py-3 text-left">Mã phiếu kiểm toán</th>
                   <th className="px-6 py-3 text-left">Ngày tạo phiếu</th>
                   <th className="px-6 py-3 text-left">Người tạo phiếu</th>
@@ -217,25 +146,24 @@ const Audit = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredRecords.map((record) => (
+                {filteredRecords?.map((record) => (
                   <tr
                     key={record.id}
                     className="border-b border-gray-200 hover:bg-gray-100 cursor-pointer"
-                    onClick={() => handleRowClick(record.auditId)}
+                    onClick={() => handleRowClick(record.id)}
                   >
                     <td className="px-6 py-4">{record.id}</td>
-                    <td className="px-6 py-4 text-indigo-600">
-                      {record.auditId}
-                    </td>
-                    <td className="px-6 py-4">{record.createdDate}</td>
-                    <td className="px-6 py-4">{record.createdBy}</td>
                     <td className="px-6 py-4">
-                      {formatCurrency(record.totalDeficit)}
+                      {new Date(record.createdDate).toDateString()}
                     </td>
-                    <td className="px-6 py-4">{record.notes}</td>
+                    <td className="px-6 py-4">{record.employee?.name}</td>
+                    <td className="px-6 py-4">
+                      {formatCurrency(record.totalPrice)}
+                    </td>
+                    <td className="px-6 py-4">{record.name}</td>
                     <td className="px-6 py-4 text-center">
                       <button className="text-indigo-600 hover:text-indigo-900">
-                        Sửa
+                        Chi tiết
                       </button>
                     </td>
                   </tr>
@@ -246,11 +174,9 @@ const Audit = () => {
         )}
       </div>
 
-      <CreateAuditForm
+      <InventoryCheckForm
         showForm={showCreateForm}
         onClose={() => setShowCreateForm(false)}
-        onSuccess={handleCreateSuccess}
-        onError={handleCreateError}
       />
 
       <Snackbar

@@ -30,6 +30,11 @@ export const useUpdateShipment = () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SHIPMENT_LIST] });
       queryClient.invalidateQueries({ queryKey: [LIST_INBOUND_REPORT_KEY] });
       queryClient.invalidateQueries({ queryKey: [LIST_OUTBOUND_REPORT_KEY] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.STATISTIC_LIST] });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.STATISTIC_CATEGORY],
+      });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.STATISTIC_WEEK] });
     },
   });
 };

@@ -59,6 +59,9 @@ export const ProductSchema = z.object({
   description: z.string().nullable(),
   marketPrice: z.number().nonnegative(),
   productionCost: z.number().nonnegative(),
+  capacity: z.string(),
+  productType: z.string(),
+  weight: z.string(),
   image: z.string(),
   minQuantity: z.number().int().positive(),
   maxQuantity: z.number().int().positive(),
@@ -109,6 +112,9 @@ export const UpsertProductModelSchema = z.object({
     .number()
     .min(0, "Production cost must be a positive number"), // Production cost must be a non-negative number
   image: z.string().optional(), // Image must be a valid URL
+  capacity:z.string(),
+  productType:z.string(),
+  weight:z.string(),
   minQuantity: z.number().min(0, "Minimum quantity must be a positive number"), // Minimum quantity must be a non-negative number
   maxQuantity: z.number().min(0, "Maximum quantity must be a positive number"), // Maximum quantity must be a non-negative number
   categoryId: z.coerce.number().int().min(1, "Category ID is required"), // Category ID must be a positive number
@@ -174,4 +180,18 @@ export const EmployeeRequestSchema = z.object({
   }),
   username: z.string(),
   password: z.string().optional(),
+});
+const InventoryCheckItemSchema = z.object({
+  loss: z.number().min(1, "Số lượng mất phải lớn hơn 0"), // Loss must be greater than 0
+  productId: z.number().int(), // Product ID must be an integer
+});
+
+// Main schema for the report request
+export const InventoryCheckRequestSchema = z.object({
+  date: z.string().refine((val) => !isNaN(Date.parse(val)), {
+    message: "Ngày không hợp lệ", // Date must be a valid ISO string
+  }),
+  name: z.string().min(1, "Tên báo cáo không thể để trống"), // InventoryCheck name cannot be empty
+  employeeId: z.number().int(), // Employee ID must be an integer
+  items: z.array(InventoryCheckItemSchema).min(1, "Cần ít nhất một sản phẩm"), // Ensure at least one item is provided
 });

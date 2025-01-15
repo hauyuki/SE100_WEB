@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import { TagApis } from "../../api/TagApis";
 
 interface EditTagModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (tagData: { name: string; meaning: string }) => void;
+  onSubmit: (tagData: { id: number; name: string; meaning: string }) => void;
   initialData: {
+    id: number;
+    areaId:number;
     name: string;
     meaning: string;
     date: string;
@@ -20,16 +23,22 @@ const EditTagModal: React.FC<EditTagModalProps> = ({
 }) => {
   const [tagName, setTagName] = useState(initialData.name);
   const [meaning, setMeaning] = useState(initialData.meaning);
-
+  const [setareaId, setSetareaId] = useState(initialData.areaId);
   useEffect(() => {
     setTagName(initialData.name);
     setMeaning(initialData.meaning);
+    setSetareaId(initialData.areaId);
   }, [initialData]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit({ name: tagName, meaning });
-    onClose();
+  const handleSubmit = async(e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      await TagApis.updateTag(initialData.id, { name: tagName, description: meaning,areaId:setareaId });
+      onSubmit({ id: initialData.id, name: tagName, meaning });
+      onClose();
+    } catch (error) {
+      console.error("Failed to update tag:", error);
+    }
   };
 
   if (!isOpen) return null;

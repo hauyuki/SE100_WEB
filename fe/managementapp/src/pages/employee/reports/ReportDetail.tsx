@@ -6,6 +6,10 @@ import {
 } from "@heroicons/react/24/outline";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
+import { useGetStockReportDetail } from "../../../hooks/stocks";
+import { useAuthContext } from "../../../contexts/AuthContext";
+import { Role } from "../../../models/Auth";
+import { handleGenerateReport } from "../../../utils/generate_report";
 
 interface ReportData {
   id: string;
@@ -52,7 +56,7 @@ interface ReportData {
 
 const ReportDetail = () => {
   const { id } = useParams();
-
+  const { data: report } = useGetStockReportDetail(Number(id));
   // Mock data - replace with actual API call
   const reportData: ReportData = {
     id: "BC001",
@@ -118,23 +122,27 @@ const ReportDetail = () => {
   const handleDownloadPDF = async () => {
     const element = document.getElementById("report-content");
     if (!element) return;
-
+  
     const canvas = await html2canvas(element);
     const imgData = canvas.toDataURL("image/png");
     const pdf = new jsPDF("p", "mm", "a4");
     const imgProps = pdf.getImageProperties(imgData);
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
+  
     pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
     pdf.save(`report-${reportData.id}.pdf`);
   };
-
+  console.log('report', report)
+  const { user } = useAuthContext();
   return (
     <div className="p-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <Link to="/report" className="inline-flex items-center text-indigo-600">
+        <Link
+          to={user?.role === Role.ADMIN_ROLE ? "/admin/reports" : "/report"}
+          className="inline-flex items-center text-indigo-600"
+        >
           <ChevronLeftIcon className="h-5 w-5 mr-1" />
           Trở về
         </Link>
@@ -152,67 +160,129 @@ const ReportDetail = () => {
         {/* Report Header */}
         <div className="bg-white rounded-lg p-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            {reportData.title}
+            {report?.name}
           </h1>
           <div className="grid grid-cols-2 gap-4">
             <div>
+              <p className="text-sm text-gray-500">Người lập báo cáo</p>
+              <p className="font-medium">{report?.employee?.name}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Ngày lập báo cáo</p>
+              <p className="font-medium">{report?.date
+                  ? new Date(report?.startDate).toLocaleDateString("vi-VN")
+                  : ""}</p>
+            </div>
+            <div>
               <p className="text-sm text-gray-500">Mã báo cáo</p>
-              <p className="font-medium">{reportData.id}</p>
+              <p className="font-medium">{report?.id}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Loại báo cáo</p>
-              <p className="font-medium">{reportData.type}</p>
+              <p className="text-sm text-gray-500">Tên báo cáo</p>
+              <p className="font-medium">{report?.name}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Ngày tạo</p>
+              <p className="text-sm text-gray-500">Ngày bắt đầu</p>
               <p className="font-medium">
-                {new Date(reportData.createdDate).toLocaleDateString("vi-VN")}
+                {" "}
+                {report?.startDate
+                  ? new Date(report?.startDate).toLocaleDateString("vi-VN")
+                  : ""}
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Người tạo</p>
-              <p className="font-medium">{reportData.createdBy}</p>
+              <p className="text-sm text-gray-500">Ngày kết thúc</p>
+              <p className="font-medium">
+                {report?.endDate
+                  ? new Date(report?.endDate).toLocaleDateString("vi-VN")
+                  : ""}
+              </p>
             </div>
+            <div>
+              <p className="text-sm text-gray-500">Doanh thu</p>
+              <p className="font-medium">
+                {report && `${report?.outboundPrice<report?.inboundPrice?"Lỗ: ": "Lãi: "}${formatCurrency(report?.outboundPrice-report?.inboundPrice)}`}
+              </p>
+            </div>
+            {/* <div>
+              <p className="text-sm text-gray-500">Tổng doanh thu </p>
+              <p className="font-medium">
+                {report && formatCurrency(report?.totalPrice)}
+              </p>
+            </div> */}
+            {/* <div>
+              <p className="text-sm text-gray-500">Người tạo</p>
+              <p className="font-medium">{report.}</p>
+            </div> */}
           </div>
         </div>
 
         {/* Imports Section */}
-        {reportData.content.imports && (
+        {report?.items && (
           <div className="bg-white rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Nhập hàng</h2>
+            <h2 className="text-xl font-semibold mb-4">Nội dung báo cáo </h2>
             <div className="overflow-x-auto">
               <table className="min-w-full">
                 <thead>
-                  <tr className="bg-gray-50">
+                  <tr className="bg-gray-50 ">
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                       Mã phiếu nhập
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Ngày nhập
+                      Tên sản phẩm
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                      Giá trị
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      Số lượng nhập
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      Số lượng xuất
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      Tổng tiền nhập
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      Tổng tiền xuất
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      Trạng thái
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {reportData.content.imports.items.map((item) => (
-                    <tr key={item.id}>
-                      <td className="px-6 py-4 whitespace-nowrap">{item.id}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {new Date(item.date).toLocaleDateString("vi-VN")}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
-                        {formatCurrency(item.value)}
-                      </td>
-                    </tr>
-                  ))}
+                  {report?.items
+                    .filter(item => (
+                      (item.inboundPrice !== 0 || item.outboundPrice !== 0) &&
+                      (item.outboundPrice !== 0)
+                    ))
+                    .map((item) => (
+                      <tr key={item.id}>
+                        <td className="px-6 py-4 whitespace-nowrap">{item.id}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-left">
+                          {item.product.name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-left">
+                          {item.quantity}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-left">
+                          {item.outboundQuantity}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-left">
+                          {formatCurrency(item.inboundPrice)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-left">
+                          {formatCurrency(item.outboundPrice)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-left">
+                          {formatCurrency(item.outboundPrice)}
+                        </td>
+                      </tr>
+                    ))}
                   <tr className="bg-gray-50 font-medium">
-                    <td colSpan={2} className="px-6 py-4 text-right">
+                    <td colSpan={5} className="px-6 py-4 text-right">
                       Tổng cộng
                     </td>
                     <td className="px-6 py-4 text-right">
-                      {formatCurrency(reportData.content.imports.total)}
+                      {formatCurrency(report?.totalPrice)}
                     </td>
                   </tr>
                 </tbody>
@@ -222,7 +292,7 @@ const ReportDetail = () => {
         )}
 
         {/* Exports Section */}
-        {reportData.content.exports && (
+        {/* {reportData.content.exports && (
           <div className="bg-white rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4">Xuất hàng</h2>
             <div className="overflow-x-auto">
@@ -264,10 +334,10 @@ const ReportDetail = () => {
               </table>
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Products Section */}
-        {reportData.content.products && (
+        {/* {reportData.content.products && (
           <div className="bg-white rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4">Sản phẩm</h2>
             <div className="overflow-x-auto">
@@ -325,10 +395,10 @@ const ReportDetail = () => {
               </table>
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Revenue Section */}
-        {reportData.content.revenue && (
+        {/* {reportData.content.revenue && (
           <div className="bg-white rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4">Doanh thu</h2>
             <div className="overflow-x-auto">
@@ -392,7 +462,7 @@ const ReportDetail = () => {
               </table>
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

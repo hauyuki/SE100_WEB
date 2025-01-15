@@ -38,6 +38,7 @@ const Header: React.FC<HeaderProps> = ({ currentPath = "dashboard" }) => {
       if (adminPath === "dashboard") return "Dashboard";
       if (adminPath.startsWith("product/")) return "Chi tiết sản phẩm";
       if (adminPath === "products") return "Quản lý sản phẩm";
+      if (adminPath === "profile") return "Thông tin cá nhân";
       if (
         adminPath.startsWith("import") ||
         adminPath.startsWith("export") ||
@@ -45,6 +46,7 @@ const Header: React.FC<HeaderProps> = ({ currentPath = "dashboard" }) => {
       )
         return "Quản lý xuất nhập hàng";
       if (adminPath.startsWith("reports")) return "Báo cáo";
+      if (adminPath.startsWith("report")) return "Báo cáo chi tiết";
       if (adminPath === "audit") return "Kiểm toán";
       if (adminPath === "tags") return "Quản lý tag";
       if (adminPath === "accounts") return "Quản lý tài khoản";

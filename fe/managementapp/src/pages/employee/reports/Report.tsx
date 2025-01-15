@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   LineChart,
   Line,
@@ -17,14 +17,18 @@ import {
   useGetStockReportDateRanges,
   useGetStockReports,
 } from "../../../hooks/stocks";
+import { useAuthContext } from "../../../contexts/AuthContext";
+import { Role } from "../../../models/Auth";
 
 const Report = () => {
   const navigate = useNavigate();
-
+  const [searchType, setSearchType] = useState('');
+  const [searchCreator, setSearchCreator] = useState('');
   const [timeFilter, setTimeFilter] = useState<string>("7 ngày qua");
   const [showTimeFilterDropdown, setShowTimeFilterDropdown] = useState(false);
   const [showCustomDateRange, setShowCustomDateRange] = useState(false);
   const [startDate, setStartDate] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [endDate, setEndDate] = useState<string>("");
   const { data: chartData, refetch } = useGetStockReportDateRanges({
     startDate: startDate,
@@ -71,8 +75,17 @@ const Report = () => {
       setShowCustomDateRange(false);
     }
   };
-
+  const { user } = useAuthContext();
   const { data: reports } = useGetStockReports();
+  const reportTypes = ["WEEK", "PERIOD", "MONTH"];
+const creators = reports?.map(report => report.employee.name);
+const filteredReports = reports?.filter((report) =>
+  (report.name?.toLowerCase().includes(searchTerm?.toLowerCase() || '') || !searchTerm) &&
+  (report.stockReportType?.toLowerCase().includes(searchType?.toLowerCase() || '') || !searchType) &&
+  (report.employee.name?.toLowerCase().includes(searchCreator?.toLowerCase() || '') || !searchCreator)
+);
+
+  
   return (
     <div className="p-6">
       {/* Statistics Section */}
@@ -191,13 +204,51 @@ const Report = () => {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg font-medium">Danh sách báo cáo</h2>
           <button
-            onClick={() => navigate("/report/generate")}
+            onClick={() => navigate("/admin/reports/generate")}
             className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
           >
             Tạo báo cáo
           </button>
         </div>
-
+        <div className="flex gap-4">
+          <div className="mb-4">
+            <input
+              type="text"
+              placeholder="Tìm kiếm theo tên báo cáo..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="border border-gray-300 rounded px-4 py-2 w-full"
+            />
+          </div>
+          <div className="mb-4">
+            <select
+              value={searchType}
+              onChange={(e) => setSearchType(e.target.value)}
+              className="border border-gray-300 rounded px-4 py-2 w-full"
+            >
+              <option value="">Tất cả loại báo cáo</option>
+              {reportTypes.map((type) => (
+                <option key={type} value={type}>
+                  {type === "WEEK" ? "Báo cáo theo tuần" : type === "PERIOD" ? "Báo cáo theo giai đoạn" : "Báo cáo theo tháng"}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="mb-4">
+            <select
+              value={searchCreator}
+              onChange={(e) => setSearchCreator(e.target.value)}
+              className="border border-gray-300 rounded px-4 py-2 w-full"
+            >
+              <option value="">Tất cả người tạo báo cáo</option>
+              {creators?.map((creator, index) => (
+                <option key={index} value={creator}>
+                  {creator}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
         <div className="overflow-x-auto">
           {reports && (
             <table className="min-w-full">
@@ -210,68 +261,46 @@ const Report = () => {
                     Tên báo cáo
                   </th>
                   <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase">
-                    Ngày bắt đầu
+                    Loại báo cáo
                   </th>
                   <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase">
-                    Ngày kết thúc
+                    Ngày tạo báo cáo
                   </th>
                   <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase">
-                    Số lượng tồn
+                    Người tạo báo cáo
                   </th>
-                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase">
-                    Nhập
-                  </th>
-                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase">
-                    Xuất
-                  </th>
-                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase">
-                    Giá nhập
-                  </th>
-                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase">
-                    Giá xuất
-                  </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                  
+                  {/* <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
                     Thao tác
-                  </th>
+                  </th> */}
                 </tr>
               </thead>{" "}
               <tbody className="divide-y divide-gray-200">
-                {reports?.map((report) => (
+                {filteredReports?.map((report) => (
                   <tr key={report.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {report.id}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-indigo-600">
-                      {report.name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {new Date(report.startDate).toDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {new Date(report.endDate).toDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {report.stockQuantity}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {report.inboundQuantity}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {report.outboundQuantity}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {report.inboundPrice}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {report.outboundPrice}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
-                      <button
-                        className="text-gray-600 hover:text-indigo-600 transition-colors"
-                        title="Tải xuống"
+                      <Link
+                        to={
+                          user?.role === Role.ADMIN_ROLE
+                            ? `/admin/report/${report.id}`
+                            : `/report/${report.id}`
+                        }
+                        className="text-indigo-500 hover:text-indigo-600"
                       >
-                        <ArrowDownTrayIcon className="h-5 w-5" />
-                      </button>
+                        {report.name}
+                      </Link>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {report.stockReportType==="WEEK"?"Báo cáo theo tuần":report.stockReportType==="PERIOD"?"Báo cáo theo giai đoạn":report.stockReportType==="MONTH"?"Báo cáo theo tháng":""}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {new Date(report.date).toDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {report.employee.name}
                     </td>
                   </tr>
                 ))}

@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ChevronLeftIcon, PencilIcon } from "@heroicons/react/24/outline";
 import UpdateExportForm from "./components/UpdateExportForm";
+import { Role } from "../../../models/Auth";
+import { useAuthContext } from "../../../contexts/AuthContext";
+import { useGetOutboundReportDetail } from "../../../hooks/outboundReports";
 
 interface Product {
   id: string;
@@ -30,7 +33,7 @@ const ExportDetail = () => {
     status: string;
     completionDate?: string;
   } | null>(null);
-
+  const { data: outboundReport } = useGetOutboundReportDetail(Number(id));
   // Mock data (replace with actual API call in production)
   const mockData: ExportDetail = {
     id: 1,
@@ -100,13 +103,14 @@ const ExportDetail = () => {
       [e.target.name]: e.target.value,
     }));
   };
+  const { user } = useAuthContext();
 
   return (
     <div className="container mx-auto p-6">
       {/* Back button */}
       <div className="flex justify-between items-center mb-6">
         <Link
-          to="/import"
+          to={user?.role === Role.EMPLOYEE_ROLE ? "/import" : "/admin/import"}
           className="inline-flex items-center text-indigo-600 hover:text-indigo-700"
         >
           <ChevronLeftIcon className="h-5 w-5 mr-1" />
@@ -126,18 +130,18 @@ const ExportDetail = () => {
         <div className="p-6 border-b border-gray-200">
           <div className="flex justify-between items-center">
             <h1 className="text-2xl font-bold text-gray-900">
-              Chi tiết phiếu xuất #{currentData.orderId}
+              Chi tiết phiếu xuất #{outboundReport?.id}
             </h1>
             <span
               className={`inline-flex items-center justify-center px-3 py-1 text-sm font-medium rounded-full ${
-                currentData.status === "Vận chuyển thành công"
+                outboundReport?.shipment.status === "COMPLETED"
                   ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20"
-                  : currentData.status === "Đang vận chuyển"
+                  : outboundReport?.shipment.status === "PENDING"
                   ? "bg-amber-50 text-amber-700 ring-1 ring-amber-600/20"
                   : "bg-rose-50 text-rose-700 ring-1 ring-rose-600/20"
               }`}
             >
-              {currentData.status}
+              {outboundReport?.shipment.status}
             </span>
           </div>
         </div>
@@ -148,25 +152,28 @@ const ExportDetail = () => {
           <div className="grid grid-cols-2 gap-6">
             <div>
               <p className="text-sm text-gray-600 mb-1">Đơn vị vận chuyển</p>
-              <p className="font-medium">{currentData.shipper}</p>
+              <p className="font-medium">{outboundReport?.shipment.carrier}</p>
             </div>
             <div>
               <p className="text-sm text-gray-600 mb-1">Tổng giá trị</p>
               <p className="font-medium text-indigo-600">
-                {formatCurrency(currentData.totalValue)}
+                {formatCurrency(outboundReport?.totalPrice ?? 0)}
               </p>
             </div>
             <div>
               <p className="text-sm text-gray-600 mb-1">Ngày vận chuyển</p>
-              <p className="font-medium">{currentData.shippingDate}</p>
+              {outboundReport?.shipment.date?.toDateString()}
             </div>
             <div>
               <p className="text-sm text-gray-600 mb-1">Ngày hoàn thành</p>
-              <p className="font-medium">{currentData.completionDate || "-"}</p>
+              <p className="font-medium">
+                {outboundReport?.shipment.completedDate?.toDateString() ??
+                  "Chưa hoàn thành"}
+              </p>
             </div>
             <div className="col-span-2">
               <p className="text-sm text-gray-600 mb-1">Ghi chú</p>
-              <p className="font-medium">{currentData.notes}</p>
+              <p className="font-medium">{outboundReport?.shipment.status}</p>
             </div>
           </div>
         </div>
@@ -199,7 +206,7 @@ const ExportDetail = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {currentData.products.map((product, index) => (
+                {outboundReport?.items.map((product, index) => (
                   <tr key={product.id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {index + 1}
@@ -208,16 +215,16 @@ const ExportDetail = () => {
                       {product.id}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {product.name}
+                      {product.product.name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {formatCurrency(product.price)}
+                      {formatCurrency(product.unitPrice)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {product.quantity}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-indigo-600 font-medium">
-                      {formatCurrency(product.price * product.quantity)}
+                      {formatCurrency(product.totalPrice)}
                     </td>
                   </tr>
                 ))}
@@ -229,7 +236,7 @@ const ExportDetail = () => {
                     Tổng cộng
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-indigo-600 font-medium">
-                    {formatCurrency(currentData.totalValue)}
+                    {formatCurrency(outboundReport?.totalPrice ?? 0)}
                   </td>
                 </tr>
               </tbody>

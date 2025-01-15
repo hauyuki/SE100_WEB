@@ -17,26 +17,34 @@ const AddProductForm = ({
   onClose,
   onSuccess,
   onError,
+  SttProduct
 }: {
   showForm: boolean;
   onClose: () => void;
   onSuccess?: () => void;
   onError?: (error: string) => void;
+  SttProduct:number
 }) => {
   const form = useForm<UpsertProductModel>({
     resolver: zodResolver(UpsertProductModelSchema),
     defaultValues: {
       name: "",
+      productType:"",
+      capacity:"",
+      weight:"",
       description: "",
       sku: "",
+      categoryId: 0,
       marketPrice: 0,
       productionCost: 0,
       image: "",
       minQuantity: 10,
       maxQuantity: 1000,
       tagIds: [],
+      
     },
   });
+
   const [image, setImage] = useState<any>("");
 
   const {
@@ -49,12 +57,11 @@ const AddProductForm = ({
   } = form;
   useEffect(() => {
     reset();
-  }, []);
+  }, [SttProduct]);
   const { mutate: addProduct, isPending } = usePostProducts();
   const { data: categories } = useGetCategories();
   const { data: companies } = useGetCompanies();
   const { data: tags } = useGetTags();
-
   const [selectedTags, setSelectedTags] = useState<number[]>([]); // state to track selected tags
   const [availableTags, setAvailableTags] = useState<boolean>(false); // state for options dropdown
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -73,6 +80,7 @@ const AddProductForm = ({
     setValue("tagIds", selectedTags);
   }, [selectedTags]);
   const onSubmit = (data: UpsertProductModel) => {
+    console.log('data', data)
     addProduct(
       { ...data, tagIds: selectedTags },
       {
@@ -88,15 +96,18 @@ const AddProductForm = ({
       }
     );
   };
-  const productName = watch("name");
+  const categoryId = watch("categoryId");
+  const ProductType = watch("productType");
   useEffect(() => {
-    if (productName) {
-      const generatedSKU =
-        productName.replace(/\s+/g, "-").substring(0, 10) +
-        uuidv4().toString().substring(0, 3);
+    if (Number(categoryId)===0) {
+      setValue("sku", "");
+    }else{
+      const category = categories?.find((category) => Number(category.id) === Number(categoryId));
+      const result = category?.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').split(' ').map(word => word.charAt(0).toUpperCase()).join('');
+      const generatedSKU =result + (SttProduct+1).toString().padStart(4, '0');
       setValue("sku", generatedSKU);
     }
-  }, [productName]);
+  }, [categoryId,]);
 
   if (!showForm) return null;
 
@@ -162,7 +173,7 @@ const AddProductForm = ({
                 className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
               >
-                <option value="">Select Category</option>
+                <option value={0}>Select Category</option>
                 {categories?.map((category) => (
                   <option key={category.id} value={category.id}>
                     {category.name}
@@ -199,7 +210,67 @@ const AddProductForm = ({
                 </p>
               )}
             </div>
-
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Product type 
+              </label>
+              <select
+                {...register("productType")}
+                className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                required
+              >
+                <option value="">Select Product Type</option>
+                <option value="CREAM">Dạng kem</option>
+                <option value="SPRAY">Dạng xịt</option>
+                <option value="LOTION">Dạng lotion</option>
+                <option value="POWDER">Dạng bột</option>
+                <option value="OTHER">Dạng khác</option>
+              </select>
+              {errors.productType && (
+                <p className="text-red-500 text-sm">
+                  {errors.productType.message}
+                </p>
+              )}
+            </div>
+            {ProductType===""|| ProductType==="OTHER"?
+            <></>:
+            <>
+            {
+              ProductType==="CREAM"||ProductType==="LOTION"||ProductType==="SPRAY"?
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Capacity
+                  </label>
+                  <input
+                    type="text"
+                    {...register("capacity")}
+                    placeholder="Nhập dung tích"
+                    className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                  {errors.capacity && (
+                    <p className="text-red-500 text-sm">{errors.capacity.message}</p>
+                  )}
+                </div>
+                :
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Weight
+                  </label>
+                  <input
+                    type="text"
+                    {...register("weight")}
+                    placeholder="Nhập khối lượng"
+                    className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                  {errors.weight && (
+                    <p className="text-red-500 text-sm">{errors.weight.message}</p>
+                  )}
+                </div>
+            }
+            </>
+          }
+        
+          
             {/* Market Price Field */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -224,14 +295,14 @@ const AddProductForm = ({
               </label>
               <input
                 type="number"
-                {...register("productionCost", { valueAsNumber: true })}
+                {...register("marketPrice", { valueAsNumber: true })}
                 className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
                 min="0"
               />
-              {errors.productionCost && (
+              {errors.marketPrice && (
                 <p className="text-red-500 text-sm">
-                  {errors.productionCost.message}
+                  {errors.marketPrice.message}
                 </p>
               )}
             </div>

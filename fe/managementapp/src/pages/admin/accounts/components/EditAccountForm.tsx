@@ -108,7 +108,7 @@ const EditAccountForm: React.FC<EditAccountFormProps> = ({
       <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-gray-800">
-            Tạo Tài Khoản Mới
+            Sửa tài khoản
           </h2>
           <button
             onClick={onClose}
