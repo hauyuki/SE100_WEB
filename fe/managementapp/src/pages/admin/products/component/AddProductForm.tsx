@@ -98,16 +98,31 @@ const AddProductForm = ({
   };
   const categoryId = watch("categoryId");
   const ProductType = watch("productType");
+  const capacity = watch("capacity");
+  const weight = watch("weight");
+
   useEffect(() => {
-    if (Number(categoryId)===0) {
+    if (Number(categoryId) === 0) {
       setValue("sku", "");
-    }else{
+    } else {
       const category = categories?.find((category) => Number(category.id) === Number(categoryId));
-      const result = category?.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').split(' ').map(word => word.charAt(0).toUpperCase()).join('');
-      const generatedSKU =result + (SttProduct+1).toString().padStart(4, '0');
+      const prefix = category?.name.normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase())
+        .join('');
+      
+      let measurementValue = '';
+      if (ProductType === 'CREAM' || ProductType === 'LOTION' || ProductType === 'SPRAY') {
+        measurementValue = capacity ? `-${capacity}` : '';
+      } else if (ProductType === 'POWDER') {
+        measurementValue = weight ? `-${weight}` : '';
+      }
+
+      const generatedSKU = `${prefix}${(SttProduct+1).toString().padStart(4, '0')}${measurementValue}`;
       setValue("sku", generatedSKU);
     }
-  }, [categoryId,]);
+  }, [categoryId, ProductType, capacity, weight]);
 
   if (!showForm) return null;
 

@@ -243,17 +243,11 @@ const ReportDetail = () => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                       Tổng tiền xuất
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Trạng thái
-                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {report?.items
-                    .filter(item => (
-                      (item.inboundPrice !== 0 || item.outboundPrice !== 0) &&
-                      (item.outboundPrice !== 0)
-                    ))
+                    .filter(item => item.inboundPrice !== 0 || item.outboundPrice !== 0)
                     .map((item) => (
                       <tr key={item.id}>
                         <td className="px-6 py-4 whitespace-nowrap">{item.id}</td>
@@ -261,16 +255,13 @@ const ReportDetail = () => {
                           {item.product.name}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-left">
-                          {item.quantity}
+                          {item.inboundQuantity}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-left">
                           {item.outboundQuantity}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-left">
                           {formatCurrency(item.inboundPrice)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-left">
-                          {formatCurrency(item.outboundPrice)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-left">
                           {formatCurrency(item.outboundPrice)}
