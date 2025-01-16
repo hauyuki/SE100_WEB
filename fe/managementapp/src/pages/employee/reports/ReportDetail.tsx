@@ -10,6 +10,16 @@ import { useGetStockReportDetail } from "../../../hooks/stocks";
 import { useAuthContext } from "../../../contexts/AuthContext";
 import { Role } from "../../../models/Auth";
 import { handleGenerateReport } from "../../../utils/generate_report";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
 interface ReportData {
   id: string;
@@ -122,16 +132,54 @@ const ReportDetail = () => {
   const handleDownloadPDF = async () => {
     const element = document.getElementById("report-content");
     if (!element) return;
-  
+
     const canvas = await html2canvas(element);
     const imgData = canvas.toDataURL("image/png");
+    
+    
     const pdf = new jsPDF("p", "mm", "a4");
+    
+    
     const imgProps = pdf.getImageProperties(imgData);
     const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-  
-    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-    pdf.save(`report-${reportData.id}.pdf`);
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    
+   
+    const imgWidth = pdfWidth;
+    const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+    
+    
+    const pageCount = Math.ceil(imgHeight / pdfHeight);
+    
+    
+    let heightLeft = imgHeight;
+    let position = 0;
+    
+    for (let i = 0; i < pageCount; i++) {
+      
+      if (i > 0) {
+        pdf.addPage();
+      }
+      
+      
+      const heightToDraw = Math.min(pdfHeight, heightLeft);
+      
+      pdf.addImage(
+        imgData,
+        "PNG",
+        0,                    
+        i === 0 ? 0 : -position, 
+        pdfWidth,           
+        imgHeight            
+      );
+      
+      
+      heightLeft -= pdfHeight;
+      position += pdfHeight;
+    }
+
+    
+    pdf.save(`report-${report?.id || 'download'}.pdf`);
   };
   console.log('report', report)
   const { user } = useAuthContext();
@@ -216,6 +264,57 @@ const ReportDetail = () => {
             </div> */}
           </div>
         </div>
+
+        {/* Imports Section */}
+        {report?.items && (
+          <div className="bg-white rounded-lg p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4">Biểu đồ thống kê nhập/xuất</h2>
+            <div className="w-full h-[400px] relative">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={report.items.filter(item => item.inboundPrice !== 0 || item.outboundPrice !== 0)}
+                  margin={{
+                    top: 5,
+                    right: 30,
+                    left: 60,
+                    bottom: 5,
+                  }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis 
+                    dataKey="product.name" 
+                    hide
+                  />
+                  <YAxis 
+                    tickFormatter={(value) => {
+                      if (value >= 1000000) {
+                        return `${(value / 10000000).toLocaleString('vi-VN')} triệu`;
+                      }
+                      return value.toLocaleString('vi-VN');
+                    }}
+                  />
+                  <Tooltip 
+                    formatter={(value) => new Intl.NumberFormat('vi-VN', {
+                      style: 'currency',
+                      currency: 'VND'
+                    }).format(value as number)}
+                  />
+                  <Legend />
+                  <Bar 
+                    name="Giá nhập" 
+                    dataKey="inboundPrice" 
+                    fill="#4F46E5"
+                  />
+                  <Bar 
+                    name="Giá xuất" 
+                    dataKey="outboundPrice" 
+                    fill="#F97316"
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
 
         {/* Imports Section */}
         {report?.items && (
