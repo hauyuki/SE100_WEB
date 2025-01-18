@@ -34,6 +34,8 @@ const ProductDetail = () => {
     isError,
   } = useGetProductDetail(Number(id));
 
+  console.log('Product detail raw:', editedProduct);
+
   const handleCloseSnackbar = () => {
     setSnackbar((prev) => ({ ...prev, show: false }));
   };
@@ -92,6 +94,8 @@ const ProductDetail = () => {
     //   ),
     // }));
   };
+
+  console.log('Product detail:', editedProduct);
 
   return (
     <>
@@ -291,6 +295,28 @@ const ProductDetail = () => {
                   )}
                 </div>
               </div>
+              <div>
+                <p className="text-gray-600 mb-2">Loại sản phẩm</p>
+                <p>
+                  {editedProduct?.type === 'CREAM' && 'Dạng kem'}
+                  {editedProduct?.type === 'SPRAY' && 'Dạng xịt'}
+                  {editedProduct?.type === 'LOTION' && 'Dạng lotion'}
+                  {editedProduct?.type === 'POWDER' && 'Dạng bột'}
+                  {editedProduct?.type === 'OTHER' && 'Dạng khác'}
+                </p>
+              </div>
+              {editedProduct?.type && ['CREAM', 'SPRAY', 'LOTION'].includes(editedProduct.type) && (
+                <div>
+                  <p className="text-gray-600 mb-2">Dung tích</p>
+                  <p>{editedProduct?.volume || editedProduct?.capacity}</p>
+                </div>
+              )}
+              {editedProduct?.type === 'POWDER' && (
+                <div>
+                  <p className="text-gray-600 mb-2">Khối lượng</p>
+                  <p>{editedProduct?.weight}</p>
+                </div>
+              )}
             </div>
           </div>
           {/* Detailed information */}

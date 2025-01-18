@@ -28,20 +28,21 @@ const EditProductForm = ({
   const form = useForm<UpsertProductModel>({
     resolver: zodResolver(UpsertProductModelSchema),
     defaultValues: {
+      id: product.id,
       name: product.name,
-      description: product.description,
+      description: product.description ?? "",
       sku: product.sku,
+      categoryId: Number(product.category.id),
+      companyId: Number(product.company.id),
       marketPrice: Number(product.marketPrice),
       productionCost: Number(product.productionCost),
-      capacity:product.capacity??"",
-      productType:product.productType,
-      weight:product.weight??"",
+      capacity: product.capacity ?? "",
+      type: product.type,
+      weight: product.weight ?? "",
       image: product.image ?? "",
       minQuantity: product.minQuantity,
       maxQuantity: product.maxQuantity,
-      categoryId: Number(product?.category?.id) ?? 0,
-      companyId: product?.company?.id ?? 0,
-      tagIds: product.tags?.map((item) => item.id),
+      tagIds: product.tags?.map((tag) => Number(tag.id)) ?? [],
     },
   });
 
@@ -63,17 +64,17 @@ const EditProductForm = ({
         sku: product.sku,
         marketPrice: Number(product.marketPrice),
         productionCost: Number(product.productionCost),
-        capacity:product.capacity,
-        productType:product.productType,
-        weight:product.weight,
+        capacity: product.capacity,
+        type: product.type,
+        weight: product.weight,
         image: product.image,
         minQuantity: product.minQuantity,
         maxQuantity: product.maxQuantity,
-        categoryId: Number(product?.category?.id) ?? 0,
-        companyId: product?.company?.id ?? 0,
-        tagIds: product?.tags?.map((item) => item.id) || [],
+        categoryId: Number(product.category.id),
+        companyId: Number(product.company.id),
+        tagIds: product.tags?.map((tag) => Number(tag.id)) || [],
       });
-      setSelectedTags(product.tags?.map((item) => item.id) ?? []);
+      setSelectedTags(product.tags?.map((tag) => Number(tag.id)) ?? []);
       setImage(product.image ?? "");
     }
   }, [product, reset]);
@@ -125,7 +126,7 @@ const EditProductForm = ({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-semibold">Edit product</h3>
+          <h3 className="text-xl font-semibold">Edit Product</h3>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
@@ -169,8 +170,6 @@ const EditProductForm = ({
               )}
             </div>
 
-            {/* Description Field */}
-
             {/* Category Field */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -189,9 +188,7 @@ const EditProductForm = ({
                 ))}
               </select>
               {errors.categoryId && (
-                <p className="text-red-500 text-sm">
-                  {errors.categoryId.message}
-                </p>
+                <p className="text-red-500 text-sm">{errors.categoryId.message}</p>
               )}
             </div>
 
@@ -213,11 +210,73 @@ const EditProductForm = ({
                 ))}
               </select>
               {errors.companyId && (
-                <p className="text-red-500 text-sm">
-                  {errors.companyId.message}
-                </p>
+                <p className="text-red-500 text-sm">{errors.companyId.message}</p>
               )}
             </div>
+
+            {/* Product Type Field - Đặt ở đây */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Loại sản phẩm
+              </label>
+              <select
+                {...register("type")}
+                className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="">Chọn loại sản phẩm</option>
+                <option value="CREAM">Dạng kem</option>
+                <option value="SPRAY">Dạng xịt</option>
+                <option value="LOTION">Dạng lotion</option>
+                <option value="POWDER">Dạng bột</option>
+                <option value="OTHER">Dạng khác</option>
+              </select>
+              {errors.type && (
+                <p className="text-red-500 text-sm">{errors.type.message}</p>
+              )}
+            </div>
+
+            {/* Capacity/Weight Field - Đặt cạnh Product Type */}
+            {watch("type") === "" || watch("type") === "OTHER" ? (
+              <div></div>
+            ) : (
+              <>
+                {watch("type") === "CREAM" ||
+                watch("type") === "LOTION" ||
+                watch("type") === "SPRAY" ? (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Capacity
+                    </label>
+                    <input
+                      type="text"
+                      {...register("capacity")}
+                      placeholder="Nhập dung tích"
+                      className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    {errors.capacity && (
+                      <p className="text-red-500 text-sm">{errors.capacity.message}</p>
+                    )}
+                  </div>
+                ) : (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Weight
+                    </label>
+                    <input
+                      type="text"
+                      {...register("weight")}
+                      placeholder="Nhập khối lượng"
+                      className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    {errors.weight && (
+                      <p className="text-red-500 text-sm">{errors.weight.message}</p>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Production Cost Field */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Prouduction cost

@@ -29,19 +29,18 @@ const AddProductForm = ({
     resolver: zodResolver(UpsertProductModelSchema),
     defaultValues: {
       name: "",
-      productType:"",
-      capacity:"",
-      weight:"",
       description: "",
       sku: "",
       categoryId: 0,
       marketPrice: 0,
       productionCost: 0,
       image: "",
+      capacity: "",
+      type: "",
+      weight: "",
       minQuantity: 10,
       maxQuantity: 1000,
       tagIds: [],
-      
     },
   });
 
@@ -56,7 +55,21 @@ const AddProductForm = ({
     watch,
   } = form;
   useEffect(() => {
-    reset();
+    reset({
+      name: "",
+      type: "",
+      capacity: "",
+      weight: "",
+      description: "",
+      sku: "",
+      categoryId: 0,
+      marketPrice: 0,
+      productionCost: 0,
+      image: "",
+      minQuantity: 10,
+      maxQuantity: 1000,
+      tagIds: [],
+    });
   }, [SttProduct]);
   const { mutate: addProduct, isPending } = usePostProducts();
   const { data: categories } = useGetCategories();
@@ -80,9 +93,12 @@ const AddProductForm = ({
     setValue("tagIds", selectedTags);
   }, [selectedTags]);
   const onSubmit = (data: UpsertProductModel) => {
-    console.log('data', data)
+    console.log('Submit data before:', data);
     addProduct(
-      { ...data, tagIds: selectedTags },
+      {
+        ...data,
+        tagIds: selectedTags,
+      },
       {
         onSuccess: () => {
           console.log("Product added successfully");
@@ -97,7 +113,7 @@ const AddProductForm = ({
     );
   };
   const categoryId = watch("categoryId");
-  const ProductType = watch("productType");
+  const ProductType = watch("type");
   const capacity = watch("capacity");
   const weight = watch("weight");
 
@@ -123,6 +139,12 @@ const AddProductForm = ({
       setValue("sku", generatedSKU);
     }
   }, [categoryId, ProductType, capacity, weight]);
+
+  const formValues = watch();
+
+  useEffect(() => {
+    console.log('Form values changed:', formValues);
+  }, [formValues]);
 
   if (!showForm) return null;
 
@@ -227,24 +249,21 @@ const AddProductForm = ({
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Product type 
+                Loại sản phẩm
               </label>
               <select
-                {...register("productType")}
+                {...register("type")}
                 className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                required
               >
-                <option value="">Select Product Type</option>
+                <option value="">Chọn loại sản phẩm</option>
                 <option value="CREAM">Dạng kem</option>
                 <option value="SPRAY">Dạng xịt</option>
                 <option value="LOTION">Dạng lotion</option>
                 <option value="POWDER">Dạng bột</option>
                 <option value="OTHER">Dạng khác</option>
               </select>
-              {errors.productType && (
-                <p className="text-red-500 text-sm">
-                  {errors.productType.message}
-                </p>
+              {errors.type && (
+                <p className="text-red-500 text-sm">{errors.type.message}</p>
               )}
             </div>
             {ProductType===""|| ProductType==="OTHER"?

@@ -113,8 +113,7 @@ export const UpsertProductModelSchema = z.object({
     .min(0, "Production cost must be a positive number"), // Production cost must be a non-negative number
   image: z.string().optional(), // Image must be a valid URL
   capacity:z.string(),
-  productType:z.string(),
-  weight:z.string(),
+  type: z.string().min(1, "Product type is required"),
   minQuantity: z.number().min(0, "Minimum quantity must be a positive number"), // Minimum quantity must be a non-negative number
   maxQuantity: z.number().min(0, "Maximum quantity must be a positive number"), // Maximum quantity must be a non-negative number
   categoryId: z.coerce.number().int().min(1, "Category ID is required"), // Category ID must be a positive number

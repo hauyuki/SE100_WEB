@@ -234,6 +234,9 @@ const ProductPage = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Khu vực lưu trữ
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Loại sản phẩm
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -269,6 +272,13 @@ const ProductPage = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {product.tags?.[0]?.area.name ?? "A1"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {product.type === 'CREAM' && 'Dạng kem'}
+                      {product.type === 'SPRAY' && 'Dạng xịt'}
+                      {product.type === 'LOTION' && 'Dạng lotion'} 
+                      {product.type === 'POWDER' && 'Dạng bột'}
+                      {product.type === 'OTHER' && 'Dạng khác'}
                     </td>
                   </tr>
                 ))}
